@@ -5,11 +5,15 @@ interface CardProps {
     value: number;
 }
 
+const formatNumberWithCommas = (number: number): string => {
+    return new Intl.NumberFormat('en-US').format(number);
+};
+
 const Card: React.FC<CardProps> = ({ title, value }) => {
     return (
         <div className="card">
             <h3>{title}</h3>
-            <p>{value}</p>
+            <p>{formatNumberWithCommas(value)}</p>
         </div>
     );
 };
