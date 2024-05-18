@@ -60,3 +60,13 @@ export interface MockData {
     newlyMintedDomains: ChartData;
     totalRewardsEarned: ChartData;
 }
+
+export interface DataPoint {
+    date: string;
+    [key: string]: string | number;
+    dailyActiveUsers: number;
+    totalMessagesSent: number;
+    userSignUps: number;
+    newlyMintedDomains: number;
+    totalRewardsEarned: number;
+}

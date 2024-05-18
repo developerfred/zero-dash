@@ -1,13 +1,6 @@
 import { addDays, subDays, format } from 'date-fns';
 
-export interface DataPoint {
-    date: string;
-    dailyActiveUsers: number;
-    totalMessagesSent: number;
-    userSignUps: number;
-    newlyMintedDomains: number;
-    totalRewardsEarned: number;
-}
+import { DataPoint } from '@/app/types'
 
 const generateData = (startDate: Date, endDate: Date): DataPoint[] => {
     const data: DataPoint[] = [];

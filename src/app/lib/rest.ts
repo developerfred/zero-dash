@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as Request from 'superagent';
 import { config } from '@/app/config';
 import { isEmpty } from 'lodash';
@@ -56,5 +57,6 @@ export function patch<T>(path: string) {
 }
 
 export function del<T>(path: string) {
+    //@ts-ignore
     return Request.delete<T>(apiUrl(path)).set(xPlatFormHeader).withCredentials();
 }

@@ -1,8 +1,10 @@
 import React from 'react';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { DataPoint } from '@/app/types'
+
 
 interface ChartProps {
-    data: Array<{ date: string, [key: string]: number }>;
+    data: DataPoint[];
     dataKey: string;
 }
 

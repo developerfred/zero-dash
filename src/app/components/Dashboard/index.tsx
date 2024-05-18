@@ -2,8 +2,12 @@ import React, { useState } from 'react';
 import Filters from '@/components/Filters';
 import Chart from '@/components/Chart';
 import Card from '@/components/Card';
-import { mockData, DataPoint } from '../mockData';
+import { mockData} from '../mockData';
 import './dashboard.css';
+
+
+import { DataPoint } from '@/app/types'
+
 
 const Dashboard: React.FC = () => {
     const [filter, setFilter] = useState<string>('24h');

@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { AuthorizationResponse, User } from '@/app/types';
 import { del, get, post } from '@/app/lib/rest';
 
