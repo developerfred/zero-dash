@@ -1,6 +1,5 @@
 import { addDays, subDays, format } from 'date-fns';
-
-import { DataPoint } from '@/app/types'
+import { DataPoint } from '@/app/types';
 
 const generateData = (startDate: Date, endDate: Date): DataPoint[] => {
     const data: DataPoint[] = [];
@@ -57,6 +56,12 @@ export const mockData = (filter: string): DataPoint[] => {
             startDate = subDays(endDate, 365);
             break;
         default:
+            if (filter.startsWith('custom_')) {
+                const [, startDateStr, endDateStr] = filter.split('_');
+                startDate = new Date(startDateStr);
+                const customEndDate = new Date(endDateStr);
+                return generateData(startDate, customEndDate);
+            }
             startDate = subDays(endDate, 1);
     }
 

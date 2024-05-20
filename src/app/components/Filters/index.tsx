@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
+import Modal from 'react-modal';
 import 'react-datepicker/dist/react-datepicker.css';
+import './custom-datapicker.css'
 import './filters.css';
 
 interface FiltersProps {
@@ -11,6 +13,8 @@ interface FiltersProps {
 const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
     const [customDateRange, setCustomDateRange] = useState<[Date | null, Date | null]>([null, null]);
     const [startDate, endDate] = customDateRange;
+    const [selectedOption, setSelectedOption] = useState<string>('24h');
+    const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const options = [
         { label: 'Last 24 hours', value: '24h' },
@@ -27,9 +31,37 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
     ];
 
     const handleButtonClick = (value: string) => {
-        setFilter(value);
+        setSelectedOption(value);
         if (value !== 'custom') {
+            setFilter(value);
             setCustomDateRange([null, null]);
+        } else {
+            setModalIsOpen(true);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedOption === 'custom' && startDate && endDate) {
+            const formattedStartDate = format(startDate, 'yyyy-MM-dd');
+            const formattedEndDate = format(endDate, 'yyyy-MM-dd');
+            setFilter(`custom_${formattedStartDate}_${formattedEndDate}`);
+        }
+    }, [startDate, endDate, selectedOption, setFilter]);
+
+    const closeModal = () => {
+        setModalIsOpen(false);
+    };
+
+    const handleDateChange = (dates: [Date | null, Date | null]) => {
+        setCustomDateRange(dates);
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const dates = e.target.value.split(' - ');
+        if (dates.length === 2) {
+            const newStartDate = dates[0] ? new Date(dates[0]) : null;
+            const newEndDate = dates[1] ? new Date(dates[1]) : null;
+            setCustomDateRange([newStartDate, newEndDate]);
         }
     };
 
@@ -40,24 +72,42 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
                     <button
                         key={option.value}
                         onClick={() => handleButtonClick(option.value)}
-                        className="filter-button"
+                        className={`filter-button ${selectedOption === option.value ? 'active' : ''}`}
                     >
                         {option.label}
                     </button>
                 ))}
             </div>
-            {startDate && endDate && (
-                <div className="date-range">
+            <Modal
+                isOpen={modalIsOpen}
+                onRequestClose={closeModal}
+                contentLabel="Select Custom Date Range"
+                className="modal"
+                overlayClassName="overlay"
+            >
+                <div className="modal-content">
+                <h2>Select Custom Date Range</h2>
+                {/* <input
+                    type="text"
+                    value={startDate && endDate ? `${format(startDate, 'yyyy-MM-dd')} - ${format(endDate, 'yyyy-MM-dd')}` : ''}
+                    onChange={handleInputChange}
+                    placeholder="YYYY-MM-DD - YYYY-MM-DD"
+                /> */}
+                <div className="datepicker-container">
                     <DatePicker
                         selected={startDate}
-                        onChange={(date: [Date, Date]) => setCustomDateRange(date)}
+                        onChange={handleDateChange}
                         startDate={startDate}
                         endDate={endDate}
                         selectsRange
                         inline
                     />
+
+                    
                 </div>
-            )}
+                <button onClick={closeModal} className="modal-close-button">Apply</button>
+                </div>
+            </Modal>
         </div>
     );
 };

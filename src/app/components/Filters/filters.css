@@ -47,7 +47,7 @@
   padding: 10px;
   border: 2px solid #81e6d9; 
   border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.1) !important;
   color: #e2e8f0;
   font-size: 16px;
   transition: border-color 0.3s ease, background-color 0.3s ease;
@@ -55,6 +55,84 @@
 
 .react-datepicker__input-container input:focus {
   border-color: #4fd1c5; 
-  background-color:rgba(255, 255, 255, 0.1);
+  background-color:rgba(255, 255, 255, 0.1) !important;
   outline: none;
 }
+
+
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0);
+  padding: 20px;
+  border-radius: 8px;
+  outline: none;
+  width: 90%;
+  max-width: 500px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+.modal h2 {
+  color: #e2e8f0;
+  margin-bottom: 20px;
+  display: flex;  
+  justify-content: center;
+  
+}
+
+.modal input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #81e6d9;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.modal-close-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #4fd1c5;
+  color: #1a202c;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+}
+
+.modal-close-button:hover,
+.modal-close-button:focus {
+  background-color: #38b2ac;
+  outline: none;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.datepicker-container {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  max-width: 350px;
+}
+
+    
