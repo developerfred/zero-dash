@@ -17,6 +17,7 @@
     "@types/chart.js": "^2.9.41",
     "@types/lodash": "^4.17.4",
     "@types/react-datepicker": "^6.2.0",
+    "@types/react-modal": "^3.16.3",
     "@types/react-slick": "^0.23.13",
     "@types/superagent": "^8.1.7",
     "@types/three": "^0.164.0",
