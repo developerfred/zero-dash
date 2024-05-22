@@ -1,28 +1,40 @@
 import React from 'react';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { DataPoint } from '@/app/types'
-
+import { ResponsiveContainer } from 'recharts';
+import { DataPoint } from '@/app/types';
+import LineChartComponent from './LineChart';
+import BarChartComponent from './BarChart';
+import AreaChartComponent from './AreaChart';
+import RadarChartComponent from './RadarChart';
 
 interface ChartProps {
     data: DataPoint[];
     dataKey: string;
+    chartType: 'line' | 'area' | 'bar' | 'radar';
 }
 
-const Chart: React.FC<ChartProps> = ({ data, dataKey }) => (
-    <div className="chart-wrapper">
-        <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data}>
-                <Line type="monotone" dataKey={dataKey} stroke="#01f4cb" />
-                <CartesianGrid stroke="#ccc" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip 
-                    contentStyle={{ backgroundColor: '#333', border: 'none', borderRadius: '10px', color: '#fff' }}
-                    itemStyle={{ color: '#01f4cb' }}
-                    labelStyle={{ color: '#fff' }} />
-            </LineChart>
-        </ResponsiveContainer>
-    </div>
-);
+const Chart: React.FC<ChartProps> = ({ data, dataKey, chartType }) => {
+    const renderChart = (): React.ReactElement => {
+        switch (chartType) {
+            case 'line':
+                return <LineChartComponent data={data} dataKey={dataKey} />;
+            case 'area':
+                return <AreaChartComponent data={data} dataKey={dataKey} />;
+            case 'bar':
+                return <BarChartComponent data={data} dataKey={dataKey} />;
+            case 'radar':
+                return <RadarChartComponent data={data} dataKey={dataKey} />;
+            default:
+                return <LineChartComponent data={data} dataKey={dataKey} />; 
+        }
+    };
+
+    return (
+        <div className="chart-wrapper">
+            <ResponsiveContainer width="100%" height={300}>
+                {renderChart()}
+            </ResponsiveContainer>
+        </div>
+    );
+};
 
 export default Chart;
