@@ -11,11 +11,11 @@ const Navbar: React.FC = () => {
                     </a>
                 </div>
                 <div className={styles.navbarMenu}>
-                    <a href="/global-data" className={styles.menuItem}>
-                        Global Data
+                    <a href="#zero-global" className={styles.menuItem}>
+                        ZERO DATA
                     </a>
-                    <a href="/zero-domains" className={styles.menuItem}>
-                        Zero Domains
+                    <a href="#zero-domains" className={styles.menuItem}>
+                        ZNS DATA
                     </a>
                 </div>
             </div>

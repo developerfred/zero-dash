@@ -1,12 +1,14 @@
 'use client';
 
-import Image from "next/image";
-import Dashboard from "@/app/components/Dashboard";
 
+import Dashboard from "@/components/Dashboard";
+import Navbar  from "@/components/Navbar";
 
 export default function Home() {
   return (
-    <><Dashboard/></>
-    
+    <>
+      <Navbar />
+      <Dashboard />
+    </>
   );
 }

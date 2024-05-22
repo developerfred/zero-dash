@@ -1,6 +1,3 @@
-
-
-/* Estilos para a Navbar */
 .navbar {
   display: flex;
   align-items: center;
@@ -27,14 +24,14 @@
   padding: 0 16px; 
 }
 
-/* Estilos para o lado esquerdo da Navbar */
+
 .navbarLeft {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-/* Título da Navbar */
+
 .navbarTitle {
   font-family: 'Roboto Mono', monospace;
   font-size: 1.25rem; /* tamanho similar ao text-xl */
@@ -71,18 +68,18 @@
   }
 
   .navbarMenu {
-    flex-direction: row; /* Alinha itens horizontalmente em telas menores */
+    flex-direction: row; 
     gap: 16px;
-    margin-top: 16px; /* Espaçamento superior para o menu em telas menores */
+    margin-top: 16px; 
   }
 }
 
 @media (max-width: 480px) {
   .navbarTitle {
-    font-size: 1rem; /* Reduz ainda mais o tamanho do texto */
+    font-size: 1rem; 
   }
 
   .menuItem {
-    font-size: 0.875rem; /* Reduz o tamanho do texto do menu */
+    font-size: 0.875rem; 
   }
 }
