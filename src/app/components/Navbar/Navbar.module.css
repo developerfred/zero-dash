@@ -1,0 +1,88 @@
+
+
+/* Estilos para a Navbar */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  border-radius: 50px;
+  border: 1px solid #D3D3D3; 
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 12px; 
+  backdrop-filter: blur(20px);
+  margin: 16px;
+  position: sticky;
+  top: 16px;
+  z-index: 1000;
+  transition: all 0.3s ease; 
+}
+
+
+.navbarContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1444px;
+  padding: 0 16px; 
+}
+
+/* Estilos para o lado esquerdo da Navbar */
+.navbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Título da Navbar */
+.navbarTitle {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 1.25rem; /* tamanho similar ao text-xl */
+  font-weight: 500; /* font-medium */
+  color: white;
+  text-decoration: none;
+}
+
+/* Menu centralizado */
+.navbarMenu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px; /* Espaçamento entre itens do menu */
+}
+
+.menuItem {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 1rem;
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.menuItem:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+  .navbarContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .navbarMenu {
+    flex-direction: row; /* Alinha itens horizontalmente em telas menores */
+    gap: 16px;
+    margin-top: 16px; /* Espaçamento superior para o menu em telas menores */
+  }
+}
+
+@media (max-width: 480px) {
+  .navbarTitle {
+    font-size: 1rem; /* Reduz ainda mais o tamanho do texto */
+  }
+
+  .menuItem {
+    font-size: 0.875rem; /* Reduz o tamanho do texto do menu */
+  }
+}
