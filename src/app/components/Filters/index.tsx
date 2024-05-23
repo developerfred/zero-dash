@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import Modal from 'react-modal';
 import 'react-datepicker/dist/react-datepicker.css';
-import './custom-datapicker.css'
+import './custom-datapicker.css';
 import './filters.css';
 
 interface FiltersProps {
@@ -45,6 +45,7 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
             const formattedStartDate = format(startDate, 'yyyy-MM-dd');
             const formattedEndDate = format(endDate, 'yyyy-MM-dd');
             setFilter(`custom_${formattedStartDate}_${formattedEndDate}`);
+            setModalIsOpen(false);  
         }
     }, [startDate, endDate, selectedOption, setFilter]);
 
@@ -54,15 +55,6 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
 
     const handleDateChange = (dates: [Date | null, Date | null]) => {
         setCustomDateRange(dates);
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const dates = e.target.value.split(' - ');
-        if (dates.length === 2) {
-            const newStartDate = dates[0] ? new Date(dates[0]) : null;
-            const newEndDate = dates[1] ? new Date(dates[1]) : null;
-            setCustomDateRange([newStartDate, newEndDate]);
-        }
     };
 
     return (
@@ -86,26 +78,18 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
                 overlayClassName="overlay"
             >
                 <div className="modal-content">
-                <h2>Select Custom Date Range</h2>
-                {/* <input
-                    type="text"
-                    value={startDate && endDate ? `${format(startDate, 'yyyy-MM-dd')} - ${format(endDate, 'yyyy-MM-dd')}` : ''}
-                    onChange={handleInputChange}
-                    placeholder="YYYY-MM-DD - YYYY-MM-DD"
-                /> */}
-                <div className="datepicker-container">
-                    <DatePicker
-                        selected={startDate}
-                        onChange={handleDateChange}
-                        startDate={startDate}
-                        endDate={endDate}
-                        selectsRange
-                        inline
-                    />
-
-                    
-                </div>
-                <button onClick={closeModal} className="modal-close-button">Apply</button>
+                    <h2>Select Custom Date Range</h2>
+                    <div className="datepicker-container">
+                        <DatePicker
+                            selected={startDate}
+                            onChange={handleDateChange}
+                            startDate={startDate}
+                            endDate={endDate}
+                            selectsRange
+                            inline
+                        />
+                    </div>
+                    <button onClick={closeModal} className="modal-close-button">Apply</button>
                 </div>
             </Modal>
         </div>

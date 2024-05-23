@@ -11,11 +11,20 @@ const Navbar: React.FC = () => {
                     </a>
                 </div>
                 <div className={styles.navbarMenu}>
-                    <a href="#zero-global" className={styles.menuItem}>
-                        ZERO DATA
-                    </a>
                     <a href="#zero-domains" className={styles.menuItem}>
-                        ZNS DATA
+                        ZNS
+                    </a>
+                    <a href="#zero-meow" className={styles.menuItem}>
+                        MEOW
+                    </a>
+                    <a href="#zero-wild" className={styles.menuItem}>
+                        WILD
+                    </a>
+                    <a href="#zero-finance" className={styles.menuItem}>
+                        Finance
+                    </a>
+                    <a href="#zero-productivity" className={styles.menuItem}>
+                        Productivity
                     </a>
                 </div>
             </div>

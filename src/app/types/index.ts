@@ -70,3 +70,22 @@ export interface DataPoint {
     newlyMintedDomains: number;
     totalRewardsEarned: number;
 }
+
+export interface ZnsData {
+    date: string;
+    totalRegistrations: number;
+    numDomainsRegistered: number;
+    numDomainsRegisteredTotal: number;
+    numRegistrars: number;
+    worldsCreated: number;
+    worldsDestroyed: number;
+    dailyActiveUsers?: number;
+    totalMessagesSent?: number;
+    userSignUps?: number;
+    newlyMintedDomains?: number;
+    totalRewardsEarned?: number;
+}
+
+export const isDataPointArray = (data: DataPoint[] | ZnsData[]): data is DataPoint[] => {
+    return (data as DataPoint[])[0]?.dailyActiveUsers !== undefined;
+}

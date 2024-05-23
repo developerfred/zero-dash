@@ -24,9 +24,11 @@ import { WagmiProvider } from 'wagmi';
 
 const { wallets } = getDefaultWallets();
 
+const walletconnectId = process.env.WALLET_CONNECT_ID!;
+
 const config = getDefaultConfig({
     appName: 'ZERO',
-    projectId: 'put-here-walletconnect-id',
+    projectId: walletconnectId,
     wallets: [
         ...wallets,
         {
