@@ -13,35 +13,29 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             return res.status(400).json({ error: 'Start date and end date parameters are required' });
         }
 
-        const startIso = new Date(startDate as string).toISOString();
-        const endIso = new Date(endDate as string).toISOString();
-
         const repos = await octokit.repos.listForOrg({
             org: organization as string,
             type: 'all',
         });
 
-        const issuesDataPromises = repos.data.map(async (repo) => {
-            const issues = await octokit.issues.listForRepo({
+        const contributionsPromises = repos.data.map(async (repo) => {
+            const commits = await octokit.repos.listCommits({
                 owner: organization as string,
                 repo: repo.name,
-                since: startIso,
-                state: 'all'
+                since: new Date(startDate as string).toISOString(),
+                until: new Date(endDate as string).toISOString(),
             });
 
             const contributors = new Map();
 
-            for (const issue of issues.data) {
-                const issueCreatedAt = new Date(issue.created_at).toISOString();
-                if (issueCreatedAt >= startIso && issueCreatedAt <= endIso) {
-                    const author = issue.user?.login || 'unknown';
-                    if (contributors.has(author)) {
-                        contributors.set(author, contributors.get(author) + 1);
-                    } else {
-                        contributors.set(author, 1);
-                    }
+            commits.data.forEach(commit => {
+                const author = commit.author?.login || 'unknown';
+                if (contributors.has(author)) {
+                    contributors.set(author, contributors.get(author) + 1);
+                } else {
+                    contributors.set(author, 1);
                 }
-            }
+            });
 
             return {
                 repoName: repo.name,
@@ -49,9 +43,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             };
         });
 
-        const issuesData = await Promise.all(issuesDataPromises);
+        const contributionsData = await Promise.all(contributionsPromises);
 
-        res.status(200).json(issuesData);
+        res.status(200).json(contributionsData);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch data from GitHub' });
     }

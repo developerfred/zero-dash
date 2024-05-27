@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <Dashboard />
+      <Dashboard dashboardType="Zero" />
     </>
   );
 }
