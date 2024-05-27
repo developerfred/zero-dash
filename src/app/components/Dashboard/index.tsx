@@ -12,7 +12,7 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ dashboardType }) => {
     const { filter, data, znsData, setFilter, fetchDashboardData, fetchZnsData } = useDashboardStore();
     const [loading, setLoading] = useState(true);
-    
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -45,8 +45,7 @@ const Dashboard: React.FC<DashboardProps> = ({ dashboardType }) => {
                         <div className="cards">
                             <Card title="Daily Active Users" value={totals.dailyActiveUsers} />
                             <Card title="Total Messages Sent" value={totals.totalMessagesSent} />
-                            <Card title="User Sign Ups" value={totals.userSignUps} />
-                            <Card title="Newly Minted Domains" value={totals.newlyMintedDomains} />
+                            <Card title="User Sign Ups" value={totals.userSignUps} />                            
                             <Card title="Total Rewards Earned" value={totals.totalRewardsEarned} />
                         </div>
                         <div className="charts">
@@ -64,13 +63,7 @@ const Dashboard: React.FC<DashboardProps> = ({ dashboardType }) => {
                                 <div className="chart-container">
                                     <h3>User Sign Ups</h3>
                                     <Chart data={data} dataKey="userSignUps" chartType="line" />
-                                </div>
-                                <div className="chart-container">
-                                    <h3>Newly Minted Domains</h3>
-                                    <Chart data={data} dataKey="newlyMintedDomains" chartType="line" />
-                                </div>
-                            </div>
-                            <div className="chart-row">
+                                </div>                                                    
                                 <div className="chart-container">
                                     <h3>Total Rewards Earned</h3>
                                     <Chart data={data} dataKey="totalRewardsEarned" chartType="line" />

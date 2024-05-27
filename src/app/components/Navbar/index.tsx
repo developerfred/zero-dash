@@ -14,11 +14,12 @@ const NavItem: React.FC<NavItemProps> = ({ href, label }) => (
 
 const Navbar: React.FC = () => {
     const navItems = [
-        { href: "/zns", label: "ZNS" },
-        { href: "/meow", label: "MEOW" },
-        { href: "/wild", label: "WILD" },
-        { href: "/finance", label: "Finance" },
-        { href: "/productivity", label: "Productivity" }
+        { href: "/", label: "ZERO Messenger"},
+        { href: "/zns", label: "Onchain for ZNS" },
+        { href: "/meow", label: "Meow Token Info" },
+        { href: "/wild", label: "WILD Token Info" },
+        { href: "/finance", label: "DAO" },
+        { href: "/productivity", label: "Work" }
     ];
 
     return (
