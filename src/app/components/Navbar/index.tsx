@@ -1,25 +1,29 @@
 import React from 'react';
+import { usePathname } from 'next/navigation';
 import styles from './Navbar.module.css';
 
 interface NavItemProps {
     href: string;
     label: string;
+    isActive: boolean;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ href, label }) => (
-    <a href={href} className={styles.menuItem}>
+const NavItem: React.FC<NavItemProps> = ({ href, label, isActive }) => (
+    <a href={href} className={`${styles.menuItem} ${isActive ? styles.active : ''}`}>
         {label}
     </a>
 );
 
 const Navbar: React.FC = () => {
+    const pathname = usePathname();
+
     const navItems = [
-        { href: "/", label: "ZERO Messenger"},
-        { href: "/zns", label: "Onchain for ZNS" },
-        { href: "/meow", label: "Meow Token Info" },
-        { href: "/wild", label: "WILD Token Info" },
+        { href: "/", label: "ZOS" },
+        { href: "/zns", label: "ZNS" },
+        { href: "/meow", label: "MEOW" },
+        { href: "/wild", label: "WILD" },
         { href: "/finance", label: "DAO" },
-        { href: "/productivity", label: "Work" }
+        { href: "/productivity", label: "WORK" }
     ];
 
     return (
@@ -32,7 +36,12 @@ const Navbar: React.FC = () => {
                 </div>
                 <div className={styles.navbarMenu}>
                     {navItems.map((item) => (
-                        <NavItem key={item.href} href={item.href} label={item.label} />
+                        <NavItem 
+                            key={item.href} 
+                            href={item.href} 
+                            label={item.label} 
+                            isActive={pathname === item.href}
+                        />
                     ))}
                 </div>
             </div>

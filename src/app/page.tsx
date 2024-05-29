@@ -1,6 +1,5 @@
 'use client';
 
-
 import Dashboard from "@/components/Dashboard";
 import Navbar  from "@/components/Navbar";
 

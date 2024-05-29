@@ -14,7 +14,6 @@
   transition: all 0.3s ease; 
 }
 
-
 .navbarContainer {
   display: flex;
   align-items: center;
@@ -24,28 +23,25 @@
   padding: 0 16px; 
 }
 
-
 .navbarLeft {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-
 .navbarTitle {
   font-family: 'Roboto Mono', monospace;
-  font-size: 1.25rem; /* tamanho similar ao text-xl */
-  font-weight: 500; /* font-medium */
+  font-size: 1.25rem; 
+  font-weight: 500; 
   color: white;
   text-decoration: none;
 }
 
-/* Menu centralizado */
 .navbarMenu {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 32px; /* Espaçamento entre itens do menu */
+  gap: 32px; 
 }
 
 .menuItem {
@@ -60,7 +56,11 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
-/* Responsividade para dispositivos móveis */
+.menuItem.active {
+  color: #01f4cb;
+}
+
+
 @media (max-width: 768px) {
   .navbarContainer {
     flex-direction: column;
