@@ -3,6 +3,7 @@ import Filters from '@/components/Filters';
 import Chart from '@/components/Chart';
 import Card from '@/components/Card';
 import ProductivitySection from './ProductivitySection';
+import ZeroDomainsSection from './ZeroDomainsSection';
 import useDashboardStore from '@/store/useDashboardStore';
 import '@/components/Dashboard/dashboard.css';
 
@@ -39,7 +40,8 @@ const Dashboard: React.FC<DashboardProps> = ({ dashboardType }) => {
     const renderSection = () => {
         switch (dashboardType) {
             case 'Zero':
-                return (<div className="section">
+                return (
+                    <div className="section">
                     <h2 id="zero-global">ZERO Global</h2>
                     <div className="zero-global">
                         <Filters setFilter={setFilter} />
@@ -75,40 +77,7 @@ const Dashboard: React.FC<DashboardProps> = ({ dashboardType }) => {
                 </div>);
             case 'ZNS':
                 return (
-                    <div className="section">
-                        <h2 id="zero-domains">ZERO Domains</h2>
-                        <div className="zero-domains">
-                            <Filters setFilter={setFilter} />
-                            <div className="cards">
-                                <Card title="Total Domain Registrations" value={totals.totalRegistrations} />
-                                <Card title="Total Worlds" value={totals.totalWorlds} />
-                                <Card title="Total Domains" value={totals.totalDomains} />
-                                <Card title="Total Amount Staked" value={totals.totalRewardsEarned} />
-                            </div>
-                            <div className="charts">
-                                <div className="chart-row">
-                                    <div className="chart-container">
-                                        <h3>Total Domain Registrations</h3>
-                                        <Chart data={znsData} dataKey="NetTotalRegistrations" chartType="bar" />
-                                    </div>
-                                    <div className="chart-container">
-                                        <h3>Total Worlds</h3>
-                                        <Chart data={znsData} dataKey="WorldsCreated" chartType="bar" />
-                                    </div>
-                                </div>
-                                <div className="chart-row">
-                                    <div className="chart-container">
-                                        <h3>Total Domains</h3>
-                                        <Chart data={znsData} dataKey="NumDomainsRegistered" chartType="bar" />
-                                    </div>
-                                    <div className="chart-container">
-                                        <h3>Total Amount Staked</h3>
-                                        <Chart data={znsData} dataKey="NumDomainsRegisteredTotal" chartType="area" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <ZeroDomainsSection />
                 );
             case 'MEOW':
                 return (

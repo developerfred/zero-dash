@@ -1,17 +1,23 @@
 import create from 'zustand';
-import { DataPoint, ZnsData } from '@/app/types';
 import { persist } from 'zustand/middleware';
+import { DataPoint, ZnsData } from '@/app/types';
 
 interface DashboardState {
     filter: string;
     data: DataPoint[];
     znsData: ZnsData[];
     znsDataCache: Record<string, ZnsData[]>;
+    totals: {
+        totalRegistrations: number;
+        totalWorlds: number;
+        totalDomains: number;
+    };
     setFilter: (filter: string) => void;
     setData: (data: DataPoint[]) => void;
     setZnsData: (data: ZnsData[], filter: string) => void;
     fetchDashboardData: (filter: string) => Promise<void>;
     fetchZnsData: (filter: string, limit?: number, offset?: number) => Promise<void>;
+    fetchTotals: (filter: string) => Promise<void>;
 }
 
 const useDashboardStore = create<DashboardState>()(
@@ -21,6 +27,11 @@ const useDashboardStore = create<DashboardState>()(
             data: [],
             znsData: [],
             znsDataCache: {},
+            totals: {
+                totalRegistrations: 0,
+                totalWorlds: 0,
+                totalDomains: 0,
+            },
 
             setFilter: (filter: string) => set({ filter }),
 
@@ -57,11 +68,25 @@ const useDashboardStore = create<DashboardState>()(
                         throw new Error(`Error fetching ZNS data: ${response.statusText}`);
                     }
                     const result = await response.json();
+                    console.log(result);
                     const newData = (cache || []).concat(result.data);
                     const newCache = { ...get().znsDataCache, [filter]: newData };
                     set({ znsData: newData.slice(offset, offset + limit), znsDataCache: newCache });
                 } catch (error) {
                     console.error('Error in fetchZnsData:', error);
+                }
+            },
+
+            fetchTotals: async (filter: string) => {
+                try {
+                    const response = await fetch(`/api/domains?range=${filter}`);
+                    if (!response.ok) {
+                        throw new Error(`Error fetching totals data: ${response.statusText}`);
+                    }
+                    const result = await response.json();
+                    set({ totals: result });
+                } catch (error) {
+                    console.error('Error in fetchTotals:', error);
                 }
             },
         }),

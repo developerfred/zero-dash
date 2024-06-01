@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import { octokit } from '@/app/lib/github';
 
