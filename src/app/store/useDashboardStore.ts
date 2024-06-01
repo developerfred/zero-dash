@@ -11,14 +11,79 @@ interface DashboardState {
         totalRegistrations: number;
         totalWorlds: number;
         totalDomains: number;
+        dailyActiveUsers: number;
+        totalMessagesSent: number;
+        userSignUps: number;
+        totalRewardsEarned: string;
     };
     setFilter: (filter: string) => void;
     setData: (data: DataPoint[]) => void;
     setZnsData: (data: ZnsData[], filter: string) => void;
-    fetchDashboardData: (filter: string) => Promise<void>;
+    fetchDashboardData: (fromDate: string, toDate: string) => Promise<void>;
     fetchZnsData: (filter: string, limit?: number, offset?: number) => Promise<void>;
     fetchTotals: (filter: string) => Promise<void>;
 }
+
+const parseCurrency = (value: string): number => {
+    return parseFloat(value.replace(/[^\d.-]/g, ''));
+};
+
+const formatCurrency = (value: number): string => {
+    return `$${value.toFixed(2)}`;
+};
+
+const fetchAllData = async (fromDate: string, toDate: string): Promise<DataPoint> => {
+    const data: DataPoint[] = [];
+    const startDate = new Date(fromDate);
+    const endDate = new Date(toDate);
+
+    if ((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24) <= 60) {
+        const response = await fetch(`/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}`);
+        const result: DataPoint = await response.json();
+        return result;
+    }
+
+    let currentStartDate = new Date(startDate);
+
+    while (currentStartDate < endDate) {
+        let currentEndDate = new Date(currentStartDate);
+        currentEndDate.setDate(currentEndDate.getDate() + 59);
+        if (currentEndDate > endDate) {
+            currentEndDate = endDate;
+        }
+
+        console.log(`Fetching data from ${currentStartDate.toISOString().split('T')[0]} to ${currentEndDate.toISOString().split('T')[0]}`);
+        const response = await fetch(`/api/zos/metrics?fromDate=${currentStartDate.toISOString().split('T')[0]}&toDate=${currentEndDate.toISOString().split('T')[0]}`);
+        const result: DataPoint = await response.json();
+        console.log('Fetched data:', result);
+        data.push(result);
+
+        currentStartDate.setDate(currentStartDate.getDate() + 60);
+    }
+
+    const combinedData = data.reduce((acc, current) => {
+        const accRewards = parseCurrency(acc.totalRewardsEarned);
+        const currentRewards = parseCurrency(current.totalRewardsEarned);
+        const totalRewards = accRewards + currentRewards;
+
+        console.log(`Accumulated Rewards: ${accRewards}, Current Rewards: ${currentRewards}, Total Rewards: ${totalRewards}`);
+
+        return {
+            dailyActiveUsers: acc.dailyActiveUsers + current.dailyActiveUsers,
+            totalMessagesSent: acc.totalMessagesSent + current.totalMessagesSent,
+            userSignUps: acc.userSignUps + current.userSignUps,
+            totalRewardsEarned: formatCurrency(totalRewards)
+        };
+    }, {
+        dailyActiveUsers: 0,
+        totalMessagesSent: 0,
+        userSignUps: 0,
+        totalRewardsEarned: '$0.00'
+    });
+
+    console.log('Combined Data:', combinedData);
+    return combinedData;
+};
 
 const useDashboardStore = create<DashboardState>()(
     persist(
@@ -31,6 +96,10 @@ const useDashboardStore = create<DashboardState>()(
                 totalRegistrations: 0,
                 totalWorlds: 0,
                 totalDomains: 0,
+                dailyActiveUsers: 0,
+                totalMessagesSent: 0,
+                userSignUps: 0,
+                totalRewardsEarned: '$0.00',
             },
 
             setFilter: (filter: string) => set({ filter }),
@@ -42,14 +111,10 @@ const useDashboardStore = create<DashboardState>()(
                 set({ znsData: data, znsDataCache: cache });
             },
 
-            fetchDashboardData: async (filter: string) => {
+            fetchDashboardData: async (fromDate: string, toDate: string) => {
                 try {
-                    const response = await fetch(`/api/dashboard?filter=${filter}`);
-                    if (!response.ok) {
-                        throw new Error(`Error fetching dashboard data: ${response.statusText}`);
-                    }
-                    const result = await response.json();
-                    set({ data: result.data });
+                    const combinedData = await fetchAllData(fromDate, toDate);
+                    set({ totals: combinedData });
                 } catch (error) {
                     console.error('Error in fetchDashboardData:', error);
                 }
