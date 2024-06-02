@@ -1,14 +1,14 @@
 // @ts-nocheck
 import React from 'react';
 import { ResponsiveContainer } from 'recharts';
-import { DataPoint, ZnsData, isDataPointArray } from '@/app/types';
+import { DataPoint, ZnsData, MetricsData } from '@/app/types';
 import LineChartComponent from './LineChart';
 import BarChartComponent from './BarChart';
 import AreaChartComponent from './AreaChart';
 import RadarChartComponent from './RadarChart';
 
 interface ChartProps {
-    data: DataPoint[] | ZnsData[];
+    data: DataPoint[] | ZnsData[] | MetricsData[];
     dataKey: string;
     chartType: 'line' | 'area' | 'bar' | 'radar';
 }

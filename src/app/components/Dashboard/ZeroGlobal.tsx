@@ -5,14 +5,12 @@ import Chart from '@/components/Chart';
 import Card from '@/components/Card';
 
 const ZeroGlobal: React.FC = () => {
-    const { filter, totals, data, setFilter, fetchDashboardDataByFilter } = useDashboardStore();
+    const { filter, totals, zosData, setFilter, fetchDashboardDataByFilter } = useDashboardStore();
 
     useEffect(() => {
         fetchDashboardDataByFilter(filter);
-    }, [filter, fetchDashboardDataByFilter]);
-
-    console.log("Totals:", data);
-
+    }, [filter]);
+    
     return (
         <div className="section">
             <h2 id="zero-global">ZERO Global</h2>
@@ -28,21 +26,21 @@ const ZeroGlobal: React.FC = () => {
                     <div className="chart-row">
                         <div className="chart-container">
                             <h3>Daily Active Users</h3>
-                            <Chart data={data} dataKey="dailyActiveUsers" chartType="line" />
+                            <Chart data={zosData} dataKey="dailyActiveUsers" chartType="line" />
                         </div>
                         <div className="chart-container">
                             <h3>Total Messages Sent</h3>
-                            <Chart data={data} dataKey="totalMessagesSent" chartType="line" />
+                            <Chart data={zosData} dataKey="totalMessagesSent" chartType="line" />
                         </div>
                     </div>
                     <div className="chart-row">
                         <div className="chart-container">
                             <h3>User Sign Ups</h3>
-                            <Chart data={data} dataKey="userSignUps" chartType="line" />
+                            <Chart data={zosData} dataKey="userSignUps" chartType="line" />
                         </div>
                         <div className="chart-container">
                             <h3>Total Rewards Earned</h3>
-                            <Chart data={data} dataKey="totalRewardsEarned" chartType="line" />
+                            <Chart data={zosData} dataKey="totalRewardsEarned" chartType="line" />
                         </div>
                     </div>
                 </div>

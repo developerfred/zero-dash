@@ -89,3 +89,12 @@ export interface ZnsData {
 export const isDataPointArray = (data: DataPoint[] | ZnsData[]): data is DataPoint[] => {
     return (data as DataPoint[])[0]?.dailyActiveUsers !== undefined;
 }
+
+
+export interface MetricsData {
+    dailyActiveUsers: number;
+    totalMessagesSent: number;
+    userSignUps: number;
+    newlyMintedDomains: number;
+    totalRewardsEarned: string;
+}

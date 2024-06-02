@@ -1,8 +1,7 @@
-// @ts-nocheck
 import { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
 
-const API_URL = 'https://zosapi.zero.tech/metrics';
+const API_URL = process.env.NEXT_PUBLIC_API_METRICS;
 
 interface MetricsData {
     dailyActiveUsers: number;
@@ -24,6 +23,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(200).json(data);
     } catch (error) {
         console.error('Error fetching data:', error);
+        // @ts-ignore
         return res.status(500).json({ error: error.message });
     }
 };
@@ -36,17 +36,21 @@ const formatCurrency = (value: number): string => {
     return `$${value.toFixed(2)}`;
 };
 
+const fetchMetricsData = async (fromDate: string, toDate: string): Promise<MetricsData> => {
+    const response = await fetch(`${API_URL}?fromDate=${fromDate}&toDate=${toDate}`);
+    if (!response.ok) {
+        throw new Error(`Error fetching data: ${response.statusText}`);
+    }
+    return response.json();
+};
+
 const fetchDataInIntervals = async (fromDate: string, toDate: string): Promise<MetricsData> => {
     const data: MetricsData[] = [];
     const startDate = new Date(fromDate);
     const endDate = new Date(toDate);
 
     if ((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24) <= 60) {
-        const response = await fetch(`${API_URL}?fromDate=${fromDate}&toDate=${toDate}`);
-        if (!response.ok) {
-            throw new Error(`Error fetching data: ${response.statusText}`);
-        }
-        return await response.json();
+        return fetchMetricsData(fromDate, toDate);
     }
 
     let currentStartDate = new Date(startDate);
@@ -57,20 +61,18 @@ const fetchDataInIntervals = async (fromDate: string, toDate: string): Promise<M
         if (currentEndDate > endDate) {
             currentEndDate = endDate;
         }
-
-        console.log(`Fetching data from ${currentStartDate.toISOString().split('T')[0]} to ${currentEndDate.toISOString().split('T')[0]}`);
-        const response = await fetch(`${API_URL}?fromDate=${currentStartDate.toISOString().split('T')[0]}&toDate=${currentEndDate.toISOString().split('T')[0]}`);
-        if (!response.ok) {
-            throw new Error(`Error fetching data: ${response.statusText}`);
-        }
-        const result: MetricsData = await response.json();
-        console.log('Fetched data:', result);
+        
+        const result = await fetchMetricsData(currentStartDate.toISOString().split('T')[0], currentEndDate.toISOString().split('T')[0]);        
         data.push(result);
 
         currentStartDate.setDate(currentStartDate.getDate() + 60);
     }
 
-    const combinedData = data.reduce((acc, current) => {
+    return combineData(data);
+};
+
+const combineData = (data: MetricsData[]): MetricsData => {
+    return data.reduce((acc, current) => {
         const accRewards = parseCurrency(acc.totalRewardsEarned);
         const currentRewards = parseCurrency(current.totalRewardsEarned);
         const totalRewards = accRewards + currentRewards;
@@ -91,9 +93,6 @@ const fetchDataInIntervals = async (fromDate: string, toDate: string): Promise<M
         newlyMintedDomains: 0,
         totalRewardsEarned: '$0.00'
     });
-
-    console.log('Combined Data:', combinedData);
-    return combinedData;
 };
 
 export default handler;

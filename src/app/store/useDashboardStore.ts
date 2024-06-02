@@ -1,10 +1,13 @@
 import create from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DataPoint, ZnsData } from '@/app/types';
+import { DataPoint, ZnsData, MetricsData } from '@/app/types';
+
+
 
 interface DashboardState {
     filter: string;
     data: DataPoint[];
+    zosData: MetricsData[];
     znsData: ZnsData[];
     znsDataCache: Record<string, ZnsData[]>;
     totals: {
@@ -18,6 +21,7 @@ interface DashboardState {
     };
     setFilter: (filter: string) => void;
     setData: (data: DataPoint[]) => void;
+    setZosData: (data: MetricsData[]) => void;
     setZnsData: (data: ZnsData[], filter: string) => void;
     fetchDashboardData: (fromDate: string, toDate: string) => Promise<void>;
     fetchZnsData: (filter: string, limit?: number, offset?: number) => Promise<void>;
@@ -33,34 +37,12 @@ const formatCurrency = (value: number): string => {
     return `$${value.toFixed(2)}`;
 };
 
-const fetchAllData = async (fromDate: string, toDate: string): Promise<DataPoint[]> => {
-    const data: DataPoint[] = [];
-    const startDate = new Date(fromDate);
-    const endDate = new Date(toDate);
-
-    if ((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24) <= 60) {
-        const response = await fetch(`/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}`);
-        const result: DataPoint[] = await response.json();
-        return result;
+const fetchAllData = async (fromDate: string, toDate: string): Promise<MetricsData> => {
+    const response = await fetch(`/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}`);
+    if (!response.ok) {
+        throw new Error(`Error fetching data: ${response.statusText}`);
     }
-
-    let currentStartDate = new Date(startDate);
-
-    while (currentStartDate < endDate) {
-        let currentEndDate = new Date(currentStartDate);
-        currentEndDate.setDate(currentEndDate.getDate() + 59);
-        if (currentEndDate > endDate) {
-            currentEndDate = endDate;
-        }
-
-        const response = await fetch(`/api/zos/metrics?fromDate=${currentStartDate.toISOString().split('T')[0]}&toDate=${currentEndDate.toISOString().split('T')[0]}`);
-        const result: DataPoint[] = await response.json();
-        data.push(...result);
-
-        currentStartDate.setDate(currentStartDate.getDate() + 60);
-    }
-
-    return data;
+    return await response.json();
 };
 
 const useDashboardStore = create<DashboardState>()(
@@ -68,6 +50,7 @@ const useDashboardStore = create<DashboardState>()(
         (set, get) => ({
             filter: '24h',
             data: [],
+            zosData: [],
             znsData: [],
             znsDataCache: {},
             totals: {
@@ -84,6 +67,8 @@ const useDashboardStore = create<DashboardState>()(
 
             setData: (data: DataPoint[]) => set({ data }),
 
+            setZosData: (data: MetricsData[]) => set({ zosData: data }),
+
             setZnsData: (data: ZnsData[], filter: string) => {
                 const cache = { ...get().znsDataCache, [filter]: data };
                 set({ znsData: data, znsDataCache: cache });
@@ -92,33 +77,18 @@ const useDashboardStore = create<DashboardState>()(
             fetchDashboardData: async (fromDate: string, toDate: string) => {
                 try {
                     const data = await fetchAllData(fromDate, toDate);
-                    const combinedData = data.reduce((acc, current) => {
-                        const accRewards = parseCurrency(acc.totalRewardsEarned);
-                        const currentRewards = parseCurrency(current.totalRewardsEarned.toString());
-                        const totalRewards = accRewards + currentRewards;
-
-                        return {
-                            dailyActiveUsers: acc.dailyActiveUsers + current.dailyActiveUsers,
-                            totalMessagesSent: acc.totalMessagesSent + current.totalMessagesSent,
-                            userSignUps: acc.userSignUps + current.userSignUps,
-                            newlyMintedDomains: acc.newlyMintedDomains + current.newlyMintedDomains,
-                            totalRewardsEarned: formatCurrency(totalRewards),
-                            totalRegistrations: acc.totalRegistrations, // Add this
-                            totalWorlds: acc.totalWorlds, // Add this
-                            totalDomains: acc.totalDomains // Add this
-                        };
-                    }, {
-                        dailyActiveUsers: 0,
-                        totalMessagesSent: 0,
-                        userSignUps: 0,
-                        newlyMintedDomains: 0,
-                        totalRewardsEarned: '$0.00',
-                        totalRegistrations: 0, // Add this
-                        totalWorlds: 0, // Add this
-                        totalDomains: 0 // Add this
+                    set({ zosData: [data] }); 
+                    set({
+                        totals: {
+                            dailyActiveUsers: data.dailyActiveUsers,
+                            totalMessagesSent: data.totalMessagesSent,
+                            userSignUps: data.userSignUps,
+                            totalRewardsEarned: data.totalRewardsEarned,
+                            totalRegistrations: get().totals.totalRegistrations,  
+                            totalWorlds: get().totals.totalWorlds,  
+                            totalDomains: get().totals.totalDomains 
+                        }
                     });
-
-                    set({ data, totals: combinedData });
                 } catch (error) {
                     console.error('Error in fetchDashboardData:', error);
                 }
