@@ -7,24 +7,25 @@ import ZeroDomainsSection from './ZeroDomainsSection';
 import useDashboardStore from '@/store/useDashboardStore';
 import '@/components/Dashboard/dashboard.css';
 import ZeroGlobal from './ZeroGlobal';
+import Loading from '@/components/Loading';
 
 interface DashboardProps {
     dashboardType: string;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ dashboardType }) => {
-    const { filter, data, znsData, setFilter, fetchDashboardData, fetchZnsData } = useDashboardStore();
+    const { filter, data, znsData, setFilter, fetchDashboardDataByFilter, fetchZnsData } = useDashboardStore();
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-            await fetchDashboardData(filter);
+            await fetchDashboardDataByFilter(filter);
             await fetchZnsData(filter);
             setLoading(false);
         };
         fetchData();
-    }, [filter, fetchDashboardData, fetchZnsData]);
+    }, [filter, fetchDashboardDataByFilter, fetchZnsData]);
 
 
     const totals = {
@@ -189,9 +190,8 @@ const Dashboard: React.FC<DashboardProps> = ({ dashboardType }) => {
     };
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <Loading />;
     }
-
     return (
         <div className="dashboard">
             {renderSection()}

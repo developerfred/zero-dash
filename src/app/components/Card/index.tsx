@@ -2,7 +2,7 @@ import React from 'react';
 
 interface CardProps {
     title: string;
-    value: number;
+    value: string | number;
 }
 
 const formatNumberWithCommas = (number: number): string => {
@@ -10,10 +10,12 @@ const formatNumberWithCommas = (number: number): string => {
 };
 
 const Card: React.FC<CardProps> = ({ title, value }) => {
+    const formattedValue = typeof value === 'number' ? formatNumberWithCommas(value) : value;
+
     return (
         <div className="card">
             <h3>{title}</h3>
-            <p>{formatNumberWithCommas(value)}</p>
+            <p>{formattedValue}</p>
         </div>
     );
 };

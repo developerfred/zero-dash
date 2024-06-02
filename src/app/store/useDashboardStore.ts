@@ -22,6 +22,7 @@ interface DashboardState {
     fetchDashboardData: (fromDate: string, toDate: string) => Promise<void>;
     fetchZnsData: (filter: string, limit?: number, offset?: number) => Promise<void>;
     fetchTotals: (filter: string) => Promise<void>;
+    fetchDashboardDataByFilter: (filter: string) => Promise<void>;
 }
 
 const parseCurrency = (value: string): number => {
@@ -32,14 +33,14 @@ const formatCurrency = (value: number): string => {
     return `$${value.toFixed(2)}`;
 };
 
-const fetchAllData = async (fromDate: string, toDate: string): Promise<DataPoint> => {
+const fetchAllData = async (fromDate: string, toDate: string): Promise<DataPoint[]> => {
     const data: DataPoint[] = [];
     const startDate = new Date(fromDate);
     const endDate = new Date(toDate);
 
     if ((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24) <= 60) {
         const response = await fetch(`/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}`);
-        const result: DataPoint = await response.json();
+        const result: DataPoint[] = await response.json();
         return result;
     }
 
@@ -52,37 +53,14 @@ const fetchAllData = async (fromDate: string, toDate: string): Promise<DataPoint
             currentEndDate = endDate;
         }
 
-        console.log(`Fetching data from ${currentStartDate.toISOString().split('T')[0]} to ${currentEndDate.toISOString().split('T')[0]}`);
         const response = await fetch(`/api/zos/metrics?fromDate=${currentStartDate.toISOString().split('T')[0]}&toDate=${currentEndDate.toISOString().split('T')[0]}`);
-        const result: DataPoint = await response.json();
-        console.log('Fetched data:', result);
-        data.push(result);
+        const result: DataPoint[] = await response.json();
+        data.push(...result);
 
         currentStartDate.setDate(currentStartDate.getDate() + 60);
     }
 
-    const combinedData = data.reduce((acc, current) => {
-        const accRewards = parseCurrency(acc.totalRewardsEarned);
-        const currentRewards = parseCurrency(current.totalRewardsEarned);
-        const totalRewards = accRewards + currentRewards;
-
-        console.log(`Accumulated Rewards: ${accRewards}, Current Rewards: ${currentRewards}, Total Rewards: ${totalRewards}`);
-
-        return {
-            dailyActiveUsers: acc.dailyActiveUsers + current.dailyActiveUsers,
-            totalMessagesSent: acc.totalMessagesSent + current.totalMessagesSent,
-            userSignUps: acc.userSignUps + current.userSignUps,
-            totalRewardsEarned: formatCurrency(totalRewards)
-        };
-    }, {
-        dailyActiveUsers: 0,
-        totalMessagesSent: 0,
-        userSignUps: 0,
-        totalRewardsEarned: '$0.00'
-    });
-
-    console.log('Combined Data:', combinedData);
-    return combinedData;
+    return data;
 };
 
 const useDashboardStore = create<DashboardState>()(
@@ -113,10 +91,76 @@ const useDashboardStore = create<DashboardState>()(
 
             fetchDashboardData: async (fromDate: string, toDate: string) => {
                 try {
-                    const combinedData = await fetchAllData(fromDate, toDate);
-                    set({ totals: combinedData });
+                    const data = await fetchAllData(fromDate, toDate);
+                    const combinedData = data.reduce((acc, current) => {
+                        const accRewards = parseCurrency(acc.totalRewardsEarned);
+                        const currentRewards = parseCurrency(current.totalRewardsEarned.toString());
+                        const totalRewards = accRewards + currentRewards;
+
+                        return {
+                            dailyActiveUsers: acc.dailyActiveUsers + current.dailyActiveUsers,
+                            totalMessagesSent: acc.totalMessagesSent + current.totalMessagesSent,
+                            userSignUps: acc.userSignUps + current.userSignUps,
+                            newlyMintedDomains: acc.newlyMintedDomains + current.newlyMintedDomains,
+                            totalRewardsEarned: formatCurrency(totalRewards),
+                            totalRegistrations: acc.totalRegistrations, // Add this
+                            totalWorlds: acc.totalWorlds, // Add this
+                            totalDomains: acc.totalDomains // Add this
+                        };
+                    }, {
+                        dailyActiveUsers: 0,
+                        totalMessagesSent: 0,
+                        userSignUps: 0,
+                        newlyMintedDomains: 0,
+                        totalRewardsEarned: '$0.00',
+                        totalRegistrations: 0, // Add this
+                        totalWorlds: 0, // Add this
+                        totalDomains: 0 // Add this
+                    });
+
+                    set({ data, totals: combinedData });
                 } catch (error) {
                     console.error('Error in fetchDashboardData:', error);
+                }
+            },
+
+            fetchDashboardDataByFilter: async (filter: string) => {
+                try {
+                    const now = new Date();
+                    let fromDate, toDate;
+
+                    switch (filter) {
+                        case '24h':
+                            toDate = now.toISOString().split('T')[0];
+                            fromDate = new Date(now.setDate(now.getDate() - 1)).toISOString().split('T')[0];
+                            break;
+                        case '7d':
+                            toDate = now.toISOString().split('T')[0];
+                            fromDate = new Date(now.setDate(now.getDate() - 7)).toISOString().split('T')[0];
+                            break;
+                        case '30d':
+                            toDate = now.toISOString().split('T')[0];
+                            fromDate = new Date(now.setDate(now.getDate() - 30)).toISOString().split('T')[0];
+                            break;
+                        case '90d':
+                            toDate = now.toISOString().split('T')[0];
+                            fromDate = new Date(now.setDate(now.getDate() - 90)).toISOString().split('T')[0];
+                            break;
+                        case '365d':
+                            toDate = now.toISOString().split('T')[0];
+                            fromDate = new Date(now.setDate(now.getDate() - 365)).toISOString().split('T')[0];
+                            break;
+                        default:
+                            // Assuming custom date range passed in format `custom_yyyy-MM-dd_yyyy-MM-dd`
+                            const dates = filter.split('_');
+                            fromDate = dates[1];
+                            toDate = dates[2];
+                            break;
+                    }
+
+                    await get().fetchDashboardData(fromDate, toDate);
+                } catch (error) {
+                    console.error('Error in fetchDashboardDataByFilter:', error);
                 }
             },
 

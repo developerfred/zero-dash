@@ -5,17 +5,13 @@ import Chart from '@/components/Chart';
 import Card from '@/components/Card';
 
 const ZeroGlobal: React.FC = () => {
-    const { filter, totals, data, setFilter, fetchDashboardData } = useDashboardStore();
+    const { filter, totals, data, setFilter, fetchDashboardDataByFilter } = useDashboardStore();
 
     useEffect(() => {
-        const fetchData = async () => {
-            const toDate = new Date().toISOString().split('T')[0];
-            const fromDate = new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0]; // Adjust this range as needed
-            await fetchDashboardData(fromDate, toDate);
-        };
+        fetchDashboardDataByFilter(filter);
+    }, [filter, fetchDashboardDataByFilter]);
 
-        fetchData();
-    }, [filter, fetchDashboardData]);
+    console.log("Totals:", data);
 
     return (
         <div className="section">
