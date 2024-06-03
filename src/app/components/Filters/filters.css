@@ -33,6 +33,11 @@
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
+
+.filter-button.active {
+  color: #81e6d9;  
+}
+
 .date-range {
   display: flex;
   flex-direction: column;
@@ -121,6 +126,7 @@
   outline: none;
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
+
 
 .datepicker-container {
   display: flex;

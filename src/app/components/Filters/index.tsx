@@ -13,7 +13,9 @@ interface FiltersProps {
 const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
     const [customDateRange, setCustomDateRange] = useState<[Date | null, Date | null]>([null, null]);
     const [startDate, endDate] = customDateRange;
-    const [selectedOption, setSelectedOption] = useState<string>('24h');
+    const [selectedOption, setSelectedOption] = useState<string>(() => {
+        return localStorage.getItem('selectedOption') || '24h';
+    });
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const options = [
@@ -32,6 +34,7 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
 
     const handleButtonClick = (value: string) => {
         setSelectedOption(value);
+        localStorage.setItem('selectedOption', value);
         if (value !== 'custom') {
             setFilter(value);
             setCustomDateRange([null, null]);
@@ -41,11 +44,17 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
     };
 
     useEffect(() => {
+        if (selectedOption !== 'custom') {
+            setFilter(selectedOption);
+        }
+    }, [selectedOption, setFilter]);
+
+    useEffect(() => {
         if (selectedOption === 'custom' && startDate && endDate) {
             const formattedStartDate = format(startDate, 'yyyy-MM-dd');
             const formattedEndDate = format(endDate, 'yyyy-MM-dd');
             setFilter(`custom_${formattedStartDate}_${formattedEndDate}`);
-            setModalIsOpen(false);  
+            setModalIsOpen(false);
         }
     }, [startDate, endDate, selectedOption, setFilter]);
 
