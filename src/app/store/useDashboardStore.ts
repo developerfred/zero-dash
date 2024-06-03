@@ -120,8 +120,29 @@ const useDashboardStore = create<DashboardState>()(
                             toDate = now.toISOString().split('T')[0];
                             fromDate = new Date(now.setDate(now.getDate() - 365)).toISOString().split('T')[0];
                             break;
-                        default:
-                            // Assuming custom date range passed in format `custom_yyyy-MM-dd_yyyy-MM-dd`
+                        case 'today':
+                            fromDate = toDate = now.toISOString().split('T')[0];
+                            break;
+                        case 'yesterday':
+                            toDate = new Date(now.setDate(now.getDate() - 1)).toISOString().split('T')[0];
+                            fromDate = toDate;
+                            break;
+                        case 'last_week':                            
+                            now.setDate(now.getDate() - now.getDay()); 
+                            toDate = now.toISOString().split('T')[0];
+                            fromDate = new Date(now.setDate(now.getDate() - 6)).toISOString().split('T')[0];
+                            break;
+                        case 'last_month':
+                            now.setMonth(now.getMonth() - 1);
+                            toDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+                            fromDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                            break;
+                        case 'last_year':
+                            now.setFullYear(now.getFullYear() - 1);
+                            toDate = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0];
+                            fromDate = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+                            break;
+                        default:                            
                             const dates = filter.split('_');
                             fromDate = dates[1];
                             toDate = dates[2];
