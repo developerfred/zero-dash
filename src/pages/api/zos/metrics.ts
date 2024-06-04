@@ -28,6 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(200).json(data);
     } catch (error) {
         console.error('Error fetching data:', error);
+        //@ts-ignore
         return res.status(500).json({ error: error.message });
     }
 };

@@ -1,6 +1,7 @@
 import create from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DataPoint, ZnsData, MetricsData } from '@/app/types';
+import { DataPoint, ZnsData, MetricsData, TotalRewardsEarned } from '@/app/types';
+import { formatUSD } from '@/app/lib/currencyUtils';
 
 interface DashboardState {
     filter: string;
@@ -18,6 +19,7 @@ interface DashboardState {
         newlyMintedDomains: number;
         totalRewardsEarned: string;
     };
+    tokenPriceInUSD: number | null;
     setFilter: (filter: string) => void;
     setData: (data: DataPoint[]) => void;
     setZosData: (data: MetricsData[]) => void;
@@ -26,6 +28,7 @@ interface DashboardState {
     fetchZnsData: (filter: string, limit?: number, offset?: number) => Promise<void>;
     fetchTotals: (filter: string) => Promise<void>;
     fetchDashboardDataByFilter: (filter: string) => Promise<void>;
+    fetchTokenPrice: () => Promise<void>;
 }
 
 const fetchAllData = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
@@ -34,6 +37,15 @@ const fetchAllData = async (fromDate: string, toDate: string): Promise<MetricsDa
         throw new Error(`Error fetching data: ${response.statusText}`);
     }
     return await response.json();
+};
+
+const fetchCurrentTokenPriceInUSD = async (): Promise<number> => {
+    const response = await fetch('/api/meow/token-price');
+    if (!response.ok) {
+        throw new Error(`Error fetching MEOW price: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.price;
 };
 
 const useDashboardStore = create<DashboardState>()(
@@ -54,6 +66,7 @@ const useDashboardStore = create<DashboardState>()(
                 newlyMintedDomains: 0,
                 totalRewardsEarned: '0',
             },
+            tokenPriceInUSD: null,
 
             setFilter: (filter: string) => set({ filter }),
 
@@ -66,15 +79,31 @@ const useDashboardStore = create<DashboardState>()(
                 set({ znsData: data, znsDataCache: cache });
             },
 
+            fetchTokenPrice: async () => {
+                try {
+                    const price = await fetchCurrentTokenPriceInUSD();
+                    set({ tokenPriceInUSD: price });
+                } catch (error) {
+                    console.error('Error fetching token price:', error);
+                }
+            },
+
             fetchDashboardData: async (fromDate: string, toDate: string) => {
                 try {
                     const data = await fetchAllData(fromDate, toDate);
+                    const tokenPriceInUSD = get().tokenPriceInUSD;
+
+                    if (tokenPriceInUSD === null) {
+                        throw new Error('Token price is not available');
+                    }
+
                     const totals = data.reduce((acc, curr) => {
                         acc.dailyActiveUsers += curr.dailyActiveUsers;
                         acc.totalMessagesSent += curr.totalMessagesSent;
                         acc.userSignUps += curr.userSignUps;
                         acc.newlyMintedDomains += curr.newlyMintedDomains;
-                        acc.totalRewardsEarned = (parseFloat(acc.totalRewardsEarned) + parseFloat(curr.totalRewardsEarned.amount)).toString();
+                        const rewardInUSD = parseFloat(curr.totalRewardsEarned.amount) * tokenPriceInUSD;
+                        acc.totalRewardsEarned = (parseFloat(acc.totalRewardsEarned) + rewardInUSD).toString();
                         return acc;
                     }, {
                         dailyActiveUsers: 0,
@@ -83,6 +112,9 @@ const useDashboardStore = create<DashboardState>()(
                         newlyMintedDomains: 0,
                         totalRewardsEarned: '0',
                     });
+                    
+                    totals.totalRewardsEarned = formatUSD(parseFloat(totals.totalRewardsEarned) * 100);
+                    //@ts-ignore
                     set({ zosData: data, totals });
                 } catch (error) {
                     console.error('Error fetching dashboard data:', error);
@@ -144,7 +176,9 @@ const useDashboardStore = create<DashboardState>()(
                             break;
                     }
 
-                    await get().fetchDashboardData(fromDate, toDate);
+                    const { fetchTokenPrice, fetchDashboardData } = get();
+                    await fetchTokenPrice();
+                    await fetchDashboardData(fromDate, toDate);
                 } catch (error) {
                     console.error('Error in fetchDashboardDataByFilter:', error);
                 }
@@ -162,8 +196,7 @@ const useDashboardStore = create<DashboardState>()(
                     if (!response.ok) {
                         throw new Error(`Error fetching ZNS data: ${response.statusText}`);
                     }
-                    const result = await response.json();
-                    console.log(result);
+                    const result = await response.json();                    
                     const newData = (cache || []).concat(result.data);
                     const newCache = { ...get().znsDataCache, [filter]: newData };
                     set({ znsData: newData.slice(offset, offset + limit), znsDataCache: newCache });

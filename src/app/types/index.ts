@@ -91,10 +91,17 @@ export const isDataPointArray = (data: DataPoint[] | ZnsData[]): data is DataPoi
 }
 
 
+export interface TotalRewardsEarned {
+    amount: string;
+    unit: string;
+    precision: number;
+}
+
 export interface MetricsData {
+    date: string;
     dailyActiveUsers: number;
     totalMessagesSent: number;
     userSignUps: number;
     newlyMintedDomains: number;
-    totalRewardsEarned: string;
+    totalRewardsEarned: TotalRewardsEarned;
 }
