@@ -4,11 +4,16 @@ import fetch from 'node-fetch';
 const API_URL = process.env.NEXT_PUBLIC_API_METRICS;
 
 interface MetricsData {
+    date: string;
     dailyActiveUsers: number;
     totalMessagesSent: number;
     userSignUps: number;
     newlyMintedDomains: number;
-    totalRewardsEarned: string;
+    totalRewardsEarned: {
+        amount: string;
+        unit: string;
+        precision: number;
+    };
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -23,28 +28,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(200).json(data);
     } catch (error) {
         console.error('Error fetching data:', error);
-        // @ts-ignore
         return res.status(500).json({ error: error.message });
     }
 };
 
-const parseCurrency = (value: string): number => {
-    return parseFloat(value.replace(/[^\d.-]/g, ''));
-};
-
-const formatCurrency = (value: number): string => {
-    return `$${value.toFixed(2)}`;
-};
-
-const fetchMetricsData = async (fromDate: string, toDate: string): Promise<MetricsData> => {
+const fetchMetricsData = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
     const response = await fetch(`${API_URL}?fromDate=${fromDate}&toDate=${toDate}`);
     if (!response.ok) {
         throw new Error(`Error fetching data: ${response.statusText}`);
     }
-    return response.json();
+    const data = await response.json();
+    return Object.entries(data).map(([date, metrics]: [string, any]) => ({
+        date,
+        ...metrics,
+    }));
 };
 
-const fetchDataInIntervals = async (fromDate: string, toDate: string): Promise<MetricsData> => {
+const fetchDataInIntervals = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
     const data: MetricsData[] = [];
     const startDate = new Date(fromDate);
     const endDate = new Date(toDate);
@@ -61,38 +61,14 @@ const fetchDataInIntervals = async (fromDate: string, toDate: string): Promise<M
         if (currentEndDate > endDate) {
             currentEndDate = endDate;
         }
-        
-        const result = await fetchMetricsData(currentStartDate.toISOString().split('T')[0], currentEndDate.toISOString().split('T')[0]);        
-        data.push(result);
+
+        const result = await fetchMetricsData(currentStartDate.toISOString().split('T')[0], currentEndDate.toISOString().split('T')[0]);
+        data.push(...result);
 
         currentStartDate.setDate(currentStartDate.getDate() + 60);
     }
 
-    return combineData(data);
-};
-
-const combineData = (data: MetricsData[]): MetricsData => {
-    return data.reduce((acc, current) => {
-        const accRewards = parseCurrency(acc.totalRewardsEarned);
-        const currentRewards = parseCurrency(current.totalRewardsEarned);
-        const totalRewards = accRewards + currentRewards;
-
-        console.log(`Accumulated Rewards: ${accRewards}, Current Rewards: ${currentRewards}, Total Rewards: ${totalRewards}`);
-
-        return {
-            dailyActiveUsers: acc.dailyActiveUsers + current.dailyActiveUsers,
-            totalMessagesSent: acc.totalMessagesSent + current.totalMessagesSent,
-            userSignUps: acc.userSignUps + current.userSignUps,
-            newlyMintedDomains: acc.newlyMintedDomains + current.newlyMintedDomains,
-            totalRewardsEarned: formatCurrency(totalRewards)
-        };
-    }, {
-        dailyActiveUsers: 0,
-        totalMessagesSent: 0,
-        userSignUps: 0,
-        newlyMintedDomains: 0,
-        totalRewardsEarned: '$0.00'
-    });
+    return data;
 };
 
 export default handler;

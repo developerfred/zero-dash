@@ -2,8 +2,6 @@ import create from 'zustand';
 import { persist } from 'zustand/middleware';
 import { DataPoint, ZnsData, MetricsData } from '@/app/types';
 
-
-
 interface DashboardState {
     filter: string;
     data: DataPoint[];
@@ -17,6 +15,7 @@ interface DashboardState {
         dailyActiveUsers: number;
         totalMessagesSent: number;
         userSignUps: number;
+        newlyMintedDomains: number;
         totalRewardsEarned: string;
     };
     setFilter: (filter: string) => void;
@@ -29,15 +28,7 @@ interface DashboardState {
     fetchDashboardDataByFilter: (filter: string) => Promise<void>;
 }
 
-const parseCurrency = (value: string): number => {
-    return parseFloat(value.replace(/[^\d.-]/g, ''));
-};
-
-const formatCurrency = (value: number): string => {
-    return `$${value.toFixed(2)}`;
-};
-
-const fetchAllData = async (fromDate: string, toDate: string): Promise<MetricsData> => {
+const fetchAllData = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
     const response = await fetch(`/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}`);
     if (!response.ok) {
         throw new Error(`Error fetching data: ${response.statusText}`);
@@ -60,7 +51,8 @@ const useDashboardStore = create<DashboardState>()(
                 dailyActiveUsers: 0,
                 totalMessagesSent: 0,
                 userSignUps: 0,
-                totalRewardsEarned: '$0.00',
+                newlyMintedDomains: 0,
+                totalRewardsEarned: '0',
             },
 
             setFilter: (filter: string) => set({ filter }),
@@ -77,20 +69,23 @@ const useDashboardStore = create<DashboardState>()(
             fetchDashboardData: async (fromDate: string, toDate: string) => {
                 try {
                     const data = await fetchAllData(fromDate, toDate);
-                    set({ zosData: [data] }); 
-                    set({
-                        totals: {
-                            dailyActiveUsers: data.dailyActiveUsers,
-                            totalMessagesSent: data.totalMessagesSent,
-                            userSignUps: data.userSignUps,
-                            totalRewardsEarned: data.totalRewardsEarned,
-                            totalRegistrations: get().totals.totalRegistrations,  
-                            totalWorlds: get().totals.totalWorlds,  
-                            totalDomains: get().totals.totalDomains 
-                        }
+                    const totals = data.reduce((acc, curr) => {
+                        acc.dailyActiveUsers += curr.dailyActiveUsers;
+                        acc.totalMessagesSent += curr.totalMessagesSent;
+                        acc.userSignUps += curr.userSignUps;
+                        acc.newlyMintedDomains += curr.newlyMintedDomains;
+                        acc.totalRewardsEarned = (parseFloat(acc.totalRewardsEarned) + parseFloat(curr.totalRewardsEarned.amount)).toString();
+                        return acc;
+                    }, {
+                        dailyActiveUsers: 0,
+                        totalMessagesSent: 0,
+                        userSignUps: 0,
+                        newlyMintedDomains: 0,
+                        totalRewardsEarned: '0',
                     });
+                    set({ zosData: data, totals });
                 } catch (error) {
-                    console.error('Error in fetchDashboardData:', error);
+                    console.error('Error fetching dashboard data:', error);
                 }
             },
 
@@ -127,8 +122,8 @@ const useDashboardStore = create<DashboardState>()(
                             toDate = new Date(now.setDate(now.getDate() - 1)).toISOString().split('T')[0];
                             fromDate = toDate;
                             break;
-                        case 'last_week':                            
-                            now.setDate(now.getDate() - now.getDay()); 
+                        case 'last_week':
+                            now.setDate(now.getDate() - now.getDay());
                             toDate = now.toISOString().split('T')[0];
                             fromDate = new Date(now.setDate(now.getDate() - 6)).toISOString().split('T')[0];
                             break;
@@ -142,7 +137,7 @@ const useDashboardStore = create<DashboardState>()(
                             toDate = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0];
                             fromDate = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
                             break;
-                        default:                            
+                        default:
                             const dates = filter.split('_');
                             fromDate = dates[1];
                             toDate = dates[2];
