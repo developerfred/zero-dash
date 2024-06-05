@@ -1,5 +1,6 @@
 import create from 'zustand';
 import { persist } from 'zustand/middleware';
+import { formatUnits } from 'viem';
 import { DataPoint, ZnsData, MetricsData, TotalRewardsEarned } from '@/app/types';
 import { formatUSD } from '@/app/lib/currencyUtils';
 
@@ -102,7 +103,8 @@ const useDashboardStore = create<DashboardState>()(
                         acc.totalMessagesSent += curr.totalMessagesSent;
                         acc.userSignUps += curr.userSignUps;
                         acc.newlyMintedDomains += curr.newlyMintedDomains;
-                        const rewardInUSD = parseFloat(curr.totalRewardsEarned.amount) * tokenPriceInUSD;
+                        const rewardInEther = parseFloat(formatUnits(curr.totalRewardsEarned.amount, curr.totalRewardsEarned.precision));
+                        const rewardInUSD = rewardInEther * tokenPriceInUSD;
                         acc.totalRewardsEarned = (parseFloat(acc.totalRewardsEarned) + rewardInUSD).toString();
                         return acc;
                     }, {
