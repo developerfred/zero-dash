@@ -88,29 +88,25 @@ const GET_WORLDS_QUERY = gql`
 `;
 
 async function fetchDomains(variables) {
-  console.log('Fetching domains with variables:', variables);
   const response = await client.query({
     query: GET_DOMAINS_QUERY,
     variables
   });
-  console.log('Fetched domains data:', response.data);
   return response.data.domains;
 }
 
 async function fetchWorlds(variables) {
-  console.log('Fetching worlds with variables:', variables);
   const response = await client.query({
     query: GET_WORLDS_QUERY,
     variables
   });
-  console.log('Fetched worlds data:', response.data);
   return response.data.domains;
 }
 
 function calculateTimestamps(range) {
   const now = dayjs();
   let start;
-  let end = now.unix(); // Default to current time
+  let end = now.unix();
 
   switch (range) {
     case '24h':
@@ -155,10 +151,46 @@ function calculateTimestamps(range) {
   return { start, end };
 }
 
-export default async function handler(req, res) {
-  const { range, orderBy = 'creationTimestamp', orderDirection = 'desc' } = req.query;
+function groupByDate(domains, worlds) {
+  const groupedData = {};
 
-  console.log('Received request with query:', req.query);
+  domains.forEach(domain => {
+    const date = dayjs.unix(domain.creationTimestamp).format('YYYY-MM-DD');
+    if (!groupedData[date]) {
+      groupedData[date] = {
+        totalDomainRegistrations: 0,
+        totalDomains: 0,
+        totalWorlds: 0,
+        domains: [],
+        worlds: []
+      };
+    }
+    groupedData[date].domains.push(domain);
+    groupedData[date].totalDomains += 1;
+    groupedData[date].totalDomainRegistrations += 1;
+  });
+
+  worlds.forEach(world => {
+    const date = dayjs.unix(world.creationTimestamp).format('YYYY-MM-DD');
+    if (!groupedData[date]) {
+      groupedData[date] = {
+        totalDomainRegistrations: 0,
+        totalDomains: 0,
+        totalWorlds: 0,
+        domains: [],
+        worlds: []
+      };
+    }
+    groupedData[date].worlds.push(world);
+    groupedData[date].totalWorlds += 1;
+    groupedData[date].totalDomainRegistrations += 1;
+  });
+
+  return groupedData;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { range, orderBy = 'creationTimestamp', orderDirection = 'desc' } = req.query;
 
   if (!range) {
     return res.status(400).json({ error: 'Date range is required' });
@@ -175,8 +207,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: error.message });
   }
 
-  console.log('Computed timestamps:', { start, end });
-
   try {
     const variables = {
       first: 1000,
@@ -192,18 +222,9 @@ export default async function handler(req, res) {
       fetchWorlds(variables)
     ]);
 
-    const totalDomains = domains.length;
-    const totalWorlds = worlds.length;
+    const groupedData = groupByDate(domains, worlds);
 
-    const result = {
-      totalDomainRegistrations: totalDomains + totalWorlds,
-      totalDomains,
-      totalWorlds,
-      domains,
-      worlds
-    };
-
-    res.status(200).json(result);
+    res.status(200).json(groupedData);
   } catch (error) {
     console.error('Error fetching data from subgraph:', error);
     res.status(500).json({ error: 'Erro ao buscar dados do subgraph' });

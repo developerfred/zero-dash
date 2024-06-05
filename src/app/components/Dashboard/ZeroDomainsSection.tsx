@@ -9,7 +9,7 @@ const ZeroDomainsSection = () => {
     const {
         filter,
         totals,
-        znsData,
+        znsDataCache,
         setFilter,
         fetchTotals,
         fetchZnsData,
@@ -26,7 +26,7 @@ const ZeroDomainsSection = () => {
             <div className="zero-domains">
                 <Filters setFilter={setFilter} />
                 <div className="cards">
-                    <Card title="Total Domain Registrations" value={totals.totalDomainRegistrations} />
+                    <Card title="Total Domain Registrations" value={totals.totalRegistrations} />
                     <Card title="Total Worlds" value={totals.totalWorlds} />
                     <Card title="Total Domains" value={totals.totalDomains} />
                     {/* <Card title="Total Amount Staked" value={totals.totalRewardsEarned} /> */}
@@ -35,17 +35,17 @@ const ZeroDomainsSection = () => {
                     <div className="chart-row">
                         <div className="chart-container">
                             <h3>Total Domain Registrations</h3>
-                            <Chart data={znsData} dataKey="NetTotalRegistrations" chartType="bar" />
+                            <Chart data={Object.values(znsDataCache)} dataKey="totalDomainRegistrations" chartType="bar" />
                         </div>
                         <div className="chart-container">
                             <h3>Total Worlds</h3>
-                            <Chart data={znsData} dataKey="WorldsCreated" chartType="area" />
+                            <Chart data={Object.values(znsDataCache)} dataKey="totalWorlds" chartType="area" />
                         </div>
                     </div>
                     <div className="chart-row">
                         <div className="chart-container">
                             <h3>Total Domains</h3>
-                            <Chart data={znsData} dataKey="NumDomainsRegistered" chartType="line" />
+                            <Chart data={Object.values(znsDataCache)} dataKey="totalDomains" chartType="line" />
                         </div>
                         {/* <div className="chart-container">
                             <h3>Total Amount Staked</h3>

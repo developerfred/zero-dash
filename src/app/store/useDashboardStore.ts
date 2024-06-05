@@ -2,7 +2,7 @@
 import create from 'zustand';
 import { persist } from 'zustand/middleware';
 import { formatUnits } from 'viem';
-import { DataPoint, ZnsData, MetricsData, GroupedData } from '@/app/types';
+import { DataPoint, ZnsData, MetricsData, TotalRewardsEarned, GroupedData } from '@/app/types';
 import { formatUSD } from '@/app/lib/currencyUtils';
 
 interface DashboardState {
@@ -10,7 +10,7 @@ interface DashboardState {
     data: DataPoint[];
     zosData: MetricsData[];
     znsData: ZnsData[];
-    znsDataCache: Record<string, ZnsData[]>;
+    znsDataCache: Record<string, GroupedData>;
     totals: {
         totalRegistrations: number;
         totalWorlds: number;
