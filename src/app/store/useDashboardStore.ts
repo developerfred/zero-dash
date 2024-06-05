@@ -99,7 +99,7 @@ const useDashboardStore = create<DashboardState>()(
                         throw new Error('Token price is not available');
                     }
 
-                    const totals = data.reduce((acc, curr) => {
+                    const totals = data.reduce((acc, curr, index, array) => {
                         acc.dailyActiveUsers += curr.dailyActiveUsers;
                         acc.totalMessagesSent += curr.totalMessagesSent;
                         acc.userSignUps += curr.userSignUps;
@@ -107,6 +107,7 @@ const useDashboardStore = create<DashboardState>()(
                         const rewardInEther = parseFloat(formatUnits(BigInt(curr.totalRewardsEarned.amount), curr.totalRewardsEarned.precision));
                         const rewardInUSD = rewardInEther * tokenPriceInUSD;
                         acc.totalRewardsEarned = (parseFloat(acc.totalRewardsEarned) + rewardInUSD).toString();
+                        acc.dayCount = index + 1; 
                         return acc;
                     }, {
                         dailyActiveUsers: 0,
@@ -116,9 +117,12 @@ const useDashboardStore = create<DashboardState>()(
                         totalRewardsEarned: '0',
                         totalRegistrations: 0,
                         totalWorlds: 0,
-                        totalDomains: 0
+                        totalDomains: 0,
+                        dayCount: 0 
                     });
-
+                    
+                    totals.dailyActiveUsers = Math.round(totals.dailyActiveUsers / totals.dayCount);
+                    
                     totals.totalRewardsEarned = formatUSD(parseFloat(totals.totalRewardsEarned) * 100);
 
                     set({ zosData: data, totals });
