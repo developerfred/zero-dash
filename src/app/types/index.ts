@@ -113,3 +113,8 @@ export interface GroupedData {
     domains: ZnsData[];
     worlds: ZnsData[];
 }
+
+export interface Reward {
+    amount: string;
+    precision: number;
+}

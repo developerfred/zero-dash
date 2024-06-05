@@ -20,6 +20,7 @@ interface DashboardState {
         userSignUps: number;
         newlyMintedDomains: number;
         totalRewardsEarned: string;
+        dayCount: number;
     };
     tokenPriceInUSD: number | null;
     setFilter: (filter: string) => void;
@@ -92,24 +93,14 @@ const useDashboardStore = create<DashboardState>()(
 
             fetchDashboardData: async (fromDate: string, toDate: string) => {
                 try {
-                    const data = await fetchAllData(fromDate, toDate);
+                    const data: DataPoint[] = await fetchAllData(fromDate, toDate);
                     const tokenPriceInUSD = get().tokenPriceInUSD;
 
                     if (tokenPriceInUSD === null) {
                         throw new Error('Token price is not available');
                     }
 
-                    const totals = data.reduce((acc, curr, index, array) => {
-                        acc.dailyActiveUsers += curr.dailyActiveUsers;
-                        acc.totalMessagesSent += curr.totalMessagesSent;
-                        acc.userSignUps += curr.userSignUps;
-                        acc.newlyMintedDomains += curr.newlyMintedDomains;
-                        const rewardInEther = parseFloat(formatUnits(BigInt(curr.totalRewardsEarned.amount), curr.totalRewardsEarned.precision));
-                        const rewardInUSD = rewardInEther * tokenPriceInUSD;
-                        acc.totalRewardsEarned = (parseFloat(acc.totalRewardsEarned) + rewardInUSD).toString();
-                        acc.dayCount = index + 1; 
-                        return acc;
-                    }, {
+                    const initialTotals: Totals = {
                         dailyActiveUsers: 0,
                         totalMessagesSent: 0,
                         userSignUps: 0,
@@ -118,8 +109,21 @@ const useDashboardStore = create<DashboardState>()(
                         totalRegistrations: 0,
                         totalWorlds: 0,
                         totalDomains: 0,
-                        dayCount: 0 
-                    });
+                        dayCount: 0
+                    };
+
+                    const totals = data.reduce<Totals>((acc, curr) => {
+                        acc.dailyActiveUsers += curr.dailyActiveUsers;
+                        acc.totalMessagesSent += curr.totalMessagesSent;
+                        acc.userSignUps += curr.userSignUps;
+                        acc.newlyMintedDomains += curr.newlyMintedDomains;
+                        const rewardInEther = parseFloat(formatUnits(BigInt(curr.totalRewardsEarned.amount), curr.totalRewardsEarned.precision));
+                        const rewardInUSD = rewardInEther * tokenPriceInUSD;
+                        acc.totalRewardsEarned = (parseFloat(acc.totalRewardsEarned) + rewardInUSD).toString();
+                        acc.dayCount += 1;
+                        return acc;
+                    }, initialTotals);
+
                     
                     totals.dailyActiveUsers = Math.round(totals.dailyActiveUsers / totals.dayCount);
                     
