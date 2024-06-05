@@ -105,3 +105,11 @@ export interface MetricsData {
     newlyMintedDomains: number;
     totalRewardsEarned: TotalRewardsEarned;
 }
+
+export interface GroupedData {
+    totalDomainRegistrations: number;
+    totalWorlds: number;
+    totalDomains: number;
+    domains: ZnsData[];
+    worlds: ZnsData[];
+}
