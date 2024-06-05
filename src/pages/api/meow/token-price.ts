@@ -1,32 +1,30 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-const MEOW_PRICE_URL = 'https://coins.llama.fi/prices/current/ethereum:0x0eC78ED49C2D27b315D462d43B5BAB94d2C79bf8?searchWidth=4h';
+const ZERO_PRICE_URL = 'https://beta.zero.tech/api/tokens/zero/';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-        const response = await fetch(MEOW_PRICE_URL);
+        const response = await fetch(ZERO_PRICE_URL);
 
         if (!response.ok) {
             throw new Error(`Error fetching data: ${response.statusText}`);
         }
         const data = await response.json();
 
-        const meowPrice = data.coins['ethereum:0x0eC78ED49C2D27b315D462d43B5BAB94d2C79bf8'];
-        if (!meowPrice) {
-            return res.status(404).json({ error: 'MEOW price data not found' });
+        if (!data || typeof data.price === 'undefined') {
+            return res.status(404).json({ error: 'ZERO price data not found' });
         }
 
         res.status(200).json({
-            decimals: meowPrice.decimals,
-            symbol: meowPrice.symbol,
-            price: meowPrice.price,
-            timestamp: meowPrice.timestamp,
-            confidence: meowPrice.confidence,
+            price: data.price,
+            diff: data.diff,
+            cap: data.cap,
+            volume: data.volume,
+            holders: data.holders,
         });
     } catch (error) {
-        console.error('Error fetching MEOW price:', error);
-        //@ts-ignore
-        res.status(500).json({ error: error.message });
+        console.error('Error fetching ZERO price:', error);
+        res.status(500).json({ error: (error as Error).message });
     }
 };
 
