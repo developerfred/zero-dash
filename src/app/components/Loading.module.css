@@ -3,21 +3,21 @@
     justify-content: center;
     align-items: center;
     height: 100vh; 
-    background: rgba(0, 0, 0, 0.7); 
-    backdrop-filter: blur(10px); 
+    background: rgba(0, 0, 0, 0.2); 
+    backdrop-filter: blur(3px); 
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 1000; 
+    z-index: 999; 
 }
 
 .loader {
     border: 8px solid rgba(243, 243, 243, 0.1); 
     border-top: 8px solid #01f4cb;
     border-radius: 50%;
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     animation: spin 1s linear infinite; 
 }
 

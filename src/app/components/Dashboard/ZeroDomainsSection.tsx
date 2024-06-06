@@ -23,8 +23,7 @@ const ZeroDomainsSection = () => {
     return (
         <div className="section">
             <h2 id="zero-domains">ZERO Domains</h2>
-            <div className="zero-domains">
-                <Filters setFilter={setFilter} />
+            <div className="zero-domains">                
                 <div className="cards">
                     <Card title="Total Domain Registrations" value={totals.totalRegistrations} />
                     <Card title="Total Worlds" value={totals.totalWorlds} />

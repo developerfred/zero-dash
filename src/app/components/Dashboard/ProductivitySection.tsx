@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Filters from '@/components/Filters';
 import Chart from '@/components/Chart';
 import Card from '@/components/Card';
+import useDashboardStore from '@/store/useDashboardStore';
 import axios from 'axios';
 import { subDays, startOfToday, startOfYesterday, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
 
@@ -101,7 +102,11 @@ const calculateDateRange = (filter: FilterType): DateRange => {
 };
 
 const ProductivitySection: React.FC = () => {
-    const [filter, setFilter] = useState<FilterType>('24h');
+    const {
+        filter,                
+        setFilter,
+    } = useDashboardStore();
+
     const [data, setData] = useState<FetchData>({
         prData: [],
         issuesData: [],
@@ -177,8 +182,7 @@ const ProductivitySection: React.FC = () => {
     return (
         <div className="section">
             <h2 id="zero-productivity">Productivity</h2>
-            <div className="zero-productivity">
-                <Filters setFilter={setFilter} />
+            <div className="zero-productivity">                
                 <div className="cards">
                     <Card title="Open PRs" value={totals.openPRs} />
                     <Card title="Closed PRs" value={totals.closedPRs} />

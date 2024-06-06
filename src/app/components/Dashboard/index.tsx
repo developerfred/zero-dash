@@ -17,7 +17,6 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
     const { filter, data, znsData, setFilter, fetchDashboardDataByFilter, fetchZnsData } = useDashboardStore();
     const [loading, setLoading] = useState(true);
 
-    
 
     useEffect(() => {
         const fetchData = async () => {
@@ -55,7 +54,7 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
                     <div className="section">
                         <h2 id="zero-meow">MEOW</h2>
                         <div className="zero-meow">
-                            <Filters setFilter={setFilter} />
+                            
                             <div className="cards">
                                 <Card title="MEOW Active Users" value={totals.dailyActiveUsers} />
                                 <Card title="MEOW exchange" value={totals.totalMessagesSent} />
@@ -98,8 +97,7 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
                 return (
                     <div className="section">
                         <h2 id="zero-wild">WILD</h2>
-                        <div className="zero-wild">
-                            <Filters setFilter={setFilter} />
+                        <div className="zero-wild">                            
                             <div className="cards">
                                 <Card title="WILD Active Users" value={totals.dailyActiveUsers} />
                                 <Card title="WILD" value={totals.totalMessagesSent} />
@@ -142,8 +140,7 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
                 return (
                     <div className="section">
                         <h2 id="zero-finance">Finance</h2>
-                        <div className="zero-finance">
-                            <Filters setFilter={setFilter} />
+                        <div className="zero-finance">                            
                             <div className="cards">
                                 <Card title="Finance Active Users" value={totals.dailyActiveUsers} />
                                 <Card title="Finance Messages" value={totals.totalMessagesSent} />
@@ -191,11 +188,12 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
         }
     };
 
-    if (loading) {
-        return <Loading />;
-    }
+    //if (loading) {
+   //     return <Loading />;
+   // }
     return (
         <div className="dashboard">
+            <Filters setFilter={setFilter} />
             {renderSection()}
         </div>
     );

@@ -11,6 +11,7 @@ interface DashboardState {
     zosData: MetricsData[];
     znsData: ZnsData[];
     znsDataCache: Record<string, GroupedData>;
+    zosDataCache: Record<string, MetricsData[]>;
     totals: {
         totalRegistrations: number;
         totalWorlds: number;
@@ -23,6 +24,8 @@ interface DashboardState {
         dayCount: number;
     };
     tokenPriceInUSD: number | null;
+    isLoadingDashboard: boolean;
+    isLoadingZns: boolean;
     setFilter: (filter: string) => void;
     setData: (data: DataPoint[]) => void;
     setZosData: (data: MetricsData[]) => void;
@@ -59,6 +62,7 @@ const useDashboardStore = create<DashboardState>()(
             zosData: [],
             znsData: [],
             znsDataCache: {},
+            zosDataCache: {},
             totals: {
                 totalRegistrations: 0,
                 totalWorlds: 0,
@@ -68,8 +72,11 @@ const useDashboardStore = create<DashboardState>()(
                 userSignUps: 0,
                 newlyMintedDomains: 0,
                 totalRewardsEarned: '0',
+                dayCount: 0,
             },
             tokenPriceInUSD: null,
+            isLoadingDashboard: false,
+            isLoadingZns: false,
 
             setFilter: (filter: string) => set({ filter }),
 
@@ -92,7 +99,16 @@ const useDashboardStore = create<DashboardState>()(
             },
 
             fetchDashboardData: async (fromDate: string, toDate: string) => {
+                const cacheKey = `${fromDate}_${toDate}`;
+                const cachedData = get().zosDataCache[cacheKey];
+
+                if (cachedData) {
+                    set({ zosData: cachedData });
+                    return;
+                }
+
                 try {
+                    set({ isLoadingDashboard: true });
                     const data: DataPoint[] = await fetchAllData(fromDate, toDate);
                     const tokenPriceInUSD = get().tokenPriceInUSD;
 
@@ -109,7 +125,7 @@ const useDashboardStore = create<DashboardState>()(
                         totalRegistrations: 0,
                         totalWorlds: 0,
                         totalDomains: 0,
-                        dayCount: 0
+                        dayCount: 0,
                     };
 
                     const totals = data.reduce<Totals>((acc, curr) => {
@@ -124,14 +140,18 @@ const useDashboardStore = create<DashboardState>()(
                         return acc;
                     }, initialTotals);
 
-                    
                     totals.dailyActiveUsers = Math.round(totals.dailyActiveUsers / totals.dayCount);
-                    
                     totals.totalRewardsEarned = formatUSD(parseFloat(totals.totalRewardsEarned) * 100);
 
-                    set({ zosData: data, totals });
+                    set((state) => ({
+                        zosData: data,
+                        zosDataCache: { ...state.zosDataCache, [cacheKey]: data },
+                        totals,
+                        isLoadingDashboard: false,
+                    }));
                 } catch (error) {
                     console.error('Error fetching dashboard data:', error);
+                    set({ isLoadingDashboard: false });
                 }
             },
 
@@ -206,6 +226,7 @@ const useDashboardStore = create<DashboardState>()(
                 }
 
                 try {
+                    set({ isLoadingZns: true });
                     const response = await fetch(`/api/zns?filter=${filter}&limit=${limit}&offset=${offset}`);
                     if (!response.ok) {
                         throw new Error(`Error fetching ZNS data: ${response.statusText}`);
@@ -213,9 +234,10 @@ const useDashboardStore = create<DashboardState>()(
                     const result = await response.json();
                     const newData = (cache || []).concat(result.data);
                     const newCache = { ...get().znsDataCache, [filter]: newData };
-                    set({ znsData: newData.slice(offset, offset + limit), znsDataCache: newCache });
+                    set({ znsData: newData.slice(offset, offset + limit), znsDataCache: newCache, isLoadingZns: false });
                 } catch (error) {
                     console.error('Error in fetchZnsData:', error);
+                    set({ isLoadingZns: false });
                 }
             },
 

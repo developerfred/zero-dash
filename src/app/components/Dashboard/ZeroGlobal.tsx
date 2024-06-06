@@ -14,8 +14,7 @@ const ZeroGlobal: React.FC = () => {
     return (
         <div className="section">
             <h2 id="zero-global">ZERO Global</h2>
-            <div className="zero-global">
-                <Filters setFilter={setFilter} />
+            <div className="zero-global">                
                 <div className="cards">
                     <Card title="Daily Active Users" value={totals.dailyActiveUsers} />
                     <Card title="Total Messages Sent" value={totals.totalMessagesSent} />
