@@ -10,12 +10,14 @@ import ZeroGlobal from './ZeroGlobal';
 import Loading from '@/components/Loading';
 
 interface DashboardProps {
-    dashboardType: string;
+    activeSection: string;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ dashboardType }) => {
+const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
     const { filter, data, znsData, setFilter, fetchDashboardDataByFilter, fetchZnsData } = useDashboardStore();
     const [loading, setLoading] = useState(true);
+
+    
 
     useEffect(() => {
         const fetchData = async () => {
@@ -40,7 +42,7 @@ const Dashboard: React.FC<DashboardProps> = ({ dashboardType }) => {
     };
 
     const renderSection = () => {
-        switch (dashboardType) {
+        switch (activeSection) {
             case 'Zero':
                 return (
                        <ZeroGlobal />);
