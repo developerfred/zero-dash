@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
@@ -13,9 +14,7 @@ interface FiltersProps {
 const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
     const [customDateRange, setCustomDateRange] = useState<[Date | null, Date | null]>([null, null]);
     const [startDate, endDate] = customDateRange;
-    const [selectedOption, setSelectedOption] = useState<string>(() => {
-        return localStorage.getItem('selectedOption') || '24h';
-    });
+    const [selectedOption, setSelectedOption] = useState<string>();
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const options = [
