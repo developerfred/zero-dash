@@ -7,7 +7,7 @@ interface ChartProps {
     dataKey: string;
 }
 
-const AreaChartComponent: React.FC<ChartProps> = ({ data, dataKey }) => (
+const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value" }) => (
     <div className="chart-wrapper">
         <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={data}>

@@ -13,6 +13,7 @@ const ZeroDomainsSection = () => {
         setFilter,
         fetchTotals,
         fetchZnsData,
+        isLoadingZns,
     } = useDashboardStore();
 
     useEffect(() => {
@@ -25,9 +26,9 @@ const ZeroDomainsSection = () => {
             <h2 id="zero-domains">ZERO Domains</h2>
             <div className="zero-domains">                
                 <div className="cards">
-                    <Card title="Total Domain Registrations" value={totals.totalRegistrations} />
-                    <Card title="Total Worlds" value={totals.totalWorlds} />
-                    <Card title="Total Domains" value={totals.totalDomains} />
+                    <Card title="Total Domain Registrations" value={totals.totalRegistrations} isLoading={isLoadingZns} />
+                    <Card title="Total Worlds" value={totals.totalWorlds} isLoading={isLoadingZns} />
+                    <Card title="Total Domains" value={totals.totalDomains} isLoading={isLoadingZns} />
                     {/* <Card title="Total Amount Staked" value={totals.totalRewardsEarned} /> */}
                 </div>
                 <div className="charts">

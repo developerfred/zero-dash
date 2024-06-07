@@ -14,7 +14,7 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
-    const { filter, data, znsData, setFilter, fetchDashboardDataByFilter, fetchZnsData } = useDashboardStore();
+    const { filter, data, znsData, setFilter, fetchDashboardDataByFilter, fetchZnsData, isLoadingDashboard } = useDashboardStore();
     const [loading, setLoading] = useState(true);
 
 
@@ -56,11 +56,11 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
                         <div className="zero-meow">
                             
                             <div className="cards">
-                                <Card title="MEOW Active Users" value={totals.dailyActiveUsers} />
-                                <Card title="MEOW exchange" value={totals.totalMessagesSent} />
+                                <Card title="MEOW Active Users" value={totals.dailyActiveUsers} isLoading={isLoadingDashboard} />
+                                <Card title="MEOW exchange" value={totals.totalMessagesSent} isLoading={isLoadingDashboard} />
                                 <Card title="User Sign Ups" value={totals.userSignUps} />
-                                <Card title="Newly Minted Domains" value={totals.newlyMintedDomains} />
-                                <Card title="Total Rewards Earned" value={totals.totalRewardsEarned} />
+                                <Card title="Newly Minted Domains" value={totals.newlyMintedDomains} isLoading={isLoadingDashboard} />
+                                <Card title="Total Rewards Earned" value={totals.totalRewardsEarned} isLoading={isLoadingDashboard} />
                             </div>
                             <div className="charts">
                                 <div className="chart-row">
@@ -99,17 +99,17 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
                         <h2 id="zero-wild">WILD</h2>
                         <div className="zero-wild">                            
                             <div className="cards">
-                                <Card title="WILD Active Users" value={totals.dailyActiveUsers} />
-                                <Card title="WILD" value={totals.totalMessagesSent} />
-                                <Card title="User Sign Ups" value={totals.userSignUps} />
-                                <Card title="Newly Minted Domains" value={totals.newlyMintedDomains} />
-                                <Card title="Total Rewards Earned" value={totals.totalRewardsEarned} />
+                                <Card title="WILD Active Users" value={totals.dailyActiveUsers} isLoading={isLoadingDashboard} />
+                                <Card title="WILD" value={totals.totalMessagesSent} isLoading={isLoadingDashboard} />
+                                <Card title="User Sign Ups" value={totals.userSignUps} isLoading={isLoadingDashboard} />
+                                <Card title="Newly Minted Domains" value={totals.newlyMintedDomains} isLoading={isLoadingDashboard} />
+                                <Card title="Total Rewards Earned" value={totals.totalRewardsEarned} isLoading={isLoadingDashboard} />
                             </div>
                             <div className="charts">
                                 <div className="chart-row">
                                     <div className="chart-container">
                                         <h3>WILD Active Users</h3>
-                                        <Chart data={data} dataKey="dailyActiveUsers" chartType="line" />
+                                        <Chart data={data} dataKey="dailyActiveUsers" chartType="line"  />
                                     </div>
                                     <div className="chart-container">
                                         <h3>Total Messages Sent</h3>
@@ -142,11 +142,11 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
                         <h2 id="zero-finance">Finance</h2>
                         <div className="zero-finance">                            
                             <div className="cards">
-                                <Card title="Finance Active Users" value={totals.dailyActiveUsers} />
-                                <Card title="Finance Messages" value={totals.totalMessagesSent} />
-                                <Card title="User Sign Ups" value={totals.userSignUps} />
-                                <Card title="Newly Minted Domains" value={totals.newlyMintedDomains} />
-                                <Card title="Total Rewards Earned" value={totals.totalRewardsEarned} />
+                                <Card title="Finance Active Users" value={totals.dailyActiveUsers} isLoading={isLoadingDashboard} />
+                                <Card title="Finance Messages" value={totals.totalMessagesSent} isLoading={isLoadingDashboard} />
+                                <Card title="User Sign Ups" value={totals.userSignUps} isLoading={isLoadingDashboard} />
+                                <Card title="Newly Minted Domains" value={totals.newlyMintedDomains} isLoading={isLoadingDashboard} />
+                                <Card title="Total Rewards Earned" value={totals.totalRewardsEarned} isLoading={isLoadingDashboard} />
                             </div>
                             <div className="charts">
                                 <div className="chart-row">
@@ -188,9 +188,6 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
         }
     };
 
-    //if (loading) {
-   //     return <Loading />;
-   // }
     return (
         <div className="dashboard">
             <Filters setFilter={setFilter} />

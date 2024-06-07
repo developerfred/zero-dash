@@ -1,4 +1,4 @@
-//@ts-nocheck
+// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';

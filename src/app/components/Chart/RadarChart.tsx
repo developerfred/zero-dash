@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from 'recharts';
 import { DataPoint } from '@/app/types';
 
 interface ChartProps {
@@ -7,7 +7,7 @@ interface ChartProps {
     dataKey: string;
 }
 
-const RadarChartComponent: React.FC<ChartProps> = ({ data, dataKey }) => (
+const RadarChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value" }) => (
     <div className="chart-wrapper">
         <ResponsiveContainer width="100%" height={300}>
             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>

@@ -105,7 +105,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                 throw new Error('Token price is not available');
             }
 
-            const initialTotals: Totals = {
+            const initialTotals = {
                 dailyActiveUsers: 0,
                 totalMessagesSent: 0,
                 userSignUps: 0,
@@ -117,7 +117,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                 dayCount: 0,
             };
 
-            const totals = data.reduce<Totals>((acc, curr) => {
+            const totals = data.reduce((acc, curr) => {
                 acc.dailyActiveUsers += curr.dailyActiveUsers;
                 acc.totalMessagesSent += curr.totalMessagesSent;
                 acc.userSignUps += curr.userSignUps;
@@ -132,11 +132,12 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             totals.dailyActiveUsers = Math.round(totals.dailyActiveUsers / totals.dayCount);
             totals.totalRewardsEarned = formatUSD(parseFloat(totals.totalRewardsEarned) * 100);
 
-            set({
+            set((state) => ({
                 zosData: data,
+                zosDataCache: { ...state.zosDataCache, [`${fromDate}_${toDate}`]: data },
                 totals,
                 isLoadingDashboard: false,
-            });
+            }));
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
             set({ isLoadingDashboard: false });
@@ -192,9 +193,13 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                     fromDate = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
                     break;
                 default:
-                    const dates = filter.split('_');
-                    fromDate = dates[1];
-                    toDate = dates[2];
+                    if (filter && filter.includes('_')) {
+                        const dates = filter.split('_');
+                        fromDate = dates[1];
+                        toDate = dates[2];
+                    } else {
+                        throw new Error(`Invalid filter format: ${filter}`);
+                    }
                     break;
             }
 
@@ -205,6 +210,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             console.error('Error in fetchDashboardDataByFilter:', error);
         }
     },
+
 
     fetchZnsData: async (filter: string, limit = 100, offset = 0) => {
         const cache = get().znsDataCache[filter];

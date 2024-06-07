@@ -7,7 +7,7 @@ interface ChartProps {
     dataKey: string;
 }
 
-const BarChartComponent: React.FC<ChartProps> = ({ data, dataKey }) => (
+const BarChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value" }) => (
     <div className="chart-wrapper">
         <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
