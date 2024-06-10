@@ -73,7 +73,7 @@ export function formatUSD(cents: number) {
         return `$${(tensOfThousands / 100).toFixed(2)}M`;
     } else if (dollars >= 100000) {
         return `$${Math.floor(dollars / 1000)}K`;
-    } else {
+    } else if (cents < 1) {
         return `$${absoluteValue.toFixed(5).replace(/\.?0+$/, '')}`;
     }
 
