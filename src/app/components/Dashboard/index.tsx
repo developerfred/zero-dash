@@ -8,6 +8,7 @@ import useDashboardStore from '@/store/useDashboardStore';
 import '@/components/Dashboard/dashboard.css';
 import ZeroGlobal from './ZeroGlobal';
 import Loading from '@/components/Loading';
+import MeowSection from './MeowSection';
 
 interface DashboardProps {
     activeSection: string;
@@ -51,47 +52,7 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
                 );
             case 'MEOW':
                 return (
-                    <div className="section">
-                        <h2 id="zero-meow">MEOW</h2>
-                        <div className="zero-meow">
-                            
-                            <div className="cards">
-                                <Card title="MEOW Active Users" value={totals.dailyActiveUsers} isLoading={isLoadingDashboard} />
-                                <Card title="MEOW exchange" value={totals.totalMessagesSent} isLoading={isLoadingDashboard} />
-                                <Card title="User Sign Ups" value={totals.userSignUps} />
-                                <Card title="Newly Minted Domains" value={totals.newlyMintedDomains} isLoading={isLoadingDashboard} />
-                                <Card title="Total Rewards Earned" value={totals.totalRewardsEarned} isLoading={isLoadingDashboard} />
-                            </div>
-                            <div className="charts">
-                                <div className="chart-row">
-                                    <div className="chart-container">
-                                        <h3>MEOW Active Users</h3>
-                                        <Chart data={data} dataKey="dailyActiveUsers" chartType="line" />
-                                    </div>
-                                    <div className="chart-container">
-                                        <h3>Total Messages Sent</h3>
-                                        <Chart data={data} dataKey="totalMessagesSent" chartType="line" />
-                                    </div>
-                                </div>
-                                <div className="chart-row">
-                                    <div className="chart-container">
-                                        <h3>User Sign Ups</h3>
-                                        <Chart data={data} dataKey="userSignUps" chartType="line" />
-                                    </div>
-                                    <div className="chart-container">
-                                        <h3>Newly Minted Domains</h3>
-                                        <Chart data={data} dataKey="newlyMintedDomains" chartType="line" />
-                                    </div>
-                                </div>
-                                <div className="chart-row">
-                                    <div className="chart-container">
-                                        <h3>Total Rewards Earned</h3>
-                                        <Chart data={data} dataKey="totalRewardsEarned" chartType="line" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <MeowSection />
                 );
             case 'WILD':
                 return (

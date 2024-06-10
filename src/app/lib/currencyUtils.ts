@@ -61,6 +61,7 @@ export function calculateTotalPriceInUSDCents(num: string, currentTokenPriceInUS
 
 export function formatUSD(cents: number) {
     const dollars = Math.floor(cents / 100);
+    const absoluteValue = Math.abs(cents);
     if (dollars >= 1000000000000) {
         const tensOfBillions = Math.floor(dollars / 10000000000);
         return `$${(tensOfBillions / 100).toFixed(2)}T`;
@@ -72,6 +73,8 @@ export function formatUSD(cents: number) {
         return `$${(tensOfThousands / 100).toFixed(2)}M`;
     } else if (dollars >= 100000) {
         return `$${Math.floor(dollars / 1000)}K`;
+    } else {
+        return `$${absoluteValue.toFixed(5).replace(/\.?0+$/, '')}`;
     }
 
     return `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`;
