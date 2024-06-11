@@ -6,6 +6,7 @@ import { formatUSD } from '@/app/lib/currencyUtils';
 
 interface DashboardState {
     filter: string;
+    pairData: any;
     data: DataPoint[];
     zosData: MetricsData[];
     znsData: ZnsData[];
@@ -25,6 +26,7 @@ interface DashboardState {
     tokenPriceInUSD: number | null;
     isLoadingDashboard: boolean;
     isLoadingZns: boolean;
+    isLoadingPairData: boolean;
     setFilter: (filter: string) => void;
     setData: (data: DataPoint[]) => void;
     setZosData: (data: MetricsData[]) => void;
@@ -34,6 +36,7 @@ interface DashboardState {
     fetchTotals: (filter: string) => Promise<void>;
     fetchDashboardDataByFilter: (filter: string) => Promise<void>;
     fetchTokenPrice: () => Promise<void>;
+    fetchPairData: () => Promise<void>;
 }
 
 const fetchAllData = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
@@ -53,9 +56,19 @@ const fetchCurrentTokenPriceInUSD = async (): Promise<number> => {
     return data.price;
 };
 
+
+const fetchPairDataFromAPI = async (): Promise<any> => {
+    const response = await fetch('/api/meow/pairs'); 
+    if (!response.ok) {
+        throw new Error(`Error fetching pair data: ${response.statusText}`);
+    }
+    return await response.json();
+};
+
 const useDashboardStore = create<DashboardState>((set, get) => ({
     filter: '24h',
     data: [],
+    pairData: null,
     zosData: [],
     znsData: [],
     znsDataCache: {},
@@ -74,6 +87,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
     tokenPriceInUSD: null,
     isLoadingDashboard: false,
     isLoadingZns: false,
+    isLoadingPairData: false,
 
     setFilter: (filter: string) => set({ filter }),
 
@@ -250,6 +264,17 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             set({ znsDataCache: result, totals });
         } catch (error) {
             console.error('Error in fetchTotals:', error);
+        }
+    },
+
+    fetchPairData: async () => {
+        try {
+            set({ isLoadingPairData: true });
+            const data = await fetchPairDataFromAPI();
+            set({ pairData: data, isLoadingPairData: false });
+        } catch (error) {
+            console.error('Error fetching pair data:', error);
+            set({ isLoadingPairData: false });
         }
     },
 }));
