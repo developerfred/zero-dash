@@ -53,7 +53,10 @@ const fetchCurrentTokenPriceInUSD = async (): Promise<number> => {
         throw new Error(`Error fetching MEOW price: ${response.statusText}`);
     }
     const data = await response.json();
-    return data.price;
+    return {
+        price: data.price,
+        holders: data.holders
+    };
 };
 
 
@@ -85,6 +88,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         dayCount: 0,
     },
     tokenPriceInUSD: null,
+    meowHolders: 0,
     isLoadingDashboard: false,
     isLoadingZns: false,
     isLoadingPairData: false,
@@ -102,8 +106,8 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
 
     fetchTokenPrice: async () => {
         try {
-            const price = await fetchCurrentTokenPriceInUSD();
-            set({ tokenPriceInUSD: price });
+            const info = await fetchCurrentTokenPriceInUSD();            
+            set({ tokenPriceInUSD: info.price, meowHolders: info.holders  });
         } catch (error) {
             console.error('Error fetching token price:', error);
         }

@@ -8,7 +8,7 @@ import { formatUSD } from '@/app/lib/currencyUtils';
 
 const MeowSection: React.FC = () => {
     const { chartData, fetchChartData, isLoadingChart } = useChartStore();
-    const { filter, setFilter, fetchPairData, isLoadingPairData, pairData } = useDashboardStore();
+    const { filter, setFilter, fetchPairData, isLoadingPairData, pairData, fetchTokenPrice, meowHolders } = useDashboardStore();
 
     useEffect(() => {
         if (!filter) {
@@ -70,8 +70,8 @@ const MeowSection: React.FC = () => {
         }
 
         fetchChartData('ethereum:0x0ec78ed49c2d27b315d462d43b5bab94d2c79bf8', start, now);
-        fetchPairData();
-    }, [filter, fetchChartData, fetchPairData]);
+        fetchPairData();        
+    }, [filter, fetchChartData, fetchPairData, fetchTokenPrice]);
 
     const getVolume = (pairData: any, filter: string) => {
         if (!pairData || pairData.length === 0) return 0;
@@ -108,6 +108,7 @@ const MeowSection: React.FC = () => {
                 <div className="cards">
                     <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart} />
                     <Card title="Volume" value={formatUSD(getVolume(pairData, filter))} isLoading={isLoadingPairData} />
+                    <Card title="Holders" value={meowHolders} isLoading={isLoadingPairData} />
                 </div>
                 <div className="charts">
                     <div className="chart-row">
