@@ -1,4 +1,3 @@
-//@ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 const DUNE_API_KEY = process.env.DUNE_API_KEY || "";
@@ -36,8 +35,8 @@ export default async function handler(
             parseInt(offset as string, 10)
         );
         res.status(200).json({ message: 'Total domain registrations fetched successfully', data: queryResult });
-    } catch (error) {
-        console.error('Error fetching query result:', error);
-        res.status(500).json({ message: 'Error fetching query result', error: error.message });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        res.status(500).json({ message: 'Error fetching data', error: message });
     }
 }

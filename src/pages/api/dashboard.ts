@@ -13,11 +13,16 @@ export default function handler(
     res: NextApiResponse<ResponseData>
 ) {
     const { filter } = req.query;
+
     try {
-        const data = mockData(filter as string);
+        if (typeof filter !== 'string') {
+            throw new Error('Invalid filter');
+        }
+
+        const data = mockData(filter);
         res.status(200).json({ message: 'Data fetched successfully', data });
-    } catch (error) {
-        //@ts-ignore
-        res.status(500).json({ message: 'Error fetching data', error: error.message });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        res.status(500).json({ message: 'Error fetching data', error: message });
     }
 }

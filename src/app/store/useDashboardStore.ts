@@ -24,6 +24,7 @@ interface DashboardState {
         dayCount: number;
     };
     tokenPriceInUSD: number | null;
+    meowHolders: number | string;
     isLoadingDashboard: boolean;
     isLoadingZns: boolean;
     isLoadingPairData: boolean;
