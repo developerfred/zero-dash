@@ -11,15 +11,14 @@ const ZeroDomainsSection = () => {
         totals,
         znsDataCache,
         setFilter,
-        fetchTotals,
-        fetchZnsData,
+        fetchTotals,        
         isLoadingZns,
     } = useDashboardStore();
 
     useEffect(() => {
         fetchTotals(filter);
-        fetchZnsData(filter);
-    }, [filter, fetchTotals, fetchZnsData]);
+        
+    }, [filter, fetchTotals, ]);
 
     return (
         <div className="section">

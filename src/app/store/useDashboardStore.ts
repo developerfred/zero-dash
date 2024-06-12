@@ -30,10 +30,8 @@ interface DashboardState {
     isLoadingPairData: boolean;
     setFilter: (filter: string) => void;
     setData: (data: DataPoint[]) => void;
-    setZosData: (data: MetricsData[]) => void;
-    setZnsData: (data: ZnsData[], filter: string) => void;
+    setZosData: (data: MetricsData[]) => void;    
     fetchDashboardData: (fromDate: string, toDate: string) => Promise<void>;
-    fetchZnsData: (filter: string, limit?: number, offset?: number) => Promise<void>;
     fetchTotals: (filter: string) => Promise<void>;
     fetchDashboardDataByFilter: (filter: string) => Promise<void>;
     fetchTokenPrice: () => Promise<void>;
@@ -99,11 +97,6 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
     setData: (data: DataPoint[]) => set({ data }),
 
     setZosData: (data: MetricsData[]) => set({ zosData: data }),
-
-    setZnsData: (data: ZnsData[], filter: string) => {
-        const cache = { ...get().znsDataCache, [filter]: data };
-        set({ znsData: data, znsDataCache: cache });
-    },
 
     fetchTokenPrice: async () => {
         try {
@@ -234,29 +227,6 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         }
     },
 
-
-    fetchZnsData: async (filter: string, limit = 100, offset = 0) => {
-        const cache = get().znsDataCache[filter];
-        if (cache && cache.length > offset) {
-            set({ znsData: cache.slice(offset, offset + limit) });
-            return;
-        }
-
-        try {
-            set({ isLoadingZns: true });
-            const response = await fetch(`/api/zns?filter=${filter}&limit=${limit}&offset=${offset}`);
-            if (!response.ok) {
-                throw new Error(`Error fetching ZNS data: ${response.statusText}`);
-            }
-            const result = await response.json();
-            const newData = (cache || []).concat(result.data);
-            const newCache = { ...get().znsDataCache, [filter]: newData };
-            set({ znsData: newData.slice(offset, offset + limit), znsDataCache: newCache, isLoadingZns: false });
-        } catch (error) {
-            console.error('Error in fetchZnsData:', error);
-            set({ isLoadingZns: false });
-        }
-    },
 
     fetchTotals: async (filter: string) => {
         try {
