@@ -18,7 +18,10 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
     const { filter, data, znsData, setFilter, fetchDashboardDataByFilter, fetchZnsData, isLoadingDashboard } = useDashboardStore();
     const [loading, setLoading] = useState(true);
 
-
+    useEffect(() => {
+        setFilter('7d');
+    }, [setFilter]);
+    
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);

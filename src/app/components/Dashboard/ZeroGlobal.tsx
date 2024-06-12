@@ -6,6 +6,10 @@ import Loading from '@/components/Loading';
 
 const ZeroGlobal: React.FC = () => {
     const { filter, totals, zosData, setFilter, fetchDashboardDataByFilter, isLoadingDashboard } = useDashboardStore();
+    
+    useEffect(() => {
+        setFilter('7d');
+    }, [setFilter]);
 
     useEffect(() => {
         fetchDashboardDataByFilter(filter);

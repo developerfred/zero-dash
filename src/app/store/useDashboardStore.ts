@@ -164,6 +164,10 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
     },
 
     fetchDashboardDataByFilter: async (filter: string) => {
+        if (!filter) {
+            throw new Error('Filter is required');
+        }
+
         try {
             const now = new Date();
             let fromDate, toDate;

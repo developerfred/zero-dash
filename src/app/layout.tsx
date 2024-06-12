@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import '@rainbow-me/rainbowkit/styles.css';
 import { Providers } from './providers';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 import icon from './favicon.ico';
 
@@ -26,7 +27,10 @@ export default function RootLayout({
         <link rel="icon" href="/logo-zero.png" sizes="any" />        
       </head>
       <body className={inter.className}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <ErrorBoundary>{children}
+          </ErrorBoundary>
+        </Providers>
       </body>
     </html>
   );
