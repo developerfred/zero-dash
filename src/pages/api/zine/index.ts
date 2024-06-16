@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { Post, GroupedPosts } from '@/app/types';
 
 const GHOST_API_URL = 'https://wilderworld.ghost.io/ghost/api/content/posts/';
 const GHOST_API_KEY = process.env.ZINE_WORK_KEY;
@@ -17,8 +18,8 @@ const dateRanges = {
     'last_year': { startDate: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString(), endDate: new Date().toISOString() },
 };
 
-const groupPostsByDate = (posts) => {
-    return posts.reduce((acc, post) => {
+const groupPostsByDate = (posts: Post[]): GroupedPosts => {
+    return posts.reduce((acc: GroupedPosts, post: Post) => {
         const date = new Date(post.published_at).toISOString().split('T')[0];
         if (!acc[date]) {
             acc[date] = {
@@ -36,11 +37,11 @@ const groupPostsByDate = (posts) => {
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     const { filter } = req.query;
 
-    if (!filter || !dateRanges[filter]) {
+    if (!filter || !dateRanges[filter as keyof typeof dateRanges]) {
         return res.status(400).json({ error: 'Invalid or missing filter parameter' });
     }
 
-    const { startDate, endDate } = dateRanges[filter];
+    const { startDate, endDate } = dateRanges[filter as keyof typeof dateRanges];
 
     try {
         const response = await axios.get(GHOST_API_URL, {
@@ -51,7 +52,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             },
         });
 
-        const posts = response.data.posts.map(post => ({
+        const posts: Post[] = response.data.posts.map((post: any) => ({
             id: post.id,
             title: post.title,
             slug: post.slug,

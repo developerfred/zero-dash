@@ -118,3 +118,20 @@ export interface Reward {
     amount: string;
     precision: number;
 }
+
+export interface Post {
+    id: string;
+    title: string;
+    slug: string;
+    published_at: string;
+    updated_at: string;
+    feature_image: string;
+}
+
+export interface GroupedPosts {
+    [key: string]: {
+        date: string;
+        numberOfPosts: number;
+        posts: Post[];
+    };
+}
