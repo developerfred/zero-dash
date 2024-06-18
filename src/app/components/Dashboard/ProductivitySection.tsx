@@ -193,6 +193,7 @@ const ProductivitySection: React.FC = () => {
                     <Card title="Average Resolution Time (days)" value={Number(totals.averageResolutionTime.toFixed(2))} />
                     <Card title="Contributors" value={totals.contributors} />
                     <Card title="Reviewers" value={totals.reviewers} />
+                    <Card title="Zine Posts" value={totals.reviewers} />
                 </div>
                 <div className="charts">
                     <div className="chart-row">
@@ -236,6 +237,10 @@ const ProductivitySection: React.FC = () => {
                         </div>
                         <div className="chart-container">
                             <h3>Reviewers</h3>
+                            <Chart data={data.reviewsData} dataKey="reviewers.length" chartType="line" />
+                        </div>
+                        <div className="chart-container">
+                            <h3>Zine Posts</h3>
                             <Chart data={data.reviewsData} dataKey="reviewers.length" chartType="line" />
                         </div>
                     </div>
