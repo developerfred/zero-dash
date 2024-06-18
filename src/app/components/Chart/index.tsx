@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { ResponsiveContainer } from 'recharts';
-import { DataPoint, ZnsData, MetricsData } from '@/app/types';
+import { DataPoint, ZnsData, MetricsData, FinanceData } from '@/app/types';
 import LineChartComponent from './LineChart';
 import BarChartComponent from './BarChart';
 import AreaChartComponent from './AreaChart';
@@ -9,7 +9,7 @@ import RadarChartComponent from './RadarChart';
 import Loading from '@/components/Loading';
 
 interface ChartProps {
-    data: DataPoint[] | ZnsData[] | MetricsData[];
+    data: DataPoint[] | ZnsData[] | MetricsData[] | FinanceData[];
     dataKey: string;
     chartType: 'line' | 'area' | 'bar' | 'radar';
 }

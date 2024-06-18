@@ -135,3 +135,9 @@ export interface GroupedPosts {
         posts: Post[];
     };
 }
+
+
+export interface FinanceData {
+    date: string;
+    numberOfTransactions: number;
+};
