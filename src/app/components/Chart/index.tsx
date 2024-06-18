@@ -9,7 +9,7 @@ import RadarChartComponent from './RadarChart';
 import Loading from '@/components/Loading';
 
 interface ChartProps {
-    data: DataPoint[] | ZnsData[] | MetricsData[] | FinanceData[];
+    data: DataPoint[] | ZnsData[] | MetricsData[] | FinanceData[] | BalanceChartData[];
     dataKey: string;
     chartType: 'line' | 'area' | 'bar' | 'radar';
 }

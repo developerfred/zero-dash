@@ -6,7 +6,7 @@ import useDashboardStore from '@/store/useDashboardStore';
 import useChartStore from '@/store/useChartStore';
 import { formatUnits } from 'viem';
 import { formatUSD } from '@/app/lib/currencyUtils';
-import { FinanceData } from '@/app/types';
+import { FinanceData, BalanceChartData } from '@/app/types';
 
 const FinanceSection: React.FC = () => {
     const { filter, setFilter, tokenPriceInUSD, fetchTokenPrice } = useDashboardStore();
@@ -14,6 +14,7 @@ const FinanceSection: React.FC = () => {
     const [financeData, setFinanceData] = useState<FinanceData[]>([]);
     const { chartData, fetchChartData, isLoadingChart } = useChartStore();
     const [chartPrice, setChartPrice] = useState<number | null>(null);
+    const [balanceChartData, setBalanceChartData] = useState<{ date: string; balance: number }[]>([]);
 
     useEffect(() => {
         fetchSafeData(filter);
@@ -95,8 +96,13 @@ const FinanceSection: React.FC = () => {
     useEffect(() => {
         if (chartData.length) {
             setChartPrice(chartData[chartData.length - 1]?.price || null);
+            const balanceData: BalanceChartData[] = chartData.map((data) => ({
+                date: data.date,
+                balance: balances[1] ? parseFloat(formatUnits(BigInt(balances[1].balance), 18)) * data.price : 0
+            }));
+            setBalanceChartData(balanceData);
         }
-    }, [chartData]);
+    }, [chartData, balances]);
 
     const calculateBalanceInUSD = () => {
         if (balances[1] && balances[1].balance && balances[1].token && chartPrice) {
@@ -129,6 +135,10 @@ const FinanceSection: React.FC = () => {
                         <div className="chart-container">
                             <h3>DAO transactions Time</h3>
                             <Chart data={financeData} dataKey="numberOfTransactions" chartType="area" />
+                        </div>
+                        <div className="chart-container">
+                            <h3>DAO Balance Over Time</h3>
+                            <Chart data={balanceChartData} dataKey="balance" chartType="area" />
                         </div>
                     </div>
                 </div>

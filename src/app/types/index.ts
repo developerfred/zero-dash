@@ -141,3 +141,8 @@ export interface FinanceData {
     date: string;
     numberOfTransactions: number;
 };
+
+export interface BalanceChartData {
+    date: string;
+    balance: number;
+};
