@@ -83,7 +83,7 @@ const WildSection: React.FC = () => {
                 <div className="cards">
                     <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart || isLoading || isPriceLoading} />
                     <Card title="Wild DAOS" value={totalDaos} isLoading={isLoading || isPriceLoading} />
-                    <Card title="Total WILD (USD)" value={formatUSD(totalBalances.WILD)} isLoading={isLoading || isPriceLoading} />
+                    <Card title="Total WILD (USD)" value={formatUSD(tokenBalances.WILD * chartData[0]?.price)} isLoading={isLoading || isPriceLoading} />
                     <Card title="Total ETH (USD)" value={formatUSD(totalBalances.ETH)} isLoading={isLoading || isPriceLoading} />
                 </div>
                 <div className="charts">
