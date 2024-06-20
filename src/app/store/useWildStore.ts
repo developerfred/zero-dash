@@ -14,9 +14,21 @@ interface WildStore {
     isPriceLoading: boolean;
     aggregatedTransactionsData: { date: string, count: number }[];
     isTransactionsLoading: boolean;
+    isInfoLoading: boolean;
+    volume: number;
+    holderCount: number;
+    lpHolderCount: number;
     fetchTransactions: (fromDate?: string, toDate?: string) => void;
     fetchData: () => void;    
+    fetchWildInfo: () => void;
 }
+
+export const formatToMillion = (value: number): string => {
+    if (value >= 1e6) {
+        return `$${(value / 1e6).toFixed(2)}M`;
+    }
+    return `$${value.toFixed(2)}`;
+};
 
 const useWildStore = create<WildStore>((set) => ({
     totalDaos: 0,
@@ -27,6 +39,10 @@ const useWildStore = create<WildStore>((set) => ({
     isLoading: false,
     isPriceLoading: false,
     isTransactionsLoading: false,
+    isInfoLoading: false,
+    volume: 0,
+    holderCount: 0,
+    lpHolderCount: 0,
     
 
     fetchData: async () => {
@@ -48,13 +64,7 @@ const useWildStore = create<WildStore>((set) => ({
             };
 
 
-            const formatToMillion = (value: number): string => {
-                if (value >= 1e6) {
-                    return `$${(value / 1e6).toFixed(2)}M`;
-                }
-                return `$${value.toFixed(2)}`;
-            };
-
+            
             
             const formattedBalancesUSD = {
                 ETH: formatToMillion(totalBalancesUSD.ETH),
@@ -90,7 +100,24 @@ const useWildStore = create<WildStore>((set) => ({
             set({ isTransactionsLoading: false });
         }
     },
-    
+
+    fetchWildInfo: async () => {
+        set({ isInfoLoading: true });
+        try {
+            const response = await axios.get('/api/wild/info');
+            const { volume, holder_count, lp_holder_count } = response.data;
+            set({
+                volume: formatToMillion(volume),
+                holderCount: holder_count,
+                lpHolderCount: lp_holder_count,
+                isInfoLoading: false
+            });
+        } catch (error) {
+            console.error('Failed to fetch wild info:', error);
+            set({ isInfoLoading: false });
+        }
+    },
 }));
+
 
 export default useWildStore;

@@ -10,7 +10,7 @@ import useWildStore from '@/store/useWildStore';
 import { formatUSD } from '@/app/lib/currencyUtils';
 
 const WildSection: React.FC = () => {
-    const { totalDaos, totalBalances, tokenBalances, fetchData, isLoading, isPriceLoading, fetchTransactions, isTransactionsLoading, aggregatedTransactionsData, transactionCount } = useWildStore();
+    const { totalDaos, totalBalances, tokenBalances, fetchData, isLoading, isPriceLoading, fetchTransactions, isTransactionsLoading, aggregatedTransactionsData, transactionCount, isInfoLoading, volume, holderCount, fetchWildInfo } = useWildStore();
     const { chartData, fetchChartData, isLoadingChart } = useChartStore();
     const { filter } = useDashboardStore();
 
@@ -73,9 +73,10 @@ const WildSection: React.FC = () => {
                 }
         }
         fetchData();
+        fetchWildInfo();
         fetchTransactions(start, now);
         fetchChartData('ethereum:0x2a3bff78b79a009976eea096a51a948a3dc00e34', start, now);
-    }, [filter, fetchChartData, fetchData, fetchTransactions]);
+    }, [filter, fetchChartData, fetchData, fetchTransactions, fetchWildInfo]);
 
     return (
         <div className="section">
@@ -83,6 +84,8 @@ const WildSection: React.FC = () => {
             <div className="zero-wild">
                 <div className="cards">
                     <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart || isLoading || isPriceLoading} />
+                    <Card title="Volume (DEX)" value={volume || 0} isLoading={isInfoLoading} />
+                    <Card title="Holders" value={holderCount || 0} isLoading={isInfoLoading} />
                     <Card title="Wild DAOS" value={totalDaos} isLoading={isLoading} />
                     <Card title="Total WILD (USD)" value={totalBalances.WILD} isLoading={isPriceLoading} />
                     <Card title="Total ETH (USD)" value={totalBalances.ETH} isLoading={isPriceLoading} />
