@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import create from 'zustand';
+import { create } from 'zustand';
 import axios from 'axios';
 
 const CHAIN_BASE_KEY = process.env.CHAIN_BASE_KEY;

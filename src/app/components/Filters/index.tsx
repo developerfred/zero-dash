@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
@@ -10,6 +9,8 @@ import './filters.css';
 interface FiltersProps {
     setFilter: (filter: string) => void;
 }
+
+Modal.setAppElement('body'); 
 
 const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
     const [customDateRange, setCustomDateRange] = useState<[Date | null, Date | null]>([null, null]);
@@ -43,7 +44,7 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
     };
 
     useEffect(() => {
-        if (selectedOption !== 'custom') {
+        if (selectedOption && selectedOption !== 'custom') {
             setFilter(selectedOption);
         }
     }, [selectedOption, setFilter]);

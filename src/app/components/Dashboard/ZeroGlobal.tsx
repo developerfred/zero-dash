@@ -5,7 +5,7 @@ import Card from '@/components/Card';
 import Loading from '@/components/Loading';
 
 const ZeroGlobal: React.FC = () => {
-    const { filter, totals, zosData, setFilter, fetchDashboardDataByFilter, isLoadingDashboard } = useDashboardStore();
+    const { filter, totals, zosData, setFilter, fetchDashboardDataByFilter, isLoadingDashboard, rewardsData } = useDashboardStore();
     
     useEffect(() => {
         setFilter('7d');
@@ -43,7 +43,7 @@ const ZeroGlobal: React.FC = () => {
                             </div>
                             <div className="chart-container">
                                 <h3>Total Rewards Earned</h3>
-                                <Chart data={zosData} dataKey="totalRewardsEarned" chartType="line" />
+                            <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" />
                             </div>
                         </div>
                     </div>

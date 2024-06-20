@@ -1,5 +1,5 @@
 // @ts-nocheck
-import create from 'zustand';
+import { create } from 'zustand';
 import { formatUnits } from 'viem';
 import { DataPoint, ZnsData, MetricsData, GroupedData } from '@/app/types';
 import { formatUSD } from '@/app/lib/currencyUtils';
@@ -23,6 +23,7 @@ interface DashboardState {
         totalRewardsEarned: string;
         dayCount: number;
     };
+    rewardsData: { date: string; totalRewardsEarned: number }[];
     tokenPriceInUSD: number | null;
     meowHolders: number | string;
     isLoadingDashboard: boolean;
@@ -30,7 +31,7 @@ interface DashboardState {
     isLoadingPairData: boolean;
     setFilter: (filter: string) => void;
     setData: (data: DataPoint[]) => void;
-    setZosData: (data: MetricsData[]) => void;    
+    setZosData: (data: MetricsData[]) => void;
     fetchDashboardData: (fromDate: string, toDate: string) => Promise<void>;
     fetchTotals: (filter: string) => Promise<void>;
     fetchDashboardDataByFilter: (filter: string) => Promise<void>;
@@ -46,7 +47,7 @@ const fetchAllData = async (fromDate: string, toDate: string): Promise<MetricsDa
     return await response.json();
 };
 
-const fetchCurrentTokenPriceInUSD = async (): Promise<number> => {
+const fetchCurrentTokenPriceInUSD = async (): Promise<{ price: number; holders: number }> => {
     const response = await fetch('/api/meow/token-price');
     if (!response.ok) {
         throw new Error(`Error fetching MEOW price: ${response.statusText}`);
@@ -58,9 +59,8 @@ const fetchCurrentTokenPriceInUSD = async (): Promise<number> => {
     };
 };
 
-
 const fetchPairDataFromAPI = async (): Promise<any> => {
-    const response = await fetch('/api/meow/pairs'); 
+    const response = await fetch('/api/meow/pairs');
     if (!response.ok) {
         throw new Error(`Error fetching pair data: ${response.statusText}`);
     }
@@ -86,6 +86,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         totalRewardsEarned: '0',
         dayCount: 0,
     },
+    rewardsData: [],
     tokenPriceInUSD: null,
     meowHolders: 0,
     isLoadingDashboard: false,
@@ -100,8 +101,8 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
 
     fetchTokenPrice: async () => {
         try {
-            const info = await fetchCurrentTokenPriceInUSD();            
-            set({ tokenPriceInUSD: info.price, meowHolders: info.holders  });
+            const info = await fetchCurrentTokenPriceInUSD();
+            set({ tokenPriceInUSD: info.price, meowHolders: info.holders });
         } catch (error) {
             console.error('Error fetching token price:', error);
         }
@@ -129,6 +130,8 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                 dayCount: 0,
             };
 
+            const rewardsData: { date: string; totalRewardsEarned: number }[] = [];
+
             const totals = data.reduce((acc, curr) => {
                 acc.dailyActiveUsers += curr.dailyActiveUsers;
                 acc.totalMessagesSent += curr.totalMessagesSent;
@@ -137,6 +140,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                 const rewardInEther = parseFloat(formatUnits(BigInt(curr.totalRewardsEarned.amount), curr.totalRewardsEarned.precision));
                 const rewardInUSD = rewardInEther * tokenPriceInUSD;
                 acc.totalRewardsEarned = (parseFloat(acc.totalRewardsEarned) + rewardInUSD).toString();
+                rewardsData.push({ date: curr.date, totalRewardsEarned: rewardInUSD });
                 acc.dayCount += 1;
                 return acc;
             }, initialTotals);
@@ -148,6 +152,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                 zosData: data,
                 zosDataCache: { ...state.zosDataCache, [`${fromDate}_${toDate}`]: data },
                 totals,
+                rewardsData,
                 isLoadingDashboard: false,
             }));
         } catch (error) {
@@ -226,7 +231,6 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             console.error('Error in fetchDashboardDataByFilter:', error);
         }
     },
-
 
     fetchTotals: async (filter: string) => {
         try {

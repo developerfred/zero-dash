@@ -70,44 +70,17 @@ const MeowSection: React.FC = () => {
         }
 
         fetchChartData('ethereum:0x0ec78ed49c2d27b315d462d43b5bab94d2c79bf8', start, now);
-        fetchPairData();        
-    }, [filter, fetchChartData, fetchPairData, fetchTokenPrice]);
+        //fetchPairData();        
+    }, [filter, fetchChartData,  fetchTokenPrice]);
 
-    const getVolume = (pairData: any, filter: string) => {
-        if (!pairData || pairData.length === 0) return 0;
-
-        switch (filter) {
-            case '24h':
-            case 'today':
-            case 'yesterday':
-                return pairData[0].one_day_volume;
-            case '7d':
-            case 'last_week':
-                return pairData[0].seven_day_volume;
-            case '30d':
-            case 'last_month':
-                return pairData[0].thirty_day_volume;
-            case '90d':
-                return pairData[0].thirty_day_volume * 3;
-            case '365d':
-            case 'last_year':
-                return pairData[0].thirty_day_volume * 12;
-            default:
-                if (filter.startsWith('custom')) {
-                    const days = (new Date(filter.split('_')[2]).getTime() - new Date(filter.split('_')[1]).getTime()) / (1000 * 60 * 60 * 24);
-                    return pairData[0].thirty_day_volume / 30 * days;
-                }
-                return pairData[0].one_day_volume + pairData[0].seven_day_volume + pairData[0].thirty_day_volume;
-        }
-    };
+    
 
     return (
         <div className="section">
             <h2 id="zero-meow">MEOW</h2>            
             <div className="zero-meow">
                 <div className="cards">
-                    <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart} />
-                    <Card title="Volume" value={formatUSD(getVolume(pairData, filter))} isLoading={isLoadingPairData} />
+                    <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart} />                    
                     <Card title="Holders" value={meowHolders} isLoading={isLoadingPairData} />
                 </div>
                 <div className="charts">
