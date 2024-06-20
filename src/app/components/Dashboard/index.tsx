@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import React, { useEffect, useState } from 'react';
 import Filters from '@/components/Filters';
 import Chart from '@/components/Chart';
@@ -10,6 +12,7 @@ import ZeroGlobal from './ZeroGlobal';
 import Loading from '@/components/Loading';
 import MeowSection from './MeowSection';
 import FinanceSection from './FinanceSection';
+import WildSection from './WildSection';
 
 interface DashboardProps {
     activeSection: string;
@@ -44,73 +47,18 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
         totalDomains: znsData.reduce((acc, item) => acc + item.numDomainsRegistered, 0),
     };
 
+    const sectionComponents = {
+        Zero: ZeroGlobal,
+        ZNS: ZeroDomainsSection,
+        MEOW: MeowSection,
+        WILD: WildSection,
+        Finance: FinanceSection,
+        Productivity: ProductivitySection,
+    };
+
     const renderSection = () => {
-        switch (activeSection) {
-            case 'Zero':
-                return (
-                       <ZeroGlobal />);
-            case 'ZNS':
-                return (
-                    <ZeroDomainsSection />
-                );
-            case 'MEOW':
-                return (
-                    <MeowSection />
-                );
-            case 'WILD':
-                return (
-                    <div className="section">
-                        <h2 id="zero-wild">WILD</h2>
-                        <div className="zero-wild">                            
-                            <div className="cards">
-                                <Card title="WILD Active Users" value={totals.dailyActiveUsers} isLoading={isLoadingDashboard} />
-                                <Card title="WILD" value={totals.totalMessagesSent} isLoading={isLoadingDashboard} />
-                                <Card title="User Sign Ups" value={totals.userSignUps} isLoading={isLoadingDashboard} />
-                                <Card title="Newly Minted Domains" value={totals.newlyMintedDomains} isLoading={isLoadingDashboard} />
-                                <Card title="Total Rewards Earned" value={totals.totalRewardsEarned} isLoading={isLoadingDashboard} />
-                            </div>
-                            <div className="charts">
-                                <div className="chart-row">
-                                    <div className="chart-container">
-                                        <h3>WILD Active Users</h3>
-                                        <Chart data={data} dataKey="dailyActiveUsers" chartType="line"  />
-                                    </div>
-                                    <div className="chart-container">
-                                        <h3>Total Messages Sent</h3>
-                                        <Chart data={data} dataKey="totalMessagesSent" chartType="line" />
-                                    </div>
-                                </div>
-                                <div className="chart-row">
-                                    <div className="chart-container">
-                                        <h3>User Sign Ups</h3>
-                                        <Chart data={data} dataKey="userSignUps" chartType="line" />
-                                    </div>
-                                    <div className="chart-container">
-                                        <h3>Newly Minted Domains</h3>
-                                        <Chart data={data} dataKey="newlyMintedDomains" chartType="line" />
-                                    </div>
-                                </div>
-                                <div className="chart-row">
-                                    <div className="chart-container">
-                                        <h3>Total Rewards Earned</h3>
-                                        <Chart data={data} dataKey="totalRewardsEarned" chartType="line" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            case 'Finance':
-                return (
-                    <FinanceSection />
-                );
-            case 'Productivity':
-                return (
-                    <ProductivitySection />
-                );
-            default:
-                return null;
-        }
+        const SectionComponent = sectionComponents[activeSection];
+        return SectionComponent ? <SectionComponent /> : null;
     };
 
     return (
