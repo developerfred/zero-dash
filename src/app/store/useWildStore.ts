@@ -38,8 +38,24 @@ const useWildStore = create<WildStore>((set) => ({
                 ETH: totalBalances.ETH * ethPrice,
                 WILD: totalBalances.WILD * wildPrice,
             };
+
+
+            const formatToMillion = (value: number): string => {
+                if (value >= 1e6) {
+                    return `$${(value / 1e6).toFixed(2)}M`;
+                }
+                return `$${value.toFixed(2)}`;
+            };
+
             
-            set({ totalDaos, totalBalances: totalBalancesUSD, tokenBalances });
+            const formattedBalancesUSD = {
+                ETH: formatToMillion(totalBalancesUSD.ETH),
+                WILD: formatToMillion(totalBalancesUSD.WILD),
+                GLOBAL: formatToMillion(totalBalancesUSD.ETH +totalBalancesUSD.WILD),
+            };
+
+            
+            set({ totalDaos, totalBalances: formattedBalancesUSD, tokenBalances });
         } catch (error) {
             console.error('Failed to fetch data:', error);
         } finally {
