@@ -29,7 +29,7 @@ export default function RootLayout({
       <head>        
         <link rel="icon" href="/logo-zero.png" sizes="any" />        
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning={true}>
         <Providers>
           <ErrorBoundary>{children}
           </ErrorBoundary>

@@ -1,5 +1,7 @@
 // @ts-nocheck
-import React from 'react';
+'use client';
+
+import React, { useEffect} from 'react';
 import { ResponsiveContainer } from 'recharts';
 import { DataPoint, ZnsData, MetricsData, FinanceData } from '@/app/types';
 import LineChartComponent from './LineChart';
@@ -23,6 +25,22 @@ const chartComponents = {
 
 const Chart: React.FC<ChartProps> = ({ data, dataKey, chartType }) => {
     const ChartComponent = chartComponents[chartType] || LineChartComponent;
+
+    useEffect(() => {
+        const originalConsoleError = console.error;
+
+        console.error = (...args: any[]) => {
+            if (typeof args[0] === "string" && /defaultProps/.test(args[0])) {
+                return;
+            }
+
+            originalConsoleError(...args);
+        };
+
+        return () => {
+            console.error = originalConsoleError;
+        };
+    }, []);
 
     return (
         <div className="chart-wrapper">
