@@ -10,7 +10,7 @@ import useWildStore from '@/store/useWildStore';
 import { formatUSD } from '@/app/lib/currencyUtils';
 
 const WildSection: React.FC = () => {
-    const { totalDaos, totalBalances, fetchData, isLoading, isPriceLoading, fetchTransactions, isTransactionsLoading, aggregatedTransactionsData, transactionCount, isInfoLoading, volume, holderCount, fetchWildInfo, lpHolderCount, fetchNFTVolumes, totalNFTVolume, nftVolumes } = useWildStore();
+    const { totalDaos, totalBalances, fetchData, isLoading, isPriceLoading, fetchTransactions, isTransactionsLoading, aggregatedTransactionsData, transactionCount, isInfoLoading, volume, holderCount, fetchWildInfo, lpHolderCount, fetchNFTVolumes, totalNFTVolume, nftVolumes, totalOwners } = useWildStore();
     const { chartData, fetchChartData, isLoadingChart } = useChartStore();
     const { filter } = useDashboardStore();
 
@@ -94,6 +94,7 @@ const WildSection: React.FC = () => {
                     <Card title="DAO Global Total (USD)" value={totalBalances.GLOBAL} isLoading={isPriceLoading} />
                     <Card title="DAO Transactions" value={transactionCount} isLoading={isTransactionsLoading} />
                     <Card title="Liquidity Holders" value={lpHolderCount} isLoading={isInfoLoading} />
+                    <Card title="NFTs Holders" value={totalOwners} isLoading={isInfoLoading} />
                 </div>
                 <div className="charts">
                     <div className="chart-row">
