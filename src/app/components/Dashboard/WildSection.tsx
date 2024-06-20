@@ -10,7 +10,7 @@ import useWildStore from '@/store/useWildStore';
 import { formatUSD } from '@/app/lib/currencyUtils';
 
 const WildSection: React.FC = () => {
-    const { totalDaos, totalBalances, tokenBalances, fetchData, isLoading, isPriceLoading, fetchTransactions, isTransactionsLoading, aggregatedTransactionsData, transactionCount, isInfoLoading, volume, holderCount, fetchWildInfo, lpHolderCount } = useWildStore();
+    const { totalDaos, totalBalances, fetchData, isLoading, isPriceLoading, fetchTransactions, isTransactionsLoading, aggregatedTransactionsData, transactionCount, isInfoLoading, volume, holderCount, fetchWildInfo, lpHolderCount, fetchNFTVolumes, totalNFTVolume, nftVolumes } = useWildStore();
     const { chartData, fetchChartData, isLoadingChart } = useChartStore();
     const { filter } = useDashboardStore();
 
@@ -75,8 +75,9 @@ const WildSection: React.FC = () => {
         fetchData();
         fetchWildInfo();
         fetchTransactions(start, now);
+        fetchNFTVolumes();
         fetchChartData('ethereum:0x2a3bff78b79a009976eea096a51a948a3dc00e34', start, now);
-    }, [filter, fetchChartData, fetchData, fetchTransactions, fetchWildInfo]);
+    }, [filter, fetchChartData, fetchData, fetchTransactions, fetchWildInfo, fetchNFTVolumes]);
 
     return (
         <div className="section">
@@ -85,6 +86,7 @@ const WildSection: React.FC = () => {
                 <div className="cards">
                     <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart || isLoading || isPriceLoading} />
                     <Card title="Volume (DEX)" value={volume || 0} isLoading={isInfoLoading} />
+                    <Card title="Volume NFT" value={totalNFTVolume || 0} isLoading={isInfoLoading} />
                     <Card title="Holders" value={holderCount || 0} isLoading={isInfoLoading} />
                     <Card title="Wild DAOS" value={totalDaos} isLoading={isLoading} />
                     <Card title="DAO Total WILD (USD)" value={totalBalances.WILD} isLoading={isPriceLoading} />
@@ -100,9 +102,15 @@ const WildSection: React.FC = () => {
                             <Chart data={chartData} dataKey="price" chartType="area" />
                         </div>
                         <div className="chart-container">
+                            <h3>NFTs Volume</h3>
+                            <Chart data={nftVolumes} dataKey="volume" chartType="line" />
+                        </div>                    
+                    </div>
+                    <div className="chart-row">
+                        <div className="chart-container">
                             <h3>Dao Transactions</h3>
                             <Chart data={aggregatedTransactionsData} dataKey="count" chartType="line" />
-                        </div>                    
+                        </div> 
                     </div>
                 </div>
             </div>

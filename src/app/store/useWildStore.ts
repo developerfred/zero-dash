@@ -16,9 +16,12 @@ interface WildStore {
     volume: number;
     holderCount: number;
     lpHolderCount: number;
+    nftVolumes: { name: string, volume: number }[];
+    totalNFTVolume: string;
     fetchTransactions: (fromDate?: string, toDate?: string) => void;
     fetchData: () => void;    
     fetchWildInfo: () => void;
+    fetchNFTVolumes: () => void;
 }
 
 export const formatToMillion = (value: number): string => {
@@ -41,6 +44,8 @@ const useWildStore = create<WildStore>((set) => ({
     volume: 0,
     holderCount: 0,
     lpHolderCount: 0,
+    nftVolumes: [],
+    totalNFTVolume: '0',
     
 
     fetchData: async () => {
@@ -112,6 +117,24 @@ const useWildStore = create<WildStore>((set) => ({
             });
         } catch (error) {
             console.error('Failed to fetch wild info:', error);
+            set({ isInfoLoading: false });
+        }
+    },
+    fetchNFTVolumes: async () => {
+        set({ isInfoLoading: true });
+        try {
+            const pricesResponse = await axios.get('/api/wild/prices');
+            const response = await axios.get('/api/wild/total-volume');
+            const { totalVolume, volumeByNFT } = response.data;
+            const ethPrice = pricesResponse.data.ETH ?? 0;
+
+            set({
+                totalNFTVolume: formatToMillion(totalVolume * ethPrice),
+                nftVolumes: volumeByNFT,
+                isInfoLoading: false
+            });
+        } catch (error) {
+            console.error('Failed to fetch NFT volumes:', error);
             set({ isInfoLoading: false });
         }
     },
