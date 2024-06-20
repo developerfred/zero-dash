@@ -10,7 +10,7 @@ import useWildStore from '@/store/useWildStore';
 import { formatUSD } from '@/app/lib/currencyUtils';
 
 const WildSection: React.FC = () => {
-    const { totalDaos, totalBalances, tokenBalances, fetchData, isLoading, isPriceLoading } = useWildStore();
+    const { totalDaos, totalBalances, tokenBalances, fetchData, isLoading, isPriceLoading, fetchTransactions, isTransactionsLoading, aggregatedTransactionsData, transactionCount } = useWildStore();
     const { chartData, fetchChartData, isLoadingChart } = useChartStore();
     const { filter } = useDashboardStore();
 
@@ -73,8 +73,9 @@ const WildSection: React.FC = () => {
                 }
         }
         fetchData();
+        fetchTransactions(start, now);
         fetchChartData('ethereum:0x2a3bff78b79a009976eea096a51a948a3dc00e34', start, now);
-    }, [filter, fetchChartData, fetchData]);
+    }, [filter, fetchChartData, fetchData, fetchTransactions]);
 
     return (
         <div className="section">
@@ -86,12 +87,17 @@ const WildSection: React.FC = () => {
                     <Card title="Total WILD (USD)" value={totalBalances.WILD} isLoading={isPriceLoading} />
                     <Card title="Total ETH (USD)" value={totalBalances.ETH} isLoading={isPriceLoading} />
                     <Card title="Global Total (USD)" value={totalBalances.GLOBAL} isLoading={isPriceLoading} />
+                    <Card title="DAO Transactions" value={transactionCount} isLoading={isTransactionsLoading} />
                 </div>
                 <div className="charts">
                     <div className="chart-row">
                         <div className="chart-container">
                             <h3>Token Price Over Time</h3>
                             <Chart data={chartData} dataKey="price" chartType="area" />
+                        </div>
+                        <div className="chart-container">
+                            <h3>Dao Transactions</h3>
+                            <Chart data={aggregatedTransactionsData} dataKey="count" chartType="line" />
                         </div>
                     </div>
                 </div>
