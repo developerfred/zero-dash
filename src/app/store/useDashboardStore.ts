@@ -3,6 +3,8 @@ import { create } from 'zustand';
 import { formatUnits } from 'viem';
 import { DataPoint, ZnsData, MetricsData, GroupedData } from '@/app/types';
 import { formatUSD } from '@/app/lib/currencyUtils';
+import { formatToMillion } from './useWildStore';
+import axios from 'axios';
 
 interface DashboardState {
     filter: string;
@@ -26,9 +28,13 @@ interface DashboardState {
     rewardsData: { date: string; totalRewardsEarned: number }[];
     tokenPriceInUSD: number | null;
     meowHolders: number | string;
+    volume: number; 
+    holdersCount: number; 
+    lpHolderCount: number;
     isLoadingDashboard: boolean;
     isLoadingZns: boolean;
     isLoadingPairData: boolean;
+    isInfoLoading: boolean;
     setFilter: (filter: string) => void;
     setData: (data: DataPoint[]) => void;
     setZosData: (data: MetricsData[]) => void;
@@ -37,6 +43,7 @@ interface DashboardState {
     fetchDashboardDataByFilter: (filter: string) => Promise<void>;
     fetchTokenPrice: () => Promise<void>;
     fetchPairData: () => Promise<void>;
+    fetchMeowInfo: () => void;
 }
 
 const fetchAllData = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
@@ -89,9 +96,13 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
     rewardsData: [],
     tokenPriceInUSD: null,
     meowHolders: 0,
+    volume: 0,
+    holderCount: 0,
+    lpHolderCount: 0,
     isLoadingDashboard: false,
     isLoadingZns: false,
     isLoadingPairData: false,
+    isInfoLoading: false,
 
     setFilter: (filter: string) => set({ filter }),
 
@@ -258,6 +269,23 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             console.error('Error fetching pair data:', error);
             set({ isLoadingPairData: false });
+        }
+    },
+    
+    fetchMeowInfo: async () => {
+        set({ isInfoLoading: true });
+        try {
+            const response = await axios.get('/api/meow/info');
+            const { volume, holder_count, lp_holder_count } = response.data;
+            set({
+                volume,
+                holdersCount: holder_count,
+                lpHolderCount: lp_holder_count,
+                isInfoLoading: false
+            });
+        } catch (error) {
+            console.error('Failed to fetch wild info:', error);
+            set({ isInfoLoading: false });
         }
     },
 }));

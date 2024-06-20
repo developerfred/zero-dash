@@ -8,7 +8,7 @@ import { formatUSD } from '@/app/lib/currencyUtils';
 
 const MeowSection: React.FC = () => {
     const { chartData, fetchChartData, isLoadingChart } = useChartStore();
-    const { filter, setFilter, fetchPairData, isLoadingPairData, pairData, fetchTokenPrice, meowHolders } = useDashboardStore();
+    const { filter, volume, holdersCount, lpHolderCount, isLoadingPairData, fetchMeowInfo, fetchTokenPrice, isInfoLoading } = useDashboardStore();
 
     useEffect(() => {
         if (!filter) {
@@ -70,8 +70,8 @@ const MeowSection: React.FC = () => {
         }
 
         fetchChartData('ethereum:0x0ec78ed49c2d27b315d462d43b5bab94d2c79bf8', start, now);
-        //fetchPairData();        
-    }, [filter, fetchChartData,  fetchTokenPrice]);
+        fetchMeowInfo();        
+    }, [filter, fetchChartData, fetchTokenPrice, fetchMeowInfo]);
 
     
 
@@ -80,8 +80,9 @@ const MeowSection: React.FC = () => {
             <h2 id="zero-meow">MEOW</h2>            
             <div className="zero-meow">
                 <div className="cards">
-                    <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart} />                    
-                    <Card title="Holders" value={meowHolders} isLoading={isLoadingPairData} />
+                    <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart} />                     
+                    <Card title="Holders" value={holdersCount} isLoading={isInfoLoading} />
+                    <Card title="LP" value={lpHolderCount} isLoading={isInfoLoading} />
                 </div>
                 <div className="charts">
                     <div className="chart-row">

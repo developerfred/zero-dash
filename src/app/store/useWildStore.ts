@@ -3,8 +3,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
-const CHAIN_BASE_KEY = process.env.CHAIN_BASE_KEY;
-
 interface WildStore {
     totalDaos: number;
     totalBalances: { [key: string]: number };

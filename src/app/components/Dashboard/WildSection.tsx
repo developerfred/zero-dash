@@ -10,7 +10,7 @@ import useWildStore from '@/store/useWildStore';
 import { formatUSD } from '@/app/lib/currencyUtils';
 
 const WildSection: React.FC = () => {
-    const { totalDaos, totalBalances, tokenBalances, fetchData, isLoading, isPriceLoading, fetchTransactions, isTransactionsLoading, aggregatedTransactionsData, transactionCount, isInfoLoading, volume, holderCount, fetchWildInfo } = useWildStore();
+    const { totalDaos, totalBalances, tokenBalances, fetchData, isLoading, isPriceLoading, fetchTransactions, isTransactionsLoading, aggregatedTransactionsData, transactionCount, isInfoLoading, volume, holderCount, fetchWildInfo, lpHolderCount } = useWildStore();
     const { chartData, fetchChartData, isLoadingChart } = useChartStore();
     const { filter } = useDashboardStore();
 
@@ -87,10 +87,11 @@ const WildSection: React.FC = () => {
                     <Card title="Volume (DEX)" value={volume || 0} isLoading={isInfoLoading} />
                     <Card title="Holders" value={holderCount || 0} isLoading={isInfoLoading} />
                     <Card title="Wild DAOS" value={totalDaos} isLoading={isLoading} />
-                    <Card title="Total WILD (USD)" value={totalBalances.WILD} isLoading={isPriceLoading} />
-                    <Card title="Total ETH (USD)" value={totalBalances.ETH} isLoading={isPriceLoading} />
-                    <Card title="Global Total (USD)" value={totalBalances.GLOBAL} isLoading={isPriceLoading} />
+                    <Card title="DAO Total WILD (USD)" value={totalBalances.WILD} isLoading={isPriceLoading} />
+                    <Card title="DAO Total ETH (USD)" value={totalBalances.ETH} isLoading={isPriceLoading} />
+                    <Card title="DAO Global Total (USD)" value={totalBalances.GLOBAL} isLoading={isPriceLoading} />
                     <Card title="DAO Transactions" value={transactionCount} isLoading={isTransactionsLoading} />
+                    <Card title="Liquidity Holders" value={lpHolderCount} isLoading={isInfoLoading} />
                 </div>
                 <div className="charts">
                     <div className="chart-row">
@@ -101,7 +102,7 @@ const WildSection: React.FC = () => {
                         <div className="chart-container">
                             <h3>Dao Transactions</h3>
                             <Chart data={aggregatedTransactionsData} dataKey="count" chartType="line" />
-                        </div>
+                        </div>                    
                     </div>
                 </div>
             </div>
