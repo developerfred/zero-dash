@@ -146,3 +146,51 @@ export interface BalanceChartData {
     date: string;
     balance: number;
 };
+
+
+
+export interface Totals {
+    totalRegistrations: number;
+    totalWorlds: number;
+    totalDomains: number;
+}
+
+export interface DashboardState {
+    filter: string;
+    pairData: any;
+    data: DataPoint[];
+    zosData: MetricsData[];
+    znsData: ZnsData[];
+    znsDataCache: Record<string, GroupedData>;
+    zosDataCache: Record<string, MetricsData[]>;
+    totals: {
+        totalRegistrations: number;
+        totalWorlds: number;
+        totalDomains: number;
+        dailyActiveUsers: number;
+        totalMessagesSent: number;
+        userSignUps: number;
+        newlyMintedDomains: number;
+        totalRewardsEarned: string;
+        dayCount: number;
+    };
+    rewardsData: { date: string; totalRewardsEarned: number }[];
+    tokenPriceInUSD: number | null;
+    meowHolders: number | string;
+    volume: number;
+    holdersCount: number;
+    lpHolderCount: number;
+    isLoadingDashboard: boolean;
+    isLoadingZns: boolean;
+    isLoadingPairData: boolean;
+    isInfoLoading: boolean;
+    setFilter: (filter: string) => void;
+    setData: (data: DataPoint[]) => void;
+    setZosData: (data: MetricsData[]) => void;
+    fetchDashboardData: (fromDate: string, toDate: string) => Promise<void>;
+    fetchTotals: (filter: string) => Promise<void>;
+    fetchDashboardDataByFilter: (filter: string) => Promise<void>;
+    fetchTokenPrice: () => Promise<void>;
+    fetchPairData: () => Promise<void>;
+    fetchMeowInfo: () => void;
+}

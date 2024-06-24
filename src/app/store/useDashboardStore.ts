@@ -1,50 +1,11 @@
 // @ts-nocheck
 import { create } from 'zustand';
 import { formatUnits } from 'viem';
-import { DataPoint, ZnsData, MetricsData, GroupedData } from '@/app/types';
+import { DataPoint, ZnsData, MetricsData, GroupedData, DashboardState, Totals } from '@/app/types';
 import { formatUSD } from '@/app/lib/currencyUtils';
 import { formatToMillion } from './useWildStore';
 import axios from 'axios';
 
-interface DashboardState {
-    filter: string;
-    pairData: any;
-    data: DataPoint[];
-    zosData: MetricsData[];
-    znsData: ZnsData[];
-    znsDataCache: Record<string, GroupedData>;
-    zosDataCache: Record<string, MetricsData[]>;
-    totals: {
-        totalRegistrations: number;
-        totalWorlds: number;
-        totalDomains: number;
-        dailyActiveUsers: number;
-        totalMessagesSent: number;
-        userSignUps: number;
-        newlyMintedDomains: number;
-        totalRewardsEarned: string;
-        dayCount: number;
-    };
-    rewardsData: { date: string; totalRewardsEarned: number }[];
-    tokenPriceInUSD: number | null;
-    meowHolders: number | string;
-    volume: number; 
-    holdersCount: number; 
-    lpHolderCount: number;
-    isLoadingDashboard: boolean;
-    isLoadingZns: boolean;
-    isLoadingPairData: boolean;
-    isInfoLoading: boolean;
-    setFilter: (filter: string) => void;
-    setData: (data: DataPoint[]) => void;
-    setZosData: (data: MetricsData[]) => void;
-    fetchDashboardData: (fromDate: string, toDate: string) => Promise<void>;
-    fetchTotals: (filter: string) => Promise<void>;
-    fetchDashboardDataByFilter: (filter: string) => Promise<void>;
-    fetchTokenPrice: () => Promise<void>;
-    fetchPairData: () => Promise<void>;
-    fetchMeowInfo: () => void;
-}
 
 const fetchAllData = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
     const response = await fetch(`/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}`);
@@ -244,20 +205,38 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
     },
 
     fetchTotals: async (filter: string) => {
+        const cacheKey = filter;
+        const state = get();
+        
+        const cachedData = state.znsDataCache[cacheKey];
+        if (cachedData) {
+            set({
+                totals: {
+                    totalRegistrations: cachedData.totalDomainRegistrations,
+                    totalWorlds: cachedData.totalWorlds,
+                    totalDomains: cachedData.totalDomains,
+                }
+            });
+            return;
+        }
+
         try {
+            set({ isLoadingZns: true });
             const response = await fetch(`/api/domains?range=${filter}`);
             if (!response.ok) {
                 throw new Error(`Error fetching totals data: ${response.statusText}`);
             }
             const result: Record<string, GroupedData> = await response.json();
-            const totals = {
-                totalRegistrations: Object.values(result).reduce((acc, val) => acc + val.totalDomainRegistrations, 0),
-                totalWorlds: Object.values(result).reduce((acc, val) => acc + val.totalWorlds, 0),
-                totalDomains: Object.values(result).reduce((acc, val) => acc + val.totalDomains, 0),
-            };
-            set({ znsDataCache: result, totals });
+            const totals = calculateTotals(result);
+            
+            set((state) => ({
+                znsDataCache: { ...state.znsDataCache, [cacheKey]: result },
+                totals,
+                isLoadingZns: false,
+            }));
         } catch (error) {
             console.error('Error in fetchTotals:', error);
+            set({ isLoadingZns: false });
         }
     },
 
@@ -289,5 +268,14 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         }
     },
 }));
+
+const calculateTotals = (data: Record<string, GroupedData>): Totals => {
+    return {
+        totalRegistrations: Object.values(data).reduce((acc, val) => acc + val.totalDomainRegistrations, 0),
+        totalWorlds: Object.values(data).reduce((acc, val) => acc + val.totalWorlds, 0),
+        totalDomains: Object.values(data).reduce((acc, val) => acc + val.totalDomains, 0),
+    };
+};
+
 
 export default useDashboardStore;
