@@ -32,8 +32,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const volumes = await Promise.all(volumePromises);
 
         const totalVolume = volumes.reduce((acc, nft) => acc + parseFloat(nft.total_volume), 0);
-        const totalOwners = volumes.reduce((acc, nft) => acc + (nft.nft_owner_number || 0), 0); // Somando apenas valores válidos
-        const totalItems = volumes.reduce((acc, nft) => acc + (nft.nft_items || 0), 0); // Somando apenas valores válidos
+        const totalOwners = volumes.reduce((acc, nft) => acc + (nft.nft_owner_number || 0), 0); 
+        const totalItems = volumes.reduce((acc, nft) => acc + (nft.nft_items || 0), 0); 
         const volumeByNFT = volumes.map(nft => ({
             name: nft.nft_name,
             volume: parseFloat(nft.total_volume),
