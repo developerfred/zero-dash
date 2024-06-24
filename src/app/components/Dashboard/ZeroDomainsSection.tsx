@@ -1,55 +1,55 @@
-// @ts-nocheck
 import React, { useEffect } from 'react';
 import useDashboardStore from '@/store/useDashboardStore';
-import Filters from '@/components/Filters';
 import Chart from '@/components/Chart';
 import Card from '@/components/Card';
 
-const ZeroDomainsSection = () => {
+const ZeroDomainsSection: React.FC = () => {
     const {
-        filter,
-        totals,
-        znsDataCache,
-        setFilter,
-        fetchTotals,        
+        filter,        
+        znsDataCache,        
+        fetchTotals,
         isLoadingZns,
     } = useDashboardStore();
 
     useEffect(() => {
         fetchTotals(filter);
-        
-    }, [filter, fetchTotals, ]);
+    }, [filter]);
 
+    const cachedData = znsDataCache[filter] || {};
+
+    const totals = {
+        totalRegistrations: Object.values(cachedData).reduce((acc, val) => acc + val.totalDomainRegistrations, 0),
+        totalWorlds: Object.values(cachedData).reduce((acc, val) => acc + val.totalWorlds, 0),
+        totalDomains: Object.values(cachedData).reduce((acc, val) => acc + val.totalDomains, 0),
+    };
+
+    const znsData = Object.values(cachedData);
+    
     return (
         <div className="section">
-            <h2 id="zero-domains">ZERO Domains</h2>
-            <div className="zero-domains">                
+            <h2 id="zero-domains">ZERO Domains</h2>            
+            <div className="zero-domains">
                 <div className="cards">
                     <Card title="Total Domain Registrations" value={totals.totalRegistrations} isLoading={isLoadingZns} />
                     <Card title="Total Worlds" value={totals.totalWorlds} isLoading={isLoadingZns} />
                     <Card title="Total Domains" value={totals.totalDomains} isLoading={isLoadingZns} />
-                    {/* <Card title="Total Amount Staked" value={totals.totalRewardsEarned} /> */}
                 </div>
                 <div className="charts">
                     <div className="chart-row">
                         <div className="chart-container">
                             <h3>Total Domain Registrations</h3>
-                            <Chart data={Object.values(znsDataCache)} dataKey="totalDomainRegistrations" chartType="bar" />
+                            <Chart data={znsData} dataKey="totalDomainRegistrations" chartType="bar" />
                         </div>
                         <div className="chart-container">
                             <h3>Total Worlds</h3>
-                            <Chart data={Object.values(znsDataCache)} dataKey="totalWorlds" chartType="area" />
+                            <Chart data={znsData} dataKey="totalWorlds" chartType="area" />
                         </div>
                     </div>
                     <div className="chart-row">
                         <div className="chart-container">
                             <h3>Total Domains</h3>
-                            <Chart data={Object.values(znsDataCache)} dataKey="totalDomains" chartType="line" />
+                            <Chart data={znsData} dataKey="totalDomains" chartType="line" />
                         </div>
-                        {/* <div className="chart-container">
-                            <h3>Total Amount Staked</h3>
-                            <Chart data={znsData} dataKey="NumDomainsRegisteredTotal" chartType="area" />
-                        </div> */}
                     </div>
                 </div>
             </div>
