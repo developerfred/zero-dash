@@ -12,7 +12,7 @@ const LineChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
         <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data}>
                 <Line type="monotone" dataKey={dataKey} stroke="#01f4cb" />
-                <CartesianGrid stroke="#ccc" />
+                <CartesianGrid stroke="#cccccc1d" />
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip

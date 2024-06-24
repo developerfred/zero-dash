@@ -12,25 +12,29 @@ interface FiltersProps {
 
 Modal.setAppElement('body'); 
 
+type Option = {
+    label: string;
+    value: string;
+};
+
+const createOption = (label: string, value: string): Option => ({ label, value });
+
+const options: Option[] = [
+    createOption('Today', 'today'),
+    createOption('Yesterday', 'yesterday'),
+    createOption('Last 7 days', '7d'),
+    createOption('Last 30 days', '30d'),
+    createOption('Last 90 days', '90d'),
+    createOption('Last Year', '365d'),
+    createOption('Last Week', 'last_week'),
+    createOption('Custom date range', 'custom')
+];
+
 const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
     const [customDateRange, setCustomDateRange] = useState<[Date | null, Date | null]>([null, null]);
     const [startDate, endDate] = customDateRange;
     const [selectedOption, setSelectedOption] = useState<string>();
     const [modalIsOpen, setModalIsOpen] = useState(false);
-
-    const options = [
-        { label: 'Last day', value: '24h' },
-        { label: 'Last 7 days', value: '7d' },
-        { label: 'Last 30 days', value: '30d' },
-        { label: 'Last 90 days', value: '90d' },
-        { label: 'Last 365 days', value: '365d' },
-        { label: 'Today', value: 'today' },
-        { label: 'Yesterday', value: 'yesterday' },
-        { label: 'Last Week', value: 'last_week' },
-        { label: 'Last Month', value: 'last_month' },
-        { label: 'Last Year', value: 'last_year' },
-        { label: 'Custom date range', value: 'custom' },
-    ];
 
     const handleButtonClick = (value: string) => {
         setSelectedOption(value);

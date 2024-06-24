@@ -12,7 +12,7 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
         <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={data}>
                 <Area type="monotone" dataKey={dataKey} stroke="#01f4cb" fill="#01f4cb" fillOpacity={0.6} />
-                <CartesianGrid stroke="#ccc" />
+                <CartesianGrid stroke="#cccccc1d" />
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip

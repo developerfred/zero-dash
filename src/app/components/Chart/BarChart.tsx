@@ -12,7 +12,7 @@ const BarChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value" 
         <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
                 <Bar dataKey={dataKey} fill="#01f4cb" />
-                <CartesianGrid stroke="#ccc" />
+                <CartesianGrid stroke="#cccccc1d" />
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip
