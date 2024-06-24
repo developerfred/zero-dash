@@ -21,8 +21,8 @@ const getNFTVolume = async (contractAddress: string) => {
         nft_address: contractAddress,
         total_volume: data.total_volume,
         nft_name: data.nft_name,
-        nft_owner_number: data.nft_owner_number || 0,
-        nft_items: data.nft_items || 0
+        nft_owner_number: data.nft_owner_number || 0, 
+        nft_items: data.nft_items || 0 
     };
 };
 
