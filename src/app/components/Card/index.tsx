@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import Loading from '@/components/Loading';
 import './Card.css'; // Supondo que estamos adicionando estilos CSS em um arquivo separado
 
@@ -20,7 +20,7 @@ const Card: React.FC<CardProps> = ({ title, value, isLoading }) => {
             <h3>{title}</h3>
             <div className="card-content">
                 <div className={`card-value-wrapper ${isLoading ? 'loading' : ''}`}>
-                    {isLoading ? (
+                    {isLoading || value === null || value === undefined || value === '' ? (
                         <Loading />
                     ) : (
                         <p className="card-value">{formattedValue}</p>
@@ -31,4 +31,4 @@ const Card: React.FC<CardProps> = ({ title, value, isLoading }) => {
     );
 };
 
-export default Card;
+export default memo(Card);

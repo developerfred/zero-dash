@@ -5,12 +5,13 @@ import Modal from 'react-modal';
 import 'react-datepicker/dist/react-datepicker.css';
 import './custom-datapicker.css';
 import './filters.css';
+import useZeroGlobalStore from '@/store/useZeroGlobalStore';
 
 interface FiltersProps {
     setFilter: (filter: string) => void;
 }
 
-Modal.setAppElement('body'); 
+Modal.setAppElement('body');
 
 type Option = {
     label: string;
@@ -31,9 +32,10 @@ const options: Option[] = [
 ];
 
 const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
+    const { filter } = useZeroGlobalStore();
     const [customDateRange, setCustomDateRange] = useState<[Date | null, Date | null]>([null, null]);
     const [startDate, endDate] = customDateRange;
-    const [selectedOption, setSelectedOption] = useState<string>();
+    const [selectedOption, setSelectedOption] = useState<string>(filter);
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const handleButtonClick = (value: string) => {
@@ -48,10 +50,10 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
     };
 
     useEffect(() => {
-        if (selectedOption && selectedOption !== 'custom') {
+        if (selectedOption && selectedOption !== 'custom' && selectedOption !== filter) {
             setFilter(selectedOption);
         }
-    }, [selectedOption, setFilter]);
+    }, [selectedOption, setFilter, filter]);
 
     useEffect(() => {
         if (selectedOption === 'custom' && startDate && endDate) {
