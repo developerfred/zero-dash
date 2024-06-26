@@ -1,6 +1,6 @@
-import React, { memo } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import Loading from '@/components/Loading';
-import './Card.css'; // Supondo que estamos adicionando estilos CSS em um arquivo separado
+import './Card.css';
 
 interface CardProps {
     title: string;
@@ -13,14 +13,28 @@ const formatNumberWithCommas = (number: number): string => {
 };
 
 const Card: React.FC<CardProps> = ({ title, value, isLoading }) => {
+    const [showLoading, setShowLoading] = useState(false);
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (isLoading) {
+            timer = setTimeout(() => {
+                setShowLoading(true);
+            }, 500); 
+        } else {
+            setShowLoading(false);
+        }
+        return () => clearTimeout(timer);
+    }, [isLoading]);
+
     const formattedValue = typeof value === 'number' ? formatNumberWithCommas(value) : value;
 
     return (
         <div className="card">
             <h3>{title}</h3>
             <div className="card-content">
-                <div className={`card-value-wrapper ${isLoading ? 'loading' : ''}`}>
-                    {isLoading || value === null || value === undefined || value === '' ? (
+                <div className={`card-value-wrapper ${showLoading ? 'loading' : ''}`}>
+                    {showLoading || value === null || value === undefined || value === '' ? (
                         <Loading />
                     ) : (
                         <p className="card-value">{formattedValue}</p>
