@@ -1,3 +1,4 @@
+
 import React, { memo, useState, useEffect } from 'react';
 import Loading from '@/components/Loading';
 import './Card.css';
@@ -20,14 +21,14 @@ const Card: React.FC<CardProps> = ({ title, value, isLoading }) => {
         if (isLoading) {
             timer = setTimeout(() => {
                 setShowLoading(true);
-            }, 500); 
+            }, 500);
         } else {
             setShowLoading(false);
         }
         return () => clearTimeout(timer);
     }, [isLoading]);
 
-    const formattedValue = typeof value === 'number' ? formatNumberWithCommas(value) : value;
+    const formattedValue = (typeof value === 'number' && value !== 0) ? formatNumberWithCommas(value) : value;
 
     return (
         <div className="card">

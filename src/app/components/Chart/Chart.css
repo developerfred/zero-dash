@@ -1,0 +1,21 @@
+.chart-wrapper {
+    min-height: 300px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: height 0.4s ease-in-out;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 0.4s ease-in-out;
+}

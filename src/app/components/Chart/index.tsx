@@ -8,6 +8,7 @@ import BarChartComponent from './BarChart';
 import AreaChartComponent from './AreaChart';
 import RadarChartComponent from './RadarChart';
 import Loading from '@/components/Loading';
+import './Chart.css';
 
 interface ChartProps {
     data: any[];
@@ -41,15 +42,15 @@ const Chart: React.FC<ChartProps> = ({ data, dataKey, chartType }) => {
         };
     }, []);
 
-    if (!data || data.length === 0) {
-        return <Loading />;
-    }
-
     return (
         <div className="chart-wrapper">
-            <ResponsiveContainer width="100%" height={300}>
-                <ChartComponent data={data} dataKey={dataKey} />
-            </ResponsiveContainer>
+            {(!data || data.length === 0) ? (
+                <Loading />
+            ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                    <ChartComponent data={data} dataKey={dataKey} />
+                </ResponsiveContainer>
+            )}
         </div>
     );
 };
