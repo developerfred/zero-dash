@@ -52,7 +52,7 @@
 
 .react-datepicker__input-container input {
   padding: 10px;
-  border: 2px solid #81e6d9; 
+  border: 2px solid #05ffd5; 
   border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.1) !important;
   color: #e2e8f0;
@@ -100,7 +100,7 @@
 .modal input {
   width: 100%;
   padding: 10px;
-  border: 2px solid #81e6d9;
+  border: 2px solid #05ffd5;
   border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.1);
   color: #e2e8f0;

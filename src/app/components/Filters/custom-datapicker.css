@@ -3,14 +3,14 @@
   font-size: 1rem;
   background-color: rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
-  border: 2px solid #81e6d9;
+  border: 2px solid #05ffd5;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .react-datepicker__header {
   background-color: rgba(255, 255, 255, 0.1);
-  border-bottom: 2px solid #81e6d9;
+  border-bottom: 2px solid #05ffd5;
   padding-top: 10px;
 }
 
@@ -40,12 +40,12 @@
 }
 
 .react-datepicker__navigation-icon::before {
-  border-color: #81e6d9;
+  border-color: #05ffd5;
 }
 
 .react-datepicker__input-container input {
   padding: 10px;
-  border: 2px solid #81e6d9; 
+  border: 2px solid #05ffd5; 
   border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
@@ -102,7 +102,7 @@
 .modal input {
   width: 100%;
   padding: 10px;
-  border: 2px solid #81e6d9;
+  border: 2px solid #05ffd5;
   border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
