@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { DataPoint } from '@/app/types';
+import { formatDate } from '@/lib/utils';
 
 interface ChartProps {
     data: DataPoint[];
@@ -13,7 +14,7 @@ const BarChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value" 
             <BarChart data={data}>
                 <Bar dataKey={dataKey} fill="#01f4cb" />
                 <CartesianGrid stroke="#cccccc1d" />
-                <XAxis dataKey="date" />
+                <XAxis dataKey="date" tickFormatter={formatDate} />
                 <YAxis />
                 <Tooltip
                     contentStyle={{ backgroundColor: '#333', border: 'none', borderRadius: '10px', color: '#fff' }}

@@ -1,22 +1,19 @@
 import React from 'react';
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { DataPoint } from '@/app/types';
-import { formatUSD } from '@/app/lib/currencyUtils';
+import { formatDate, formatCurrency } from '@/lib/utils';
 
 interface ChartProps {
     data: DataPoint[];
     dataKey: string;
 }
 
-const formatCurrency = (value: number): string => {
-    return `$${value.toLocaleString()}`;
-};
 
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
             <div className="custom-tooltip" style={{ backgroundColor: '#333', border: 'none', borderRadius: '10px', color: '#fff', padding: '10px' }}>
-                <p className="label" style={{ color: '#fff' }}>{`${label}`}</p>
+                <p className="label" style={{ color: '#fff' }}>{`${formatDate(label)}`}</p>
                 <p className="value" style={{ color: '#01f4cb' }}>{formatCurrency(payload[0].value)}</p>
             </div>
         );
@@ -31,8 +28,8 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
             <AreaChart data={data}>
                 <Area type="monotone" dataKey={dataKey} stroke="#01f4cb" fill="#01f4cb" fillOpacity={0.6} />
                 <CartesianGrid stroke="#cccccc1d" />
-                <XAxis dataKey="date" />
-                <YAxis tickFormatter={(value) => formatCurrency(value)} />
+                <XAxis dataKey="date" tickFormatter={formatDate} />
+                <YAxis tickFormatter={formatCurrency} />
                 <Tooltip content={<CustomTooltip />} />
             </AreaChart>
         </ResponsiveContainer>
