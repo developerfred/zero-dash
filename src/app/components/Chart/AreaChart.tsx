@@ -2,7 +2,7 @@ import React from 'react';
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Line } from 'recharts';
 import { DataPoint } from '@/app/types';
 import { formatDate, formatNumber, formatCurrency, formatLabel } from '@/lib/utils';
-
+import './Chart.css';
 
 interface ChartProps {
     data: DataPoint[];
@@ -24,26 +24,30 @@ const CustomTooltip = ({ active, payload, label, isCurrency }: any) => {
     return null;
 };
 
-const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", isCurrency = false }) => (
-    <div className="chart-wrapper" style={{ backgroundColor: '#1a1a1a', borderRadius: '10px', padding: '10px', border: '2px solid #01f4cb' }}>
-        <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={data}>
-                <defs>
-                    <linearGradient id="colorMatrix" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#01f4cb" stopOpacity={0.8} />
-                        <stop offset="100%" stopColor="#000000" stopOpacity={0.1} />
-                    </linearGradient>
-                </defs>
-                <XAxis dataKey="date" tickFormatter={formatDate} stroke="#ccc" />
-                <YAxis tickFormatter={isCurrency ? formatCurrency : formatNumber} stroke="#ccc" />
-                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                <Tooltip content={<CustomTooltip isCurrency={isCurrency} />} />
-                <Legend formatter={(value) => formatLabel(value)} /> 
-                <Line name="Rewards Earned By Day" type="monotone" dataKey="totalRewardsEarned" stroke="#01f4cb" />
-                <Area type="monotone" dataKey={dataKey} stroke="#01f4cb" fillOpacity={1} fill="url(#colorMatrix)" />
-            </AreaChart>
-        </ResponsiveContainer>
-    </div>
-);
+const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", isCurrency = false }) => {
+    
+
+    return (
+        
+            <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={data}>
+                    <defs>
+                        <linearGradient id="colorMatrix" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#01f4cb" stopOpacity={0.8} />
+                            <stop offset="100%" stopColor="#000000" stopOpacity={0.1} />
+                        </linearGradient>
+                    </defs>
+                    <XAxis dataKey="date" tickFormatter={formatDate} stroke="#ccc" />
+                    <YAxis tickFormatter={isCurrency ? formatCurrency : formatNumber} stroke="#ccc" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                    <Tooltip content={<CustomTooltip isCurrency={isCurrency} />} />
+                    <Legend formatter={(value) => formatLabel(value)} />
+                    <Line name="Rewards Earned By Day" type="monotone" dataKey="totalRewardsEarned" stroke="#01f4cb" />
+                    <Area type="monotone" dataKey={dataKey} stroke="#01f4cb" fillOpacity={1} fill="url(#colorMatrix)" />
+                </AreaChart>
+            </ResponsiveContainer>
+        
+    );
+};
 
 export default AreaChartComponent;

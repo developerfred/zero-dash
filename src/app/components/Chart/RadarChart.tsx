@@ -24,7 +24,7 @@ const CustomTooltip = ({ active, payload, label, isCurrency }: any) => {
 };
 
 const RadarChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", isCurrency = false }) => (
-    <div className="chart-wrapper" style={{ backgroundColor: '#1a1a1a', borderRadius: '10px', padding: '10px', border: '2px solid #01f4cb' }}>
+   
         <ResponsiveContainer width="100%" height={300}>
             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
                 <PolarGrid stroke="#01f4cb" />
@@ -35,7 +35,7 @@ const RadarChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value
                 <Radar name="Data" dataKey={dataKey} stroke="#01f4cb" fill="#01f4cb" fillOpacity={0.6} />
             </RadarChart>
         </ResponsiveContainer>
-    </div>
+    
 );
 
 export default RadarChartComponent;

@@ -15,6 +15,7 @@ interface ChartProps {
     dataKey: string;
     chartType: 'line' | 'area' | 'bar' | 'radar';
     isCurrency?: boolean;
+    showPercentageChange?: boolean;
 }
 
 const chartComponents = {

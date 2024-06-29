@@ -24,7 +24,7 @@ const CustomTooltip = ({ active, payload, label, isCurrency }: any) => {
 };
 
 const LineChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", isCurrency = false }) => (
-    <div className="chart-wrapper" style={{ backgroundColor: '#1a1a1a', borderRadius: '10px', padding: '10px', border: '2px solid #01f4cb' }}>
+    
         <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data}>
                 <XAxis dataKey="date" tickFormatter={formatDate} stroke="#ccc" />
@@ -32,10 +32,10 @@ const LineChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                 <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                 <Tooltip content={<CustomTooltip isCurrency={isCurrency} />} />
                 <Legend formatter={(value) => formatLabel(value)} /> 
-                <Line type="monotone" dataKey={dataKey} stroke="#01f4cb" />
+                <Line type="monotone" dataKey={dataKey} stroke="#01f4cb" fillOpacity={1} fill="url(#colorMatrix)" />
             </LineChart>
         </ResponsiveContainer>
-    </div>
+    
 );
 
 export default LineChartComponent;

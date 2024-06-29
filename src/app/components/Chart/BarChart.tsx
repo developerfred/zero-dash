@@ -2,6 +2,7 @@ import React from 'react';
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { DataPoint } from '@/app/types';
 import { formatDate, formatNumber, formatCurrency, formatLabel } from '@/lib/utils';
+import './Chart.css';
 
 interface ChartProps {
     data: DataPoint[];
@@ -24,18 +25,24 @@ const CustomTooltip = ({ active, payload, label, isCurrency }: any) => {
 };
 
 const BarChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", isCurrency = false }) => (
-    <div className="chart-wrapper" style={{ backgroundColor: '#1a1a1a', borderRadius: '10px', padding: '10px', border: '2px solid #01f4cb' }}>
+    
         <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
+                <defs>
+                    <linearGradient id="colorMatrixBar" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#01f4cb" stopOpacity={0.8} />
+                        <stop offset="100%" stopColor="#000000" stopOpacity={0.1} />
+                    </linearGradient>
+                </defs>
                 <XAxis dataKey="date" tickFormatter={(date) => formatDate(date) !== "Invalid Date" ? formatDate(date) : ""} stroke="#ccc" />
                 <YAxis tickFormatter={isCurrency ? formatCurrency : formatNumber} stroke="#ccc" />
                 <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                 <Tooltip content={<CustomTooltip isCurrency={isCurrency} />} />
-                <Legend formatter={(value) => formatLabel(value)} /> 
-                <Bar dataKey={dataKey} fill="#01f4cb" />
+                <Legend formatter={(value) => formatLabel(value)} />
+                <Bar dataKey={dataKey} fill="url(#colorMatrixBar)" />
             </BarChart>
         </ResponsiveContainer>
-    </div>
+    
 );
 
 export default BarChartComponent;

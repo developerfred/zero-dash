@@ -1,9 +1,54 @@
 .chart-wrapper {
-    min-height: 300px; 
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    background: #000; 
+    border-radius: 10px;
+    padding: 20px;    
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     transition: height 0.4s ease-in-out;
+    border: 2px solid #05ffd5d3;
+    min-height: 300px;
+}
+
+.custom-tooltip {
+    background: rgba(51, 51, 51, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: #fff;
+    padding: 10px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); 
+    backdrop-filter: blur(5px); 
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.percentage-change {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #01f4cb;
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.8); 
+    padding: 5px 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); 
+}
+
+.chart-header {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.chart-title {
+    font-size: 1.5em;
+    color: #fff;
+}
+
+.chart-description {
+    font-size: 1em;
+    color: #aaa;
 }
 
 .loading {
