@@ -88,7 +88,7 @@ const MeowSection: React.FC = () => {
                     <div className="chart-row">
                         <div className="chart-container">
                             <h3>Token Price Over Time</h3>
-                            <Chart data={chartData} dataKey="price" chartType="area" />
+                            <Chart data={chartData} dataKey="price" chartType="area" isCurrency={true} />
                         </div>
                     </div>
                 </div>

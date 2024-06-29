@@ -138,7 +138,7 @@ const FinanceSection: React.FC = () => {
                         </div>
                         <div className="chart-container">
                             <h3>DAO Balance Over Time</h3>
-                            <Chart data={balanceChartData} dataKey="balance" chartType="area" />
+                            <Chart data={balanceChartData} dataKey="balance" chartType="area" isCurrency={true} />
                         </div>
                     </div>
                 </div>

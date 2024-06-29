@@ -100,11 +100,11 @@ const WildSection: React.FC = () => {
                     <div className="chart-row">
                         <div className="chart-container">
                             <h3>Token Price Over Time</h3>
-                            <Chart data={chartData} dataKey="price" chartType="area" />
+                            <Chart data={chartData} dataKey="price" chartType="area" isCurrency={true} />
                         </div>
                         <div className="chart-container">
                             <h3>NFTs Volume</h3>
-                            <Chart data={nftVolumes} dataKey="volume" chartType="line" />
+                            <Chart data={nftVolumes} dataKey="volume" chartType="line" isCurrency={true} />
                         </div>                    
                     </div>
                     <div className="chart-row">
