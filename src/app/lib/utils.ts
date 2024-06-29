@@ -152,3 +152,9 @@ export const formatDate = (date: string | number | Date): string => {
     }
 };
 
+
+export const formatLabel = (label: string): string => {
+    return label
+        .replace(/([A-Z])/g, ' $1') 
+        .replace(/^./, str => str.toUpperCase()); 
+};

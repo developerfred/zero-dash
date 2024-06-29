@@ -1,7 +1,8 @@
 import React from 'react';
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Line } from 'recharts';
 import { DataPoint } from '@/app/types';
-import { formatDate, formatNumber, formatCurrency } from '@/lib/utils';
+import { formatDate, formatNumber, formatCurrency, formatLabel } from '@/lib/utils';
+
 
 interface ChartProps {
     data: DataPoint[];
@@ -37,7 +38,7 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                 <YAxis tickFormatter={isCurrency ? formatCurrency : formatNumber} stroke="#ccc" />
                 <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                 <Tooltip content={<CustomTooltip isCurrency={isCurrency} />} />
-                <Legend />
+                <Legend formatter={(value) => formatLabel(value)} /> 
                 <Line name="Rewards Earned By Day" type="monotone" dataKey="totalRewardsEarned" stroke="#01f4cb" />
                 <Area type="monotone" dataKey={dataKey} stroke="#01f4cb" fillOpacity={1} fill="url(#colorMatrix)" />
             </AreaChart>
