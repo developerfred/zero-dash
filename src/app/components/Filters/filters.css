@@ -15,7 +15,7 @@
 
 .filter-button {
   padding: 10px 20px;
-  border: 2px solid #05ffd5; 
+  
   border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.1);
   color: #e2e8f0; 
@@ -29,14 +29,15 @@
 .filter-button:hover,
 .filter-button:focus {
   background-color: rgba(255, 255, 255, 0.1); 
-  color: #81e6d9; 
+  color: #05ffd5; 
   outline: none;
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 
 .filter-button.active {
-  color: #81e6d9;  
+  color: #05ffd5;  
+  border: 2px solid #05ffd5; 
 }
 
 .date-range {
