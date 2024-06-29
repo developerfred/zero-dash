@@ -14,6 +14,7 @@ interface ChartProps {
     data: any[];
     dataKey: string;
     chartType: 'line' | 'area' | 'bar' | 'radar';
+    isCurrency?: boolean;
 }
 
 const chartComponents = {
@@ -23,7 +24,7 @@ const chartComponents = {
     radar: RadarChartComponent,
 };
 
-const Chart: React.FC<ChartProps> = ({ data, dataKey, chartType }) => {
+const Chart: React.FC<ChartProps> = ({ data, dataKey, chartType, isCurrency = false }) => {
     const ChartComponent = chartComponents[chartType] || LineChartComponent;
 
     useEffect(() => {
@@ -48,7 +49,7 @@ const Chart: React.FC<ChartProps> = ({ data, dataKey, chartType }) => {
                 <Loading />
             ) : (
                 <ResponsiveContainer width="100%" height={300}>
-                    <ChartComponent data={data} dataKey={dataKey} />
+                    <ChartComponent data={data} dataKey={dataKey} isCurrency={isCurrency} />
                 </ResponsiveContainer>
             )}
         </div>

@@ -43,7 +43,7 @@ const ZeroGlobal: React.FC = () => {
                             </div>
                             <div className="chart-container">
                                 <h3>Total Rewards Earned</h3>
-                            <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" />
+                            <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true}/>
                             </div>
                         </div>
                     </div>

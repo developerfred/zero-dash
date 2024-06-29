@@ -2,7 +2,7 @@
 
 import { formatUnits } from 'viem';
 import { formatUSD } from './currencyUtils';
-import { format } from 'date-fns';
+import { parseISO, format } from 'date-fns';
 
 export const calculateTotals = (data, tokenPriceInUSD) => {
     const initialTotals = {
@@ -100,11 +100,55 @@ export const formatDateRange = (filter: string): { fromDate: string; toDate: str
 };
 
 
-export const formatDate = (date: string): string => {
-    return format(new Date(date), 'MM-dd-yy');
-};
-
-
 export const formatCurrency = (value: number): string => {
     return `$${value.toLocaleString()}`;
 };
+
+export const formatNumber = (num: number): string => {
+    return num.toLocaleString();
+};
+
+
+
+
+
+const isISODate = (dateString: string) => {
+    const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
+    return isoRegex.test(dateString);
+};
+
+const isTimestamp = (dateString: string) => {
+    const timestampRegex = /^\d+$/;
+    return timestampRegex.test(dateString);
+};
+
+export const formatDate = (date: string | number | Date): string => {
+    try {
+        let parsedDate;
+
+        if (typeof date === 'string') {
+            if (isISODate(date)) {
+                parsedDate = parseISO(date);
+            } else if (isTimestamp(date)) {
+                parsedDate = new Date(Number(date) * 1000); // Assumindo que o timestamp está em segundos
+            } else {
+                parsedDate = new Date(date);
+            }
+        } else if (typeof date === 'number') {
+            parsedDate = new Date(date * 1000); // Assumindo que o timestamp está em segundos
+        } else {
+            parsedDate = date;
+        }
+
+        if (isNaN(parsedDate.getTime())) {
+            console.warn(`Invalid date: ${date}`);
+            return "Invalid Date";
+        }
+
+        return format(parsedDate, 'MM-dd-yy');
+    } catch (error) {
+        console.warn(`Error formatting date: ${date}`, error);
+        return "Invalid Date";
+    }
+};
+

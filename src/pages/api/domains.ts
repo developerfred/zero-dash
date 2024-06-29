@@ -1,4 +1,5 @@
 // @ts-nocheck
+
 import { ApolloClient, InMemoryCache, gql, HttpLink } from '@apollo/client';
 import dayjs from 'dayjs';
 import fetch from 'node-fetch';
@@ -158,6 +159,7 @@ function groupByDate(domains, worlds) {
     const date = dayjs.unix(domain.creationTimestamp).format('YYYY-MM-DD');
     if (!groupedData[date]) {
       groupedData[date] = {
+        date, 
         totalDomainRegistrations: 0,
         totalDomains: 0,
         totalWorlds: 0,
@@ -174,6 +176,7 @@ function groupByDate(domains, worlds) {
     const date = dayjs.unix(world.creationTimestamp).format('YYYY-MM-DD');
     if (!groupedData[date]) {
       groupedData[date] = {
+        date, 
         totalDomainRegistrations: 0,
         totalDomains: 0,
         totalWorlds: 0,
@@ -186,7 +189,7 @@ function groupByDate(domains, worlds) {
     groupedData[date].totalDomainRegistrations += 1;
   });
 
-  return groupedData;
+  return Object.values(groupedData); 
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -227,6 +230,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json(groupedData);
   } catch (error) {
     console.error('Error fetching data from subgraph:', error);
-    res.status(500).json({ error: 'Erro ao buscar dados do subgraph' });
+    res.status(500).json({ error: 'Error fetching data from subgraph' });
   }
 }
