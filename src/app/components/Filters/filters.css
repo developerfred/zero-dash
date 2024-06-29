@@ -15,14 +15,15 @@
 
 .filter-button {
   padding: 10px 20px;
-  border: none;
+  border: 2px solid #05ffd5; 
   border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.1); 
+  background-color: rgba(255, 255, 255, 0.1);
   color: #e2e8f0; 
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', sans-serif; 
 }
 
 .filter-button:hover,
