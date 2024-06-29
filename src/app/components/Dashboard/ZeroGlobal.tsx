@@ -8,7 +8,7 @@ const ZeroGlobal: React.FC = () => {
     const { filter, totals, zosData, setFilter, fetchDashboardDataByFilter, isLoadingDashboard, rewardsData } = useDashboardStore();
     
     useEffect(() => {
-        setFilter('7d');
+        setFilter('24h');
     }, [setFilter]);
 
     useEffect(() => {
@@ -43,7 +43,7 @@ const ZeroGlobal: React.FC = () => {
                             </div>
                             <div className="chart-container">
                                 <h3>Total Rewards Earned</h3>
-                            <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true}/>
+                            <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true} />
                             </div>
                         </div>
                     </div>
