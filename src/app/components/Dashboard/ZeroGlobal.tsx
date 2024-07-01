@@ -3,12 +3,13 @@ import useDashboardStore from '@/store/useDashboardStore';
 import Chart from '@/components/Chart';
 import Card from '@/components/Card';
 import Loading from '@/components/Loading';
+import useZeroGlobalStore from '@/store/useZeroGlobalStore';
 
 const ZeroGlobal: React.FC = () => {
-    const { filter, totals, zosData, setFilter, fetchDashboardDataByFilter, isLoadingDashboard, rewardsData } = useDashboardStore();
+    const { totals, zosData, filter, setFilter, fetchDashboardDataByFilter, isLoadingDashboard, rewardsData } = useDashboardStore();
     
     useEffect(() => {
-        setFilter('24h');
+        setFilter('7d');
     }, [setFilter]);
 
     useEffect(() => {
