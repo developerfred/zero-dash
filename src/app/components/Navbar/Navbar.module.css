@@ -30,7 +30,7 @@
 }
 
 .navbarTitle {
-  font-family: 'Roboto Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 1.25rem; 
   font-weight: 500; 
   color: white;
@@ -45,7 +45,7 @@
 }
 
 .menuItem {
-  font-family: 'Roboto Mono', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 1rem;
   color: white;
   text-decoration: none;
