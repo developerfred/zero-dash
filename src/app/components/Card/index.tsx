@@ -1,4 +1,3 @@
-
 import React, { memo, useState, useEffect } from 'react';
 import Loading from '@/components/Loading';
 import './Card.css';
@@ -9,9 +8,12 @@ interface CardProps {
     isLoading?: boolean;
 }
 
-const formatNumberWithCommas = (number: number): string => {
+const formatNumberWithCommas = (value: string | number): string => {
+    const number = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(number)) return value.toString();
     return new Intl.NumberFormat('en-US').format(number);
 };
+
 
 const Card: React.FC<CardProps> = ({ title, value, isLoading }) => {
     const [showLoading, setShowLoading] = useState(false);
@@ -28,7 +30,7 @@ const Card: React.FC<CardProps> = ({ title, value, isLoading }) => {
         return () => clearTimeout(timer);
     }, [isLoading]);
 
-    const formattedValue = (typeof value === 'number' && value !== 0) ? formatNumberWithCommas(value) : value;
+    const formattedValue = (typeof value === 'number' || (typeof value === 'string' && !isNaN(parseFloat(value)))) ? formatNumberWithCommas(value) : value;
 
     return (
         <div className="card">
