@@ -33,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeSection, setActiveSection }) => {
             <div className={styles.navbarContainer}>
                 <div className={styles.navbarLeft}>
                     <button onClick={() => setActiveSection("Zero")} className={styles.navbarTitle}>
-                        ZERO
+                        <img src='./zero-dashboard-logo.png' />
                     </button>
                 </div>
                 <div className={styles.navbarMenu}>

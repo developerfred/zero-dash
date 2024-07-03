@@ -1,9 +1,8 @@
 .navbar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 50px;
-  border: 1px solid #05ffd5;  
+  justify-content: space-between;
+  border-radius: 50px;  
   padding: 12px;
   backdrop-filter: blur(20px);
   margin: 16px;
@@ -16,10 +15,10 @@
 .navbarContainer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   width: 100%;
   max-width: 1444px;
   padding: 0 16px;
+  position: relative;
   transition: padding 0.3s ease-in-out;
 }
 
@@ -44,6 +43,9 @@
   align-items: center;
   justify-content: center;
   gap: 32px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   transition: gap 0.3s ease-in-out;
 }
 
@@ -58,13 +60,13 @@
 }
 
 .menuItem:hover {
-  color: #01f4cb;
+  color: rgba(1, 244, 203, 1);
   background-color: rgba(0, 0, 0, 0.8);
   transform: scale(1.05);
 }
 
 .menuItem.active {
-  color: #01f4cb;
+  color: rgba(1, 244, 203, 1);
 }
 
 @media (max-width: 768px) {
@@ -77,6 +79,8 @@
     flex-direction: row;
     gap: 16px;
     margin-top: 16px;
+    position: static;
+    transform: none;
   }
 }
 
