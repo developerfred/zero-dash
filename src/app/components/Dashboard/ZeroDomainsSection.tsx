@@ -26,8 +26,7 @@ const ZeroDomainsSection: React.FC = () => {
     const znsData = Object.values(cachedData);
     
     return (
-        <div className="section">
-            <h2 id="zero-domains">ZERO Domains</h2>            
+        <div className="section">            
             <div className="zero-domains">
                 <div className="cards">
                     <Card title="Total Domain Registrations" value={totals.totalRegistrations} isLoading={isLoadingZns} />

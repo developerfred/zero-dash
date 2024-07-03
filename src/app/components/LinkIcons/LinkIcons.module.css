@@ -1,0 +1,19 @@
+.iconContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;    
+}
+
+.iconLink {
+    color: #6b7280; 
+    font-size: 21px;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.iconLink:hover,
+.iconLink:focus {
+    color: #ffffff;
+    transform: scale(1.1);
+    outline: none;
+}

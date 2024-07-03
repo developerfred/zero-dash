@@ -45,7 +45,7 @@ const Chart: React.FC<ChartProps> = ({ data, dataKey, chartType, isCurrency = fa
     }, []);
 
     return (
-        <div className="chart-wrapper">
+        <div >
             {(!data || data.length === 0) ? (
                 <Loading />
             ) : (

@@ -1,19 +1,15 @@
 // @ts-nocheck
-
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, memo } from 'react';
 import Filters from '@/components/Filters';
-import Chart from '@/components/Chart';
-import Card from '@/components/Card';
+import LinkIcons from '@/components/LinkIcons';
 import ProductivitySection from './ProductivitySection';
 import ZeroDomainsSection from './ZeroDomainsSection';
 import useDashboardStore from '@/store/useDashboardStore';
 import '@/components/Dashboard/dashboard.css';
 import ZeroGlobal from './ZeroGlobal';
-import Loading from '@/components/Loading';
 import MeowSection from './MeowSection';
 import FinanceSection from './FinanceSection';
 import WildSection from './WildSection';
-import { memo } from 'react';
 
 interface DashboardProps {
     activeSection: string;
@@ -28,6 +24,15 @@ const sectionComponents = {
     Productivity: ProductivitySection,
 };
 
+const sectionTitles = {
+    Zero: "Zero Global",
+    ZNS: "Zero Domains",
+    MEOW: "Meow ",
+    WILD: "Wild ",
+    Finance: "Finance",
+    Productivity: "Productivity Section",
+};
+
 const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
     const { filter, setFilter } = useDashboardStore();
 
@@ -40,9 +45,17 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
         setFilter(filter);
     }, [filter, setFilter]);
 
+    const getTitle = () => {
+        return sectionTitles[activeSection] || "Dashboard";
+    };
+
     return (
         <div className="dashboard">
-            <Filters setFilter={setFilter} />
+            <div className="menu-box">
+                <h3 className="title-dashboard">{getTitle()}</h3>
+                <Filters setFilter={setFilter} />
+            </div>
+            <div className="links-box"><LinkIcons /></div>
             {renderSection()}
         </div>
     );

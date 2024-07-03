@@ -1,6 +1,7 @@
 import React, { memo, useState, useEffect } from 'react';
 import Loading from '@/components/Loading';
 import './Card.css';
+import { getIconForTitle } from '@/app/config/icons';
 
 interface CardProps {
     title: string;
@@ -34,7 +35,10 @@ const Card: React.FC<CardProps> = ({ title, value, isLoading }) => {
 
     return (
         <div className="card">
+            <div className='card-title-wrapper'>
+            {getIconForTitle(title)}
             <h3>{title}</h3>
+            </div>
             <div className="card-content">
                 <div className={`card-value-wrapper ${showLoading ? 'loading' : ''}`}>
                     {showLoading || value === null || value === undefined || value === '' ? (

@@ -1,144 +1,76 @@
 .filters {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: flex-end;
 }
 
-.filter-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
+.filter-container {
+    z-index: 999;
+    position: relative;
 }
 
 .filter-button {
-  padding: 10px 20px;  
-  border-radius: 8px;  
-  color: #e2e8f0; 
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  font-family: 'Inter', sans-serif; 
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: #e2e8f0;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-family: 'Inter', sans-serif;
+    
+    
+}
+.filter-icon {
+  color: #05ffd5;
 }
 
 .filter-button:hover,
-.filter-button:focus {
-  background-color: rgba(255, 255, 255, 0.1); 
-  color: #05ffd5; 
-  outline: none;
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+.filter-button:focus {    
+    color: #05ffd5;
+    outline: none;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
-
 
 .filter-button.active {
-  color: #05ffd5;  
-  border: 2px solid #05ffd5; 
+    color: #05ffd5;
 }
 
-.date-range {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.filter-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #05ffd5d3;
+    border-radius: 8px;
+    padding: 10px 0;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    display: none;
 }
 
-.react-datepicker-wrapper {
-  width: auto;
+.filter-dropdown.open {
+    display: block;
 }
 
-.react-datepicker__input-container input {
-  padding: 10px;
-  border: 2px solid #05ffd5; 
-  border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  color: #e2e8f0;
-  font-size: 16px;
-  transition: border-color 0.3s ease, background-color 0.3s ease;
+.filter-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    color: #e2e8f0;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
 }
 
-.react-datepicker__input-container input:focus {
-  border-color: #4fd1c5; 
-  background-color:rgba(255, 255, 255, 0.1) !important;
-  outline: none;
+.filter-dropdown button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
-
-
-.modal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255, 255, 255, 0);
-  padding: 20px;
-  border-radius: 8px;
-  outline: none;
-  width: 90%;
-  max-width: 500px;
-}
-
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
-}
-
-.modal h2 {
-  color: #e2e8f0;
-  margin-bottom: 20px;
-  display: flex;  
-  justify-content: center;
-  
-}
-
-.modal input {
-  width: 100%;
-  padding: 10px;
-  border: 2px solid #05ffd5;
-  border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #e2e8f0;
-  font-size: 16px;
-  margin-bottom: 20px;
-}
-
-.modal-close-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background-color: #4fd1c5;
-  color: #1a202c;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: center;
-}
-
-.modal-close-button:hover,
-.modal-close-button:focus {
-  background-color: #38b2ac;
-  outline: none;
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-
-.datepicker-container {
-  display: flex;
-  justify-content: center;
-  padding: 10px;
-
-}
-
-.modal-content {
-  display: flex;
-  flex-direction: column;
-  max-width: 350px;
-}
-
-    

@@ -5,6 +5,8 @@ import Modal from 'react-modal';
 import 'react-datepicker/dist/react-datepicker.css';
 import './custom-datapicker.css';
 import './filters.css';
+import { FaChevronDown } from 'react-icons/fa';
+import { HiAdjustmentsHorizontal } from "react-icons/hi2";
 import useZeroGlobalStore from '@/store/useZeroGlobalStore';
 
 interface FiltersProps {
@@ -37,6 +39,7 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
     const [startDate, endDate] = customDateRange;
     const [selectedOption, setSelectedOption] = useState<string>(filter);
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const handleButtonClick = (value: string) => {
         setSelectedOption(value);
@@ -47,6 +50,7 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
         } else {
             setModalIsOpen(true);
         }
+        setDropdownOpen(false);
     };
 
     useEffect(() => {
@@ -74,17 +78,28 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
 
     return (
         <div className="filters">
-            <div className="filter-buttons">
-                {options.map((option) => (
-                    <button
-                        key={option.value}
-                        onClick={() => handleButtonClick(option.value)}
-                        className={`filter-button ${selectedOption === option.value ? 'active' : ''}`}
-                    >
-                        {option.label}
-                    </button>
-                ))}
+            <div className="filter-container">
+                <button
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="filter-button"
+                >
+                    {options.find(option => option.value === selectedOption)?.label || 'Select Filter'}
+                    <div className="filter-icon">
+                        <FaChevronDown /></div>
+                </button>
+                <div className={`filter-dropdown ${dropdownOpen ? 'open' : ''}`}>
+                    {options.map((option) => (
+                        <button
+                            key={option.value}
+                            onClick={() => handleButtonClick(option.value)}
+                            className={`filter-button ${selectedOption === option.value ? 'active' : ''}`}
+                        >
+                            {option.label}
+                        </button>
+                    ))}
+                </div>
             </div>
+            <HiAdjustmentsHorizontal />
             <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={closeModal}

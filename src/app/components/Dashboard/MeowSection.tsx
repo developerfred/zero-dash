@@ -76,8 +76,7 @@ const MeowSection: React.FC = () => {
     
 
     return (
-        <div className="section">
-            <h2 id="zero-meow">MEOW</h2>            
+        <div className="section">                     
             <div className="zero-meow">
                 <div className="cards">
                     <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart} />                     

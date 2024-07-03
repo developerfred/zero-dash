@@ -17,9 +17,9 @@ const ZeroGlobal: React.FC = () => {
     }, [filter]);
 
     return (
-        <div className="section">
-            <h2 id="zero-global">ZERO Global</h2>            
+        <div className="section">                       
                 <div className="zero-global">
+                    
                     <div className="cards">
                     <Card title="Daily Active Users" value={totals.dailyActiveUsers} isLoading={isLoadingDashboard} />
                     <Card title="Total Messages Sent" value={totals.totalMessagesSent} isLoading={isLoadingDashboard} />
@@ -30,17 +30,17 @@ const ZeroGlobal: React.FC = () => {
                         <div className="chart-row">
                             <div className="chart-container">
                                 <h3>Daily Active Users</h3>
-                                <Chart data={zosData} dataKey="dailyActiveUsers" chartType="line" />
+                                <Chart data={zosData} dataKey="dailyActiveUsers" chartType="area" />
                             </div>
                             <div className="chart-container">
                                 <h3>Total Messages Sent</h3>
-                                <Chart data={zosData} dataKey="totalMessagesSent" chartType="line" />
+                                <Chart data={zosData} dataKey="totalMessagesSent" chartType="area" />
                             </div>
                         </div>
                         <div className="chart-row">
                             <div className="chart-container">
                                 <h3>User Sign Ups</h3>
-                                <Chart data={zosData} dataKey="userSignUps" chartType="line" />
+                                <Chart data={zosData} dataKey="userSignUps" chartType="area" />
                             </div>
                             <div className="chart-container">
                                 <h3>Total Rewards Earned</h3>

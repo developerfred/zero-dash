@@ -31,19 +31,19 @@ const LineChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                 <XAxis
                     dataKey="date"
                     tickFormatter={formatDate}
-                    stroke="#01f4cb"
+                    stroke="rgba(1, 244, 203, 1)"
                     style={{ fontSize: '1.0rem' }}
                     tick={{ transform: 'translate(0, 10)' }}
                 />
                 <YAxis
                     tickFormatter={isCurrency ? formatCurrency : formatNumber}
-                    stroke="#01f4cb"
+                    stroke="rgba(1, 244, 203, 1)"
                     style={{ fontSize: '1.0rem' }}
                 />
                 <CartesianGrid strokeDasharray="3 3" stroke="#01f4cc35" strokeWidth={0.5} />
                 <Tooltip content={<CustomTooltip isCurrency={isCurrency} />} />
                 <Legend formatter={(value) => formatLabel(value)} wrapperStyle={{ bottom: 2 }} />
-                <Line type="monotone" dataKey={dataKey} stroke="#01f4cb" dot={{ fill: '#01f4cb', r: 3 }} />
+                <Line type="monotone" dataKey={dataKey} stroke="rgba(1, 244, 203, 1)" dot={{ fill: 'rgba(1, 244, 203, 1)', r: 3 }} />
             </LineChart>
         </ResponsiveContainer>
     </div>

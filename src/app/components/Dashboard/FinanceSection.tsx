@@ -115,8 +115,7 @@ const FinanceSection: React.FC = () => {
     const balanceInUSD = calculateBalanceInUSD();
 
     return (
-        <div className="section">
-            <h2 id="zero-finance">Finance</h2>
+        <div className="section">            
             <div className="zero-finance">
                 <div className="cards">
                     <Card

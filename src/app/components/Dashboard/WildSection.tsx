@@ -80,8 +80,7 @@ const WildSection: React.FC = () => {
     }, [filter, fetchChartData, fetchData, fetchTransactions, fetchWildInfo, fetchNFTVolumes]);
 
     return (
-        <div className="section">
-            <h2 id="zero-wild">WILD</h2>
+        <div className="section">            
             <div className="zero-wild">
                 <div className="cards">
                     <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart || isLoading || isPriceLoading} />

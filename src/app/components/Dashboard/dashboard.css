@@ -11,34 +11,22 @@ body {
 
 .section {
   margin-bottom: 40px;
+  margin-top: 20px;
 }
 
 .section h2 {
-  text-align: center;
-  margin-bottom: 20px;
+  text-align: left;
+  margin: 20px;
   font-size: 24px;
-  color: #01f4cb;
+  color: rgb(254, 254, 254);
   text-transform: uppercase;
+
 }
 
 .cards {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
-  margin-bottom: 20px;
-}
-
-.card {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
-  padding: 20px;
-  width: 100%;
-  max-width: 200px;
-  text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-  margin: 10px;
 }
 
 .card:hover {
@@ -106,4 +94,33 @@ body {
 
 .zero-domains .charts {
   margin-top: 20px;
+} 
+
+.menu-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;    
+}
+
+.menu-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.title-dashboard {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  padding-right: 20px; 
+  margin: 0 20px;
+}
+
+.links-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 20px;
 }

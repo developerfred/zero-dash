@@ -1,5 +1,5 @@
 import React from 'react';
-import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Line, Dot } from 'recharts';
+import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Line } from 'recharts';
 import { DataPoint } from '@/app/types';
 import { formatDate, formatNumber, formatCurrency, formatLabel } from '@/lib/utils';
 import './Chart.css';
@@ -7,6 +7,7 @@ import './Chart.css';
 interface ChartProps {
     data: DataPoint[];
     dataKey: string;
+    title: string;
     isCurrency?: boolean;
 }
 
@@ -24,27 +25,31 @@ const CustomTooltip = ({ active, payload, label, isCurrency }: any) => {
     return null;
 };
 
-const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", isCurrency = false }) => {
+const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", title, isCurrency = false }) => {
     return (
         <div className="chart-wrapper">
+            <div className="chart-info">
+                <h3 className="title">{title}</h3>
+                <div className="more-info"></div>
+            </div>
             <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>
                     <defs>
                         <linearGradient id="colorMatrix" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#01f4cb" stopOpacity={0.5} />
+                            <stop offset="0%" stopColor="rgba(1, 244, 203, 1)" stopOpacity={0.5} />
                             <stop offset="100%" stopColor="#000000" stopOpacity={0} />
                         </linearGradient>
                     </defs>
                     <XAxis
                         dataKey="date"
                         tickFormatter={formatDate}
-                        stroke="#01f4cb"
+                        stroke="rgba(117, 122, 128, 1)"
                         style={{ fontSize: '1.0rem' }}
                         tick={{ transform: 'translate(0, 10)' }}
                     />
                     <YAxis
                         tickFormatter={isCurrency ? formatCurrency : formatNumber}
-                        stroke="#01f4cb"
+                        stroke="rgba(117, 122, 128, 1)"
                         style={{ fontSize: '1.0rem' }}
                     />
                     <CartesianGrid strokeDasharray="3 3" stroke="#01f4cc35" strokeWidth={0.5} />
@@ -54,19 +59,19 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                         name="Rewards Earned By Day"
                         type="monotone"
                         dataKey="totalRewardsEarned"
-                        stroke="#01f4cb"
-                        dot={{ fill: '#01f4cb', r: 3 }}
+                        stroke="rgba(1, 244, 203, 1)"
+                        dot={{ fill: 'rgba(1, 244, 203, 1)', r: 3 }}
                     />
                     <Area
                         type="monotone"
                         dataKey={dataKey}
-                        stroke="#01f4cb"
+                        stroke="rgba(1, 244, 203, 1)"
                         fillOpacity={1}
                         fill="url(#colorMatrix)"
                     />
                 </AreaChart>
             </ResponsiveContainer>
-        </div>
+        </div >
     );
 };
 
