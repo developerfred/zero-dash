@@ -36,7 +36,7 @@ const fetchPairDataFromAPI = async (): Promise<any> => {
 };
 
 const useDashboardStore = create<DashboardState>((set, get) => ({
-    filter: '24h',
+    filter: '7d',
     data: [],
     pairData: null,
     zosData: [],
