@@ -29,9 +29,8 @@
     font-size: 1.2em;
     line-height: 1.4;
     padding: 6px 10px;
-    color: #e2e8f0;
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
+    color: rgba(188, 191, 194, 1);
+    font-family: 'Inter', sans-serif;    
 }
 
 .card-content {
