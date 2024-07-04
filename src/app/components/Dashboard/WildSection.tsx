@@ -83,7 +83,7 @@ const WildSection: React.FC = () => {
         <div className="section">            
             <div className="zero-wild">
                 <div className="cards">
-                    <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart || isLoading || isPriceLoading} />
+                    <Card title="Token price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart || isLoading || isPriceLoading} />
                     <Card title="Volume (DEX)" value={volume || 0} isLoading={isInfoLoading} />
                     <Card title="Volume NFT" value={totalNFTVolume || 0} isLoading={isInfoLoading} />
                     <Card title="Holders" value={holderCount || 0} isLoading={isInfoLoading} />
@@ -92,24 +92,22 @@ const WildSection: React.FC = () => {
                     <Card title="DAO Total ETH (USD)" value={totalBalances.ETH} isLoading={isPriceLoading} />
                     <Card title="DAO Global Total (USD)" value={totalBalances.GLOBAL} isLoading={isPriceLoading} />
                     <Card title="DAO Transactions" value={transactionCount} isLoading={isTransactionsLoading} />
-                    <Card title="Liquidity Holders" value={lpHolderCount} isLoading={isInfoLoading} />
-                    <Card title="NFTs Holders" value={totalOwners} isLoading={isInfoLoading} />
+                    <Card title="Liquidity holders" value={lpHolderCount} isLoading={isInfoLoading} />
+                    <Card title="NFTs holders" value={totalOwners} isLoading={isInfoLoading} />
                 </div>
                 <div className="charts">
                     <div className="chart-row">
                         <div className="chart-container">
-                            <h3>Token Price Over Time</h3>
-                            <Chart data={chartData} dataKey="price" chartType="area" isCurrency={true} />
+                            
+                            <Chart data={chartData} dataKey="price" chartType="area" isCurrency={true} title="Token price over time" />
                         </div>
-                        <div className="chart-container">
-                            <h3>NFTs Volume</h3>
-                            <Chart data={nftVolumes} dataKey="volume" chartType="line" isCurrency={true} />
+                        <div className="chart-container">                            
+                            <Chart data={nftVolumes} dataKey="volume" chartType="line" isCurrency={true} title="NFTs Volume" />
                         </div>                    
                     </div>
                     <div className="chart-row">
-                        <div className="chart-container">
-                            <h3>Dao Transactions</h3>
-                            <Chart data={aggregatedTransactionsData} dataKey="count" chartType="line" />
+                        <div className="chart-container">                            
+                            <Chart data={aggregatedTransactionsData} dataKey="count" chartType="line" title="Dao transactions" />
                         </div> 
                     </div>
                 </div>

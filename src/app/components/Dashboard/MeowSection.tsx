@@ -79,15 +79,14 @@ const MeowSection: React.FC = () => {
         <div className="section">                     
             <div className="zero-meow">
                 <div className="cards">
-                    <Card title="Token Price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart} />                     
+                    <Card title="Token price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart} />                     
                     <Card title="Holders" value={holdersCount} isLoading={isInfoLoading} />
                     <Card title="LP" value={lpHolderCount} isLoading={isInfoLoading} />
                 </div>
                 <div className="charts">
                     <div className="chart-row">
-                        <div className="chart-container">
-                            <h3>Token Price Over Time</h3>
-                            <Chart data={chartData} dataKey="price" chartType="area" isCurrency={true} />
+                        <div className="chart-container">                            
+                            <Chart data={chartData} dataKey="price" chartType="area" isCurrency={true} title="Token price over time" />
                         </div>
                     </div>
                 </div>

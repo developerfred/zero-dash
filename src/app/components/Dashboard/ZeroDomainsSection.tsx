@@ -29,25 +29,22 @@ const ZeroDomainsSection: React.FC = () => {
         <div className="section">            
             <div className="zero-domains">
                 <div className="cards">
-                    <Card title="Total Domain Registrations" value={totals.totalRegistrations} isLoading={isLoadingZns} />
-                    <Card title="Total Worlds" value={totals.totalWorlds} isLoading={isLoadingZns} />
-                    <Card title="Total Domains" value={totals.totalDomains} isLoading={isLoadingZns} />
+                    <Card title="Total Domain registrations" value={totals.totalRegistrations} isLoading={isLoadingZns} />
+                    <Card title="Total worlds" value={totals.totalWorlds} isLoading={isLoadingZns} />
+                    <Card title="Total domains" value={totals.totalDomains} isLoading={isLoadingZns} />
                 </div>
                 <div className="charts">
                     <div className="chart-row">
-                        <div className="chart-container">
-                            <h3>Total Domain Registrations</h3>
-                            <Chart data={znsData} dataKey="totalDomainRegistrations" chartType="bar" />
+                        <div className="chart-container">                            
+                            <Chart data={znsData} dataKey="totalDomainRegistrations" chartType="bar" title="Total Domain registrations" />
                         </div>
-                        <div className="chart-container">
-                            <h3>Total Worlds</h3>
-                            <Chart data={znsData} dataKey="totalWorlds" chartType="area" />
+                        <div className="chart-container">                            
+                            <Chart data={znsData} dataKey="totalWorlds" chartType="area" title="Total worlds" />
                         </div>
                     </div>
                     <div className="chart-row">
-                        <div className="chart-container">
-                            <h3>Total Domains</h3>
-                            <Chart data={znsData} dataKey="totalDomains" chartType="line" />
+                        <div className="chart-container">                            
+                            <Chart data={znsData} dataKey="totalDomains" chartType="line" title="Total domains" />
                         </div>
                     </div>
                 </div>

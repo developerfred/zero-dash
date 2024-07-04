@@ -15,7 +15,7 @@ interface ChartProps {
     dataKey: string;
     chartType: 'line' | 'area' | 'bar' | 'radar';
     isCurrency?: boolean;
-    showPercentageChange?: boolean;
+    title?: string;
 }
 
 const chartComponents = {
@@ -25,7 +25,7 @@ const chartComponents = {
     radar: RadarChartComponent,
 };
 
-const Chart: React.FC<ChartProps> = ({ data, dataKey, chartType, isCurrency = false }) => {
+const Chart: React.FC<ChartProps> = ({ data, dataKey, chartType, isCurrency = false, title }) => {
     const ChartComponent = chartComponents[chartType] || LineChartComponent;
 
     useEffect(() => {
@@ -45,12 +45,12 @@ const Chart: React.FC<ChartProps> = ({ data, dataKey, chartType, isCurrency = fa
     }, []);
 
     return (
-        <div >
+        <div className="chart-container">
             {(!data || data.length === 0) ? (
                 <Loading />
             ) : (
                 <ResponsiveContainer width="100%" height={300}>
-                    <ChartComponent data={data} dataKey={dataKey} isCurrency={isCurrency} />
+                    <ChartComponent data={data} dataKey={dataKey} isCurrency={isCurrency} title={title} />
                 </ResponsiveContainer>
             )}
         </div>

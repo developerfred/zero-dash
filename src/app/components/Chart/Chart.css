@@ -9,6 +9,7 @@
     transition: height 0.4s ease-in-out;
     min-height: 300px;
     border: 2px solid rgba(23, 23, 23, 1);
+    min-width: 680px;
 }
 
 .custom-tooltip {

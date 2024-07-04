@@ -21,30 +21,26 @@ const ZeroGlobal: React.FC = () => {
                 <div className="zero-global">
                     
                     <div className="cards">
-                    <Card title="Daily Active Users" value={totals.dailyActiveUsers} isLoading={isLoadingDashboard} />
-                    <Card title="Total Messages Sent" value={totals.totalMessagesSent} isLoading={isLoadingDashboard} />
-                    <Card title="User Sign Ups" value={totals.userSignUps} isLoading={isLoadingDashboard} />
-                    <Card title="Total Rewards Earned" value={totals.totalRewardsEarned} isLoading={isLoadingDashboard} />
+                    <Card title="Daily active users" value={totals.dailyActiveUsers} isLoading={isLoadingDashboard} />
+                    <Card title="Total messages sent" value={totals.totalMessagesSent} isLoading={isLoadingDashboard} />
+                    <Card title="User sign ups" value={totals.userSignUps} isLoading={isLoadingDashboard} />
+                    <Card title="Total rewards earned" value={totals.totalRewardsEarned} isLoading={isLoadingDashboard} />
                     </div>
                     <div className="charts">
                         <div className="chart-row">
-                            <div className="chart-container">
-                                <h3>Daily Active Users</h3>
-                                <Chart data={zosData} dataKey="dailyActiveUsers" chartType="area" />
+                            <div className="chart-container">                                
+                            <Chart data={zosData} dataKey="dailyActiveUsers" chartType="area" title="Daily active users"  />
                             </div>
-                            <div className="chart-container">
-                                <h3>Total Messages Sent</h3>
-                                <Chart data={zosData} dataKey="totalMessagesSent" chartType="area" />
+                            <div className="chart-container">                                
+                            <Chart data={zosData} dataKey="totalMessagesSent" chartType="area" title="Total messages sent" />
                             </div>
                         </div>
                         <div className="chart-row">
                             <div className="chart-container">
-                                <h3>User Sign Ups</h3>
-                                <Chart data={zosData} dataKey="userSignUps" chartType="area" />
+                            <Chart data={zosData} dataKey="userSignUps" chartType="area" title="User sign ups" />
                             </div>
-                            <div className="chart-container">
-                                <h3>Total Rewards Earned</h3>
-                            <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true} />
+                            <div className="chart-container">                                
+                            <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true} title="Total rewards earned" />
                             </div>
                         </div>
                     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
-import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Line } from 'recharts';
+import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Dot } from 'recharts';
 import { DataPoint } from '@/app/types';
-import { formatDate, formatNumber, formatCurrency, formatLabel } from '@/lib/utils';
+import { formatDate, formatNumber, formatCurrency } from '@/lib/utils';
 import './Chart.css';
 
 interface ChartProps {
@@ -28,16 +28,12 @@ const CustomTooltip = ({ active, payload, label, isCurrency }: any) => {
 const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", title, isCurrency = false }) => {
     return (
         <div className="chart-wrapper">
-            <div className="chart-info">
-                <h3 className="title">{title}</h3>
-                <div className="more-info"></div>
-            </div>
-            <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>
+            <ResponsiveContainer width="100%" height={300} minWidth={660}>
+                <AreaChart data={data} margin={{ top: 50, right: 30, left: 20, bottom: 0 }}>
                     <defs>
                         <linearGradient id="colorMatrix" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="rgba(1, 244, 203, 1)" stopOpacity={0.5} />
-                            <stop offset="100%" stopColor="#000000" stopOpacity={0} />
+                            <stop offset="0%" stopColor="rgba(1, 244, 203, 0.5)" stopOpacity={0.5} />
+                            <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" stopOpacity={0} />
                         </linearGradient>
                     </defs>
                     <XAxis
@@ -54,24 +50,22 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                     />
                     <CartesianGrid strokeDasharray="3 3" stroke="#01f4cc35" strokeWidth={0.5} />
                     <Tooltip content={<CustomTooltip isCurrency={isCurrency} />} />
-                    <Legend formatter={(value) => formatLabel(value)} wrapperStyle={{ bottom: 2 }} />
-                    <Line
-                        name="Rewards Earned By Day"
-                        type="monotone"
-                        dataKey="totalRewardsEarned"
-                        stroke="rgba(1, 244, 203, 1)"
-                        dot={{ fill: 'rgba(1, 244, 203, 1)', r: 3 }}
-                    />
+                    {title && (
+                        <text x={20} y={15} fill="rgba(188, 191, 194, 1)" fontSize="15px" >
+                            {title}
+                        </text>
+                    )}
                     <Area
                         type="monotone"
                         dataKey={dataKey}
                         stroke="rgba(1, 244, 203, 1)"
                         fillOpacity={1}
                         fill="url(#colorMatrix)"
+                        dot={{ fill: '#01F4CB', r: 3 }}
                     />
                 </AreaChart>
             </ResponsiveContainer>
-        </div >
+        </div>
     );
 };
 
