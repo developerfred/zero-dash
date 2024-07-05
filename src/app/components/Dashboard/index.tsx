@@ -49,20 +49,16 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
         return sectionTitles[activeSection] || "Dashboard";
     };
 
-    return (
-        <div className='global-dashboard' >
-            <div className='filter-box'><div className="menu-box">
-                <h3 className="title-dashboard">{getTitle()}</h3>
-                <div className="links-box"><LinkIcons /></div>
+    return (        
+        <div className="dashboard">   
+                <div className='filter-box'><div className="menu-box">
+                    <h3 className="title-dashboard">{getTitle()}</h3>
+                    <div className="links-box"><LinkIcons /></div>
 
-            </div>
-                <Filters setFilter={setFilter} /></div>
-        
-        
-        <div className="dashboard">                        
+                </div>
+                    <Filters setFilter={setFilter} /></div>                     
             {renderSection()}
-        </div>
-        </div>
+        </div>    
     );
 };
 

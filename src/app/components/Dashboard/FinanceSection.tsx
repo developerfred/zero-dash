@@ -131,12 +131,8 @@ const FinanceSection: React.FC = () => {
                 </div>
                 <div className="charts">
                     <div className="chart-row">
-                        <div className="chart-container">                            
-                            <Chart data={financeData} dataKey="numberOfTransactions" chartType="area" title="DAO transactions over time" />
-                        </div>
-                        <div className="chart-container">                            
-                            <Chart data={balanceChartData} dataKey="balance" chartType="area" isCurrency={true} title="DAO balance over time" />
-                        </div>
+                        <Chart data={financeData} dataKey="numberOfTransactions" chartType="area" title="DAO transactions over time" />                        
+                        <Chart data={balanceChartData} dataKey="balance" chartType="area" isCurrency={true} title="DAO balance over time" />                        
                     </div>
                 </div>
             </div>

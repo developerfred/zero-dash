@@ -82,12 +82,10 @@ const MeowSection: React.FC = () => {
                     <Card title="Token price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart} />                     
                     <Card title="Holders" value={holdersCount} isLoading={isInfoLoading} />
                     <Card title="LP" value={lpHolderCount} isLoading={isInfoLoading} />
-                </div>
+                </div>              
                 <div className="charts">
-                    <div className="chart-row">
-                        <div className="chart-container">                            
-                            <Chart data={chartData} dataKey="price" chartType="area" isCurrency={true} title="Token price over time" />
-                        </div>
+                    <div className="chart-row">                                            
+                        <Chart data={chartData} dataKey="price" chartType="area" isCurrency={true} title="Token price over time" />
                     </div>
                 </div>
             </div>

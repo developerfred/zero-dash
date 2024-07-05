@@ -35,17 +35,17 @@ const ZeroDomainsSection: React.FC = () => {
                 </div>
                 <div className="charts">
                     <div className="chart-row">
-                        <div className="chart-container">                            
+                        
                             <Chart data={znsData} dataKey="totalDomainRegistrations" chartType="bar" title="Total Domain registrations" />
-                        </div>
-                        <div className="chart-container">                            
+                        
+                        
                             <Chart data={znsData} dataKey="totalWorlds" chartType="area" title="Total worlds" />
-                        </div>
+                        
                     </div>
                     <div className="chart-row">
-                        <div className="chart-container">                            
+                                                   
                             <Chart data={znsData} dataKey="totalDomains" chartType="line" title="Total domains" />
-                        </div>
+                        
                     </div>
                 </div>
             </div>
