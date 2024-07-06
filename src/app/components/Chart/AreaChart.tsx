@@ -1,8 +1,9 @@
 import React from 'react';
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Dot } from 'recharts';
 import { DataPoint } from '@/app/types';
-import { formatDate, formatNumber, formatCurrency } from '@/lib/utils';
+import { formatDate, formatNumber, formatCurrency, formatToMillion } from '@/lib/utils';
 import './Chart.css';
+import { HiEllipsisVertical } from "react-icons/hi2";
 
 interface ChartProps {
     data: DataPoint[];
@@ -13,7 +14,7 @@ interface ChartProps {
 
 const CustomTooltip = ({ active, payload, label, isCurrency }: any) => {
     if (active && payload && payload.length) {
-        const value = isCurrency ? formatCurrency(payload[0].value) : formatNumber(payload[0].value);
+        const value = isCurrency ? formatToMillion(payload[0].value) : formatToMillion(payload[0].value);
         return (
             <div className="custom-tooltip">
                 <p className="label">{`${formatDate(label)}`}</p>
@@ -28,7 +29,11 @@ const CustomTooltip = ({ active, payload, label, isCurrency }: any) => {
 const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", title, isCurrency = false }) => {
     return (
         <div className="chart-wrapper">
-            <ResponsiveContainer width="100%" height={300} minWidth={660}>
+            <div className="chart-header">
+                <h3 className="chart-title">{title}</h3>
+                <HiEllipsisVertical className="chart-icon" />
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={data} margin={{ top: 50, right: 30, left: 20, bottom: 0 }}>
                     <defs>
                         <linearGradient id="colorMatrix" x1="0" y1="0" x2="0" y2="1">
@@ -50,11 +55,6 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                     />
                     <CartesianGrid strokeDasharray="3 3" stroke="#01f4cc35" strokeWidth={0.5} />
                     <Tooltip content={<CustomTooltip isCurrency={isCurrency} />} />
-                    {title && (
-                        <text x={20} y={15} fill="rgba(188, 191, 194, 1)" fontSize="15px" >
-                            {title}
-                        </text>
-                    )}
                     <Area
                         type="monotone"
                         dataKey={dataKey}

@@ -158,3 +158,10 @@ export const formatLabel = (label: string): string => {
         .replace(/([A-Z])/g, ' $1') 
         .replace(/^./, str => str.toUpperCase()); 
 };
+
+export const formatToMillion = (value: number): string => {
+    if (value >= 1e6) {
+        return `$${(value / 1e6).toFixed(2)}M`;
+    }
+    return `$${value.toFixed(2)}`;
+};

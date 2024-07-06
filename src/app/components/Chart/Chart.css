@@ -1,16 +1,34 @@
 .chart-wrapper {
     position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: flex;        
     background: #000;     
     padding: 24px 18px;    
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     transition: height 0.4s ease-in-out;
     min-height: 300px;
     border: 2px solid rgba(23, 23, 23, 1);
-    min-width: 680px;
+    min-width: 800px;
+    flex-direction: column;
 }
+
+.chart-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.chart-title h3 {
+  margin: 0;
+  color: rgba(188, 191, 194, 1);
+  font-size: 15px;
+}
+
+.chart-title svg {
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
 
 .custom-tooltip {
     background: rgba(51, 51, 51, 0.8);
@@ -36,14 +54,14 @@
 }
 
 .chart-header {
-    text-align: center;
-    margin-bottom: 20px;
+    text-align: center;    
     color: #fff;
+    display: flex;
 }
 
 .chart-title {
-    font-size: 1.5em;
-    color: #fff;
+    font-size: 15px;
+    color: rgba(188, 191, 194, 1);
 }
 
 .chart-description {

@@ -87,6 +87,7 @@ body {
   }
   .chart-container {
     max-width: 48%;
+    padding-bottom: 50px;
   }
 }
 
