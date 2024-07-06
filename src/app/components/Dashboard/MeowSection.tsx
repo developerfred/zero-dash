@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import useChartStore from '@/store/useChartStore';
-import Filters from '@/components/Filters';
 import Chart from '@/components/Chart';
 import Card from '@/components/Card';
 import useDashboardStore from '@/store/useDashboardStore';

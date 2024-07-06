@@ -3,6 +3,7 @@ import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContaine
 import { DataPoint } from '@/app/types';
 import { formatDate, formatNumber, formatCurrency, formatLabel } from '@/lib/utils';
 import './Chart.css';
+import { HiEllipsisVertical } from 'react-icons/hi2';
 
 interface ChartProps {
     data: DataPoint[];
@@ -27,8 +28,12 @@ const CustomTooltip = ({ active, payload, label, isCurrency }: any) => {
 
 const BarChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", title, isCurrency = false }) => (
     <div className="chart-wrapper">
-        <ResponsiveContainer width="100%" height={300} minWidth={660}>
-            <BarChart data={data} margin={{ top: 50, right: 30, left: 20, bottom: 0 }}>
+        <div className="chart-header">
+            <h3 className="chart-title">{title}</h3>
+            <HiEllipsisVertical className="chart-icon" />
+        </div>
+        <ResponsiveContainer width="100%" height={300} minWidth={300}>
+            <BarChart data={data} margin={{ top: 50, right: 30, left: 20, bottom: 0 }} >
                 <defs>
                     <linearGradient id="colorMatrixBar" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="rgba(1, 244, 203, 0.5)" stopOpacity={0.5} />
@@ -48,12 +53,7 @@ const BarChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value",
                     style={{ fontSize: '1.0rem' }}
                 />
                 <CartesianGrid strokeDasharray="3 3" stroke="#01f4cc35" strokeWidth={0.5} />
-                <Tooltip content={<CustomTooltip isCurrency={isCurrency} />} />
-                {title && (
-                    <text x={20} y={15} fill="rgba(188, 191, 194, 1)" fontSize="15px" >
-                        {title}
-                    </text>
-                )}
+                <Tooltip content={<CustomTooltip isCurrency={isCurrency} />} />               
                 <Bar dataKey={dataKey} fill="url(#colorMatrixBar)" />
             </BarChart>
         </ResponsiveContainer>

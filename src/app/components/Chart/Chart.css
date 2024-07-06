@@ -6,9 +6,9 @@
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     transition: height 0.4s ease-in-out;
     min-height: 300px;
-    border: 2px solid rgba(23, 23, 23, 1);
-    min-width: 800px;
+    border: 2px solid rgba(23, 23, 23, 1);        
     flex-direction: column;
+    max-width: 720px;
 }
 
 .chart-title {

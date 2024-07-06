@@ -33,7 +33,7 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                 <h3 className="chart-title">{title}</h3>
                 <HiEllipsisVertical className="chart-icon" />
             </div>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={300} minWidth={300}>
                 <AreaChart data={data} margin={{ top: 50, right: 30, left: 20, bottom: 0 }}>
                     <defs>
                         <linearGradient id="colorMatrix" x1="0" y1="0" x2="0" y2="1">
