@@ -1,5 +1,7 @@
 import React from 'react';
 import { HiOutlineUser, HiOutlineCurrencyDollar, HiOutlineChartBar, HiOutlineChatBubbleLeft, HiOutlineUsers, HiOutlineGlobeAlt, HiOutlineCubeTransparent, HiOutlineBanknotes, HiOutlineArrowsUpDown, HiOutlineSquares2X2, HiOutlineSwatch } from 'react-icons/hi2';
+import { RiContractLine } from "react-icons/ri";
+import { BsSafe2 } from "react-icons/bs";
 
 interface IconMapping {
     keywords: string[];
@@ -14,11 +16,12 @@ const iconMappings: IconMapping[] = [
     { keywords: ["sign ups"], icon: <HiOutlineUsers /> },
     { keywords: ["volume"], icon: <HiOutlineChartBar /> },
     { keywords: ["world"], icon: <HiOutlineGlobeAlt /> },
+    { keywords: ["registrations"], icon: <RiContractLine /> },
     { keywords: ["domain"], icon: <HiOutlineCubeTransparent /> },
     { keywords: ["balance"], icon: <HiOutlineBanknotes /> },
     { keywords: ["transactions"], icon: <HiOutlineArrowsUpDown /> },
     { keywords: ["daos"], icon: <HiOutlineSquares2X2 /> },
-    { keywords: ["lp"], icon: <HiOutlineSwatch /> },
+    { keywords: ["lp"], icon: <BsSafe2 /> },
     
 
 
