@@ -24,10 +24,10 @@ const sectionComponents = {
 };
 
 const sectionTitles = {
-    Zero: "Zero Global",
-    ZNS: "Zero Domains",
-    MEOW: "M.E.O.W ",
-    WILD: "Wild ",
+    Zero: "ZERO HQ",
+    ZNS: "ZERO Domains",
+    MEOW: "M.E.O.W",
+    WILD: "W.I.L.D",
     Finance: "Finance",
     Productivity: "Productivity Section",
 };
