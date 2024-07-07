@@ -1,7 +1,9 @@
+// @ts-nocheck
 import { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
 
 const API_URL = process.env.NEXT_PUBLIC_API_METRICS;
+const API_15M_URL = process.env.NEXT_PUBLIC_API_METRICS_15M!;
 
 interface MetricsData {
     date: string;
@@ -16,15 +18,42 @@ interface MetricsData {
     };
 }
 
+interface Metrics15MData {
+    userSignUps: number;
+    totalMessagesSent: number;
+    dailyActiveUsers: number;
+}
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-    const { fromDate, toDate } = req.query;
+    const { fromDate, toDate, includeLast15Minutes } = req.query;
 
     if (typeof fromDate !== 'string' || typeof toDate !== 'string') {
         return res.status(400).json({ error: 'fromDate and toDate are required' });
     }
 
     try {
-        const data = await fetchDataInIntervals(fromDate, toDate);
+        let data: MetricsData[];
+
+        if (includeLast15Minutes && includeLast15Minutes === 'true') {
+            const metrics15MData = await fetch15MinutesData();
+            const mainMetricsData = await fetchMetricsData(fromDate, toDate);
+            const todayMetricsData = await fetchTodayMetricsData(); 
+
+            if (mainMetricsData.length === 0) {
+                throw new Error('No data found for the specified period');
+            }
+
+            data = mainMetricsData.map((mainData) => ({
+                ...mainData,
+                dailyActiveUsers: metrics15MData.dailyActiveUsers,
+                totalMessagesSent: metrics15MData.totalMessagesSent,
+                userSignUps: metrics15MData.userSignUps,
+                totalRewardsEarned: todayMetricsData.totalRewardsEarned, 
+            }));
+        } else {
+            data = await fetchMetricsData(fromDate, toDate);
+        }
+
         return res.status(200).json(data);
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -44,31 +73,25 @@ const fetchMetricsData = async (fromDate: string, toDate: string): Promise<Metri
     }));
 };
 
-const fetchDataInIntervals = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
-    const data: MetricsData[] = [];
-    const startDate = new Date(fromDate);
-    const endDate = new Date(toDate);
-
-    if ((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24) <= 60) {
-        return fetchMetricsData(fromDate, toDate);
+const fetch15MinutesData = async (): Promise<Metrics15MData> => {
+    const response = await fetch(API_15M_URL);
+    if (!response.ok) {
+        throw new Error(`Error fetching 15 minutes data: ${response.statusText}`);
     }
+    return await response.json();
+};
 
-    let currentStartDate = new Date(startDate);
-
-    while (currentStartDate < endDate) {
-        let currentEndDate = new Date(currentStartDate);
-        currentEndDate.setDate(currentEndDate.getDate() + 59);
-        if (currentEndDate > endDate) {
-            currentEndDate = endDate;
-        }
-
-        const result = await fetchMetricsData(currentStartDate.toISOString().split('T')[0], currentEndDate.toISOString().split('T')[0]);
-        data.push(...result);
-
-        currentStartDate.setDate(currentStartDate.getDate() + 60);
+const fetchTodayMetricsData = async (): Promise<MetricsData> => {
+    const today = new Date().toISOString().split('T')[0];
+    const response = await fetch(`${API_URL}?fromDate=${today}&toDate=${today}`);
+    if (!response.ok) {
+        throw new Error(`Error fetching today's data: ${response.statusText}`);
     }
-
-    return data;
+    const data = await response.json();
+    return Object.entries(data).map(([date, metrics]: [string, any]) => ({
+        date,
+        ...metrics,
+    }))[0]; 
 };
 
 export default handler;

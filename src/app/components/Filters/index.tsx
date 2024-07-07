@@ -7,10 +7,11 @@ import './custom-datapicker.css';
 import './filters.css';
 import { FaChevronDown } from 'react-icons/fa';
 import { HiAdjustmentsHorizontal } from "react-icons/hi2";
-import useZeroGlobalStore from '@/store/useZeroGlobalStore';
+import useDashboardStore from '@/store/useDashboardStore';
 
 interface FiltersProps {
     setFilter: (filter: string) => void;
+    show15MinFilter: boolean; 
 }
 
 Modal.setAppElement('body');
@@ -23,6 +24,7 @@ type Option = {
 const createOption = (label: string, value: string): Option => ({ label, value });
 
 const options: Option[] = [
+    createOption('Last 15 minutes', '15m'),
     createOption('Today', 'today'),
     createOption('Yesterday', 'yesterday'),
     createOption('Last 7 days', '7d'),
@@ -33,8 +35,8 @@ const options: Option[] = [
     createOption('Custom date range', 'custom')
 ];
 
-const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
-    const { filter } = useZeroGlobalStore();
+const Filters: React.FC<FiltersProps> = ({ setFilter, show15MinFilter }) => {
+    const { filter } = useDashboardStore();
     const [customDateRange, setCustomDateRange] = useState<[Date | null, Date | null]>([null, null]);
     const [startDate, endDate] = customDateRange;
     const [selectedOption, setSelectedOption] = useState<string>(filter);
@@ -76,6 +78,9 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
         setCustomDateRange(dates);
     };
 
+    // Use a prop to determine if the 15m filter should be included
+    const availableOptions = show15MinFilter ? options : options.filter(option => option.value !== '15m');
+
     return (
         <div className="filters">
             <div className="filter-container">
@@ -83,12 +88,13 @@ const Filters: React.FC<FiltersProps> = ({ setFilter }) => {
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     className="filter-button"
                 >
-                    {options.find(option => option.value === selectedOption)?.label || 'Select Filter'}
+                    {availableOptions.find(option => option.value === selectedOption)?.label || 'Select Filter'}
                     <div className="filter-icon">
-                        <FaChevronDown /></div>
+                        <FaChevronDown />
+                    </div>
                 </button>
                 <div className={`filter-dropdown ${dropdownOpen ? 'open' : ''}`}>
-                    {options.map((option) => (
+                    {availableOptions.map((option) => (
                         <button
                             key={option.value}
                             onClick={() => handleButtonClick(option.value)}

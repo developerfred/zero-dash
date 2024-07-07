@@ -45,7 +45,7 @@ body {
 }
 
 .filter-box-line {
-  @apply flex flex-col md:flex-row items-start md:items-center justify-between w-full box-border border-b mb-6 mt-6 p-5;
+  @apply flex flex-col md:flex-row items-start md:items-center justify-between w-full box-border border-b mt-6 p-5;
   border-color: rgba(245, 245, 245, 0.06);
 }
 

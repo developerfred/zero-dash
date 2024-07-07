@@ -27,11 +27,11 @@ const ZeroGlobal: React.FC = () => {
                 </div>
                 <div className="charts">
                     <div className="chart-row">                                                           
-                        <Chart data={zosData} dataKey="dailyActiveUsers" chartType="area" title="Daily active users"  />                                                     
-                        <Chart data={zosData} dataKey="totalMessagesSent" chartType="area" title="Total messages sent" />                            
+                        <Chart data={zosData} dataKey="dailyActiveUsers" chartType="area" title="Daily active users" isCurrency={false}  />                                                     
+                        <Chart data={zosData} dataKey="totalMessagesSent" chartType="area" title="Total messages sent" isCurrency={false}  />                            
                     </div>
                     <div className="chart-row">                            
-                        <Chart data={zosData} dataKey="userSignUps" chartType="area" title="User sign ups" />                                                        
+                        <Chart data={zosData} dataKey="userSignUps" chartType="area" title="User sign ups" isCurrency={false} />                                                        
                         <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true} title="Total rewards earned" />
                         
                     </div>

@@ -7,13 +7,87 @@ import { formatToMillion } from './useWildStore';
 import axios from 'axios';
 
 
-const fetchAllData = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
-    const response = await fetch(`/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}`);
-    if (!response.ok) {
+const calculateDateRange = (filter: string): { fromDate: string; toDate: string; include15MinutesData: boolean } => {
+    const now = new Date();
+    let fromDate: string, toDate: string;
+    let include15MinutesData = false;
+
+    const formatDate = (date: Date) => date.toISOString().split('T')[0]; 
+
+    switch (filter) {
+        case '15m':
+            include15MinutesData = true;
+            toDate = formatDate(now);
+            fromDate = formatDate(now);            
+            break;
+        case '24h':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 1)));
+            break;
+        case '7d':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 7)));
+            break;
+        case '30d':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 30)));
+            break;
+        case '90d':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 90)));
+            break;
+        case '365d':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 365)));
+            break;
+        case 'today':
+            fromDate = toDate = formatDate(now);
+            break;
+        case 'yesterday':
+            toDate = formatDate(new Date(now.setDate(now.getDate() - 1)));
+            fromDate = toDate;
+            break;
+        case 'last_week':
+            now.setDate(now.getDate() - now.getDay());
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 6)));
+            break;
+        case 'last_month':
+            now.setMonth(now.getMonth() - 1);
+            toDate = formatDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+            fromDate = formatDate(new Date(now.getFullYear(), now.getMonth(), 1));
+            break;
+        case 'last_year':
+            now.setFullYear(now.getFullYear() - 1);
+            toDate = formatDate(new Date(now.getFullYear(), 11, 31));
+            fromDate = formatDate(new Date(now.getFullYear(), 0, 1));
+            break;
+        default:
+            if (filter && filter.includes('_')) {
+                const dates = filter.split('_');
+                fromDate = dates[1];
+                toDate = dates[2];
+            } else {
+                throw new Error(`Invalid filter format: ${filter}`);
+            }
+            break;
+    }
+
+    return { fromDate, toDate, include15MinutesData };
+};
+
+
+
+const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolean = false): Promise<MetricsData[]> => {
+    const url = `/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}&includeLast15Minutes=${is15Minute}`;    
+    const response = await fetch(url);
+    if (!response.ok) {                
         throw new Error(`Error fetching data: ${response.statusText}`);
     }
     return await response.json();
 };
+
+
 
 const fetchCurrentTokenPriceInUSD = async (): Promise<{ price: number; holders: number }> => {
     const response = await fetch('/api/meow/token-price');
@@ -80,10 +154,10 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         }
     },
 
-    fetchDashboardData: async (fromDate: string, toDate: string) => {
+    fetchDashboardData: async (fromDate: string, toDate: string, is15Minute?: boolean) => {
         try {
             set({ isLoadingDashboard: true });
-            const data: DataPoint[] = await fetchAllData(fromDate, toDate);
+            const data: DataPoint[] = await fetchAllData(fromDate, toDate, is15Minute);
             const tokenPriceInUSD = get().tokenPriceInUSD;
 
             if (tokenPriceInUSD === null) {
@@ -139,66 +213,10 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         }
 
         try {
-            const now = new Date();
-            let fromDate, toDate;
-
-            switch (filter) {
-                case '24h':
-                    toDate = now.toISOString().split('T')[0];
-                    fromDate = new Date(now.setDate(now.getDate() - 1)).toISOString().split('T')[0];
-                    break;
-                case '7d':
-                    toDate = now.toISOString().split('T')[0];
-                    fromDate = new Date(now.setDate(now.getDate() - 7)).toISOString().split('T')[0];
-                    break;
-                case '30d':
-                    toDate = now.toISOString().split('T')[0];
-                    fromDate = new Date(now.setDate(now.getDate() - 30)).toISOString().split('T')[0];
-                    break;
-                case '90d':
-                    toDate = now.toISOString().split('T')[0];
-                    fromDate = new Date(now.setDate(now.getDate() - 90)).toISOString().split('T')[0];
-                    break;
-                case '365d':
-                    toDate = now.toISOString().split('T')[0];
-                    fromDate = new Date(now.setDate(now.getDate() - 365)).toISOString().split('T')[0];
-                    break;
-                case 'today':
-                    fromDate = toDate = now.toISOString().split('T')[0];
-                    break;
-                case 'yesterday':
-                    toDate = new Date(now.setDate(now.getDate() - 1)).toISOString().split('T')[0];
-                    fromDate = toDate;
-                    break;
-                case 'last_week':
-                    now.setDate(now.getDate() - now.getDay());
-                    toDate = now.toISOString().split('T')[0];
-                    fromDate = new Date(now.setDate(now.getDate() - 6)).toISOString().split('T')[0];
-                    break;
-                case 'last_month':
-                    now.setMonth(now.getMonth() - 1);
-                    toDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-                    fromDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-                    break;
-                case 'last_year':
-                    now.setFullYear(now.getFullYear() - 1);
-                    toDate = new Date(now.getFullYear(), 11, 31).toISOString().split('T')[0];
-                    fromDate = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
-                    break;
-                default:
-                    if (filter && filter.includes('_')) {
-                        const dates = filter.split('_');
-                        fromDate = dates[1];
-                        toDate = dates[2];
-                    } else {
-                        throw new Error(`Invalid filter format: ${filter}`);
-                    }
-                    break;
-            }
-
+            const { fromDate, toDate, include15MinutesData } = calculateDateRange(filter);
             const { fetchTokenPrice, fetchDashboardData } = get();
             await fetchTokenPrice();
-            await fetchDashboardData(fromDate, toDate);
+            await fetchDashboardData(fromDate, toDate, include15MinutesData);
         } catch (error) {
             console.error('Error in fetchDashboardDataByFilter:', error);
         }

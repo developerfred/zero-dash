@@ -41,29 +41,29 @@ const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
     }, [activeSection]);
 
     useEffect(() => {
-        setFilter(filter);
-    }, [filter, setFilter]);
+        if (filter === '15m' && activeSection !== 'Zero') {
+            setFilter('7d');
+        }
+    }, [activeSection, filter, setFilter]);
 
     const getTitle = () => {
         return sectionTitles[activeSection] || "Dashboard";
     };
 
-    return (        
-        <div className="dashboard">   
-                <div className='filter-box'>
-                    <div className="menu-box">
-                        <h3 className="title-dashboard">{getTitle()}</h3>
-                        <div className="links-box"><LinkIcons />
-                    </div>
+    const show15MinFilter = activeSection === 'Zero';
 
+    return (
+        <div className="dashboard">
+            <div className='filter-box'>
+                <div className="menu-box">
+                    <h3 className="title-dashboard">{getTitle()}</h3>
+                    <div className="links-box"><LinkIcons /></div>
                 </div>
-               
-
-                    <Filters setFilter={setFilter} /></div> 
-            <div className='filter-box-line'>
-            </div>                    
+                <Filters setFilter={setFilter} show15MinFilter={show15MinFilter} />
+            </div>
+            <div className='filter-box-line'></div>
             {renderSection()}
-        </div>    
+        </div>
     );
 };
 
