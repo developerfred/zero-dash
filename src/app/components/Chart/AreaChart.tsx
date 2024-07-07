@@ -14,7 +14,7 @@ interface ChartProps {
 
 const CustomTooltip = ({ active, payload, label, isCurrency }: any) => {
     if (active && payload && payload.length) {
-        const value = isCurrency ? formatToMillion(payload[0].value) : formatToMillion(payload[0].value);
+        const value = isCurrency ? formatToMillion(payload[0].value) : formatNumber(payload[0].value);
         return (
             <div className="custom-tooltip">
                 <p className="label">{`${formatDate(label)}`}</p>
