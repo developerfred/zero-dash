@@ -42,7 +42,6 @@ body {
 
 .filter-box {
   @apply flex flex-col md:flex-row items-start md:items-center justify-between w-full box-border;
-  
 }
 
 .filter-box-line {
@@ -104,7 +103,6 @@ body {
   @apply bg-opacity-90 backdrop-blur-lg w-full shadow-lg transition-transform ease-in-out mb-5 pb-10;
 }
 
-
 .chart-container:hover {
   @apply transform translate-y-[-5px];
 }
@@ -125,10 +123,45 @@ body {
 
 @media (max-width: 768px) {
   .filter-box {
-    @apply flex-col items-start gap-5;
+    @apply flex flex-row items-start gap-1 p-5;
+  }
+  .filter-box-line {
+    @apply my-0;
+  }
+
+  .cards {
+    @apply gap-0 my-4 p-5;
   }
 
   .chart-row {
     @apply flex-col;
   }
+
+  .chart-container {
+    @apply w-full my-5;
+  }
+
+  .chart-container.single {
+    @apply w-full;
+  }
 }
+
+@media (max-width: 480px) {
+  .dashboard {
+    @apply p-3;
+  }
+
+  .card {
+    @apply min-w-0 p-3;
+  }
+
+  .chart-container {
+    @apply p-3;
+  }
+
+  .chart-row {
+    @apply gap-3;
+  }
+}
+
+
