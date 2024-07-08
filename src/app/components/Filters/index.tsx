@@ -11,7 +11,7 @@ import useDashboardStore from '@/store/useDashboardStore';
 
 interface FiltersProps {
     setFilter: (filter: string) => void;
-    show15MinFilter: boolean; 
+    show15MinFilter: boolean;
 }
 
 Modal.setAppElement('body');
@@ -39,18 +39,24 @@ const Filters: React.FC<FiltersProps> = ({ setFilter, show15MinFilter }) => {
     const { filter } = useDashboardStore();
     const [customDateRange, setCustomDateRange] = useState<[Date | null, Date | null]>([null, null]);
     const [startDate, endDate] = customDateRange;
-    const [selectedOption, setSelectedOption] = useState<string>(filter);
+    const [selectedOption, setSelectedOption] = useState<string>('7d'); // Default to 7 days
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const handleButtonClick = (value: string) => {
-        setSelectedOption(value);
-        localStorage.setItem('selectedOption', value);
-        if (value !== 'custom') {
-            setFilter(value);
-            setCustomDateRange([null, null]);
+        if (value === '15m' && !show15MinFilter) {
+            setFilter('7d');
+            setSelectedOption('7d');
+            localStorage.setItem('selectedOption', '7d');
         } else {
-            setModalIsOpen(true);
+            setSelectedOption(value);
+            if (value !== 'custom') {
+                setFilter(value);
+                localStorage.setItem('selectedOption', value);
+            } else {
+                setModalIsOpen(true);
+            }
+            setCustomDateRange([null, null]);
         }
         setDropdownOpen(false);
     };
@@ -78,7 +84,6 @@ const Filters: React.FC<FiltersProps> = ({ setFilter, show15MinFilter }) => {
         setCustomDateRange(dates);
     };
 
-    // Use a prop to determine if the 15m filter should be included
     const availableOptions = show15MinFilter ? options : options.filter(option => option.value !== '15m');
 
     return (

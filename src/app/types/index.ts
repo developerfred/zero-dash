@@ -157,6 +157,7 @@ export interface Totals {
 
 export interface DashboardState {
     filter: string;
+    activeSection: string;
     pairData: any;
     data: DataPoint[];
     zosData: MetricsData[];

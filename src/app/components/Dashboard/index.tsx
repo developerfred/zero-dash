@@ -1,4 +1,5 @@
 // @ts-nocheck
+
 import React, { useCallback, useEffect, memo } from 'react';
 import Filters from '@/components/Filters';
 import LinkIcons from '@/components/LinkIcons';
@@ -33,18 +34,16 @@ const sectionTitles = {
 };
 
 const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {
-    const { filter, setFilter } = useDashboardStore();
+    const { setActiveSection, filter, setFilter } = useDashboardStore();
+
+    useEffect(() => {
+        setActiveSection(activeSection);
+    }, [activeSection, setActiveSection]);
 
     const renderSection = useCallback(() => {
         const SectionComponent = sectionComponents[activeSection];
         return SectionComponent ? <SectionComponent /> : null;
     }, [activeSection]);
-
-    useEffect(() => {
-        if (filter === '15m' && activeSection !== 'Zero') {
-            setFilter('7d');
-        }
-    }, [activeSection, filter, setFilter]);
 
     const getTitle = () => {
         return sectionTitles[activeSection] || "Dashboard";

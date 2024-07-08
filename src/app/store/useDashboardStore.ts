@@ -1,24 +1,23 @@
 // @ts-nocheck
+
 import { create } from 'zustand';
 import { formatUnits } from 'viem';
-import { DataPoint, ZnsData, MetricsData, GroupedData, DashboardState, Totals } from '@/app/types';
+import { DataPoint, MetricsData, GroupedData, DashboardState, Totals } from '@/app/types';
 import { formatUSD } from '@/app/lib/currencyUtils';
-import { formatToMillion } from './useWildStore';
 import axios from 'axios';
-
 
 const calculateDateRange = (filter: string): { fromDate: string; toDate: string; include15MinutesData: boolean } => {
     const now = new Date();
     let fromDate: string, toDate: string;
     let include15MinutesData = false;
 
-    const formatDate = (date: Date) => date.toISOString().split('T')[0]; 
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
     switch (filter) {
         case '15m':
             include15MinutesData = true;
             toDate = formatDate(now);
-            fromDate = formatDate(now);            
+            fromDate = formatDate(now);
             break;
         case '24h':
             toDate = formatDate(now);
@@ -76,18 +75,14 @@ const calculateDateRange = (filter: string): { fromDate: string; toDate: string;
     return { fromDate, toDate, include15MinutesData };
 };
 
-
-
 const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolean = false): Promise<MetricsData[]> => {
-    const url = `/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}&includeLast15Minutes=${is15Minute}`;    
+    const url = `/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}&includeLast15Minutes=${is15Minute}`;
     const response = await fetch(url);
-    if (!response.ok) {                
+    if (!response.ok) {
         throw new Error(`Error fetching data: ${response.statusText}`);
     }
     return await response.json();
 };
-
-
 
 const fetchCurrentTokenPriceInUSD = async (): Promise<{ price: number; holders: number }> => {
     const response = await fetch('/api/meow/token-price');
@@ -112,6 +107,7 @@ const fetchPairDataFromAPI = async (): Promise<any> => {
 const useDashboardStore = create<DashboardState>((set, get) => ({
     filter: '7d',
     data: [],
+    activeSection: 'Zero',
     pairData: null,
     zosData: [],
     znsData: [],
@@ -139,7 +135,24 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
     isLoadingPairData: false,
     isInfoLoading: false,
 
-    setFilter: (filter: string) => set({ filter }),
+    setFilter: (filter: string) => {
+        const { activeSection } = get();
+        if (filter === '15m' && activeSection !== 'Zero') {
+            filter = '7d'; 
+        }
+        if (filter !== '15m') {
+            localStorage.setItem('selectedOption', filter);
+        }
+        set({ filter });
+    },
+
+    setActiveSection: (section: string) => {
+        const { filter } = get();
+        if (filter === '15m' && section !== 'Zero') {
+            set({ filter: '7d' });
+        }
+        set({ activeSection: section });
+    },
 
     setData: (data: DataPoint[]) => set({ data }),
 
@@ -225,7 +238,12 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
     fetchTotals: async (filter: string) => {
         const cacheKey = filter;
         const state = get();
-        
+
+        if (filter === '15m') {
+            console.warn('not supported on fetchTotals.');
+            return;
+        }
+
         const cachedData = state.znsDataCache[cacheKey];
         if (cachedData) {
             set({
@@ -246,7 +264,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             }
             const result: Record<string, GroupedData> = await response.json();
             const totals = calculateTotals(result);
-            
+
             set((state) => ({
                 znsDataCache: { ...state.znsDataCache, [cacheKey]: result },
                 totals,
@@ -268,7 +286,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             set({ isLoadingPairData: false });
         }
     },
-    
+
     fetchMeowInfo: async () => {
         set({ isInfoLoading: true });
         try {
@@ -282,7 +300,8 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             });
         } catch (error) {
             console.error('Failed to fetch wild info:', error);
-            set({ isInfoLoading: false });
+            set(
+{ isInfoLoading: false });
         }
     },
 }));
@@ -294,6 +313,5 @@ const calculateTotals = (data: Record<string, GroupedData>): Totals => {
         totalDomains: Object.values(data).reduce((acc, val) => acc + val.totalDomains, 0),
     };
 };
-
 
 export default useDashboardStore;
