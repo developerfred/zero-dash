@@ -23,15 +23,13 @@ type Option = {
 
 const createOption = (label: string, value: string): Option => ({ label, value });
 
-const options: Option[] = [
-    createOption('Last 15 minutes', '15m'),
-    createOption('Today', 'today'),
-    createOption('Yesterday', 'yesterday'),
+const options: Option[] = [    
+    createOption('Last 24 hours', 'today'),
+    createOption('Last 48 hours', 'yesterday'),
     createOption('Last 7 days', '7d'),
     createOption('Last 30 days', '30d'),
     createOption('Last 90 days', '90d'),
-    createOption('Last Year', '365d'),
-    createOption('Last Week', 'last_week'),
+    createOption('Last 365 days', '365d'), 
     createOption('Custom date range', 'custom')
 ];
 
