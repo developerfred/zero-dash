@@ -113,6 +113,10 @@ function calculateTimestamps(range) {
     case '24h':
       start = now.subtract(24, 'hours').unix();
       break;
+    case '48h':
+      start = now.subtract(1, 'day').startOf('day').unix();
+      end = now.subtract(1, 'day').endOf('day').unix();
+      break;
     case '7d':
       start = now.subtract(7, 'days').unix();
       break;

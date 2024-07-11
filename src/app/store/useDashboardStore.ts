@@ -23,6 +23,10 @@ const calculateDateRange = (filter: string): { fromDate: string; toDate: string;
             toDate = formatDate(now);
             fromDate = formatDate(new Date(now.setDate(now.getDate() - 1)));
             break;
+        case '48h':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 2)));
+            break;
         case '7d':
             toDate = formatDate(now);
             fromDate = formatDate(new Date(now.setDate(now.getDate() - 7)));
@@ -84,6 +88,15 @@ const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolea
     return await response.json();
 };
 
+const fetchDashboardDataFromTime = async (filter: string): Promise<{ metricsData: MetricsData[], totalRewards: { amount: string, unit: string } }> => {
+    const url = `/api/zos/metrics-time?filter=${filter}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Error fetching data: ${response.statusText}`);
+    }
+    return await response.json();
+};
+
 const fetchCurrentTokenPriceInUSD = async (): Promise<{ price: number; holders: number }> => {
     const response = await fetch('/api/meow/token-price');
     if (!response.ok) {
@@ -138,7 +151,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
     setFilter: (filter: string) => {
         const { activeSection } = get();
         if (filter === '15m' && activeSection !== 'Zero') {
-            filter = '7d'; 
+            filter = '7d';
         }
         if (filter !== '15m') {
             localStorage.setItem('selectedOption', filter);
@@ -226,10 +239,57 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         }
 
         try {
-            const { fromDate, toDate, include15MinutesData } = calculateDateRange(filter);
-            const { fetchTokenPrice, fetchDashboardData } = get();
-            await fetchTokenPrice();
-            await fetchDashboardData(fromDate, toDate, include15MinutesData);
+            const { activeSection } = get();
+
+            if ((filter === '24h' || filter === '48h') && activeSection === 'Zero') {
+                const { metricsData, totalRewards } = await fetchDashboardDataFromTime(filter);
+                const tokenPriceInUSD = get().tokenPriceInUSD;
+
+                const initialTotals = {
+                    dailyActiveUsers: 0,
+                    totalMessagesSent: 0,
+                    userSignUps: 0,
+                    newlyMintedDomains: 0,
+                    totalRewardsEarned: '0',
+                    totalRegistrations: 0,
+                    totalWorlds: 0,
+                    totalDomains: 0,
+                    dayCount: 0,
+                };
+
+                const rewardsData: { date: string; totalRewardsEarned: number }[] = [];
+                const hours = filter === '24h' ? 24 : 48;
+                const rewardPerHour = parseFloat(totalRewards.amount) / hours;
+
+                for (let i = 0; i < hours; i++) {
+                    const hourTimestamp = new Date(new Date().setHours(new Date().getHours() - i)).toISOString();
+                    rewardsData.push({ date: hourTimestamp, totalRewardsEarned: rewardPerHour });
+                }
+
+                const totals = metricsData.reduce((acc, curr) => {
+                    acc.dailyActiveUsers += curr.dailyActiveUsers;
+                    acc.totalMessagesSent += curr.totalMessagesSent;
+                    acc.userSignUps += curr.userSignUps;
+                    acc.newlyMintedDomains += curr.newlyMintedDomains;
+                    return acc;
+                }, initialTotals);
+
+                totals.dailyActiveUsers = Math.round(totals.dailyActiveUsers / hours);
+                totals.totalRewardsEarned = formatUSD(parseFloat(totalRewards.amount) * 100);
+
+                set((state) => ({
+                    zosData: metricsData,
+                    zosDataCache: { ...state.zosDataCache, [`${filter}`]: metricsData },
+                    totals,
+                    rewardsData,
+                    isLoadingDashboard: false,
+                }));
+            } else {
+                const { fromDate, toDate, include15MinutesData } = calculateDateRange(filter);
+                const { fetchTokenPrice, fetchDashboardData } = get();
+                await fetchTokenPrice();
+                await fetchDashboardData(fromDate, toDate, include15MinutesData);
+            }
         } catch (error) {
             console.error('Error in fetchDashboardDataByFilter:', error);
         }
@@ -301,7 +361,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             console.error('Failed to fetch wild info:', error);
             set(
-{ isInfoLoading: false });
+                { isInfoLoading: false });
         }
     },
 }));

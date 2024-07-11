@@ -15,7 +15,8 @@ const ZeroGlobal: React.FC = () => {
     useEffect(() => {
         fetchDashboardDataByFilter(filter);
     }, [filter]);
-
+    
+    const isHourly = filter === '24h' || filter === '48h';
     return (
         <div className="section">                       
             <div className="zero-global">                    
@@ -27,12 +28,12 @@ const ZeroGlobal: React.FC = () => {
                 </div>
                 <div className="charts">
                     <div className="chart-row">                                                           
-                        <Chart data={zosData} dataKey="dailyActiveUsers" chartType="area" title="Daily active users" isCurrency={false}  />                                                     
-                        <Chart data={zosData} dataKey="totalMessagesSent" chartType="area" title="Total messages sent" isCurrency={false}  />                            
+                        <Chart data={zosData} dataKey="dailyActiveUsers" chartType="area" title="Daily active users" isCurrency={false} isHourly={isHourly} />                                                     
+                        <Chart data={zosData} dataKey="totalMessagesSent" chartType="area" title="Total messages sent" isCurrency={false} isHourly={isHourly} />                            
                     </div>
                     <div className="chart-row">                            
-                        <Chart data={zosData} dataKey="userSignUps" chartType="area" title="User sign ups" isCurrency={false} />                                                        
-                        <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true} title="Total rewards earned" />
+                        <Chart data={zosData} dataKey="userSignUps" chartType="area" title="User sign ups" isCurrency={false} isHourly={isHourly} />                                                        
+                        <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true} title="Total rewards earned" isHourly={isHourly} />
                         
                     </div>
                 </div>

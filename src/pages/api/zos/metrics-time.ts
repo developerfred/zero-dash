@@ -1,13 +1,36 @@
 // @ts-nocheck
 import { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
+import { formatUnits } from 'viem';
 
 const API_URL = 'https://zosapi.zero.tech/metrics/dynamic';
 const API_URL_METRICS = process.env.NEXT_PUBLIC_API_METRICS;
 
-let cache = {};
-let cacheTimestamp = null;
+interface MetricsData {
+    date: string;
+    dailyActiveUsers: number;
+    totalMessagesSent: number;
+    userSignUps: number;
+    newlyMintedDomains: number;
+    totalRewardsEarned: {
+        amount: string;
+        unit: string;
+        precision: number;
+    };
+}
+
+let cache: { [key: string]: any[] } = {};
+let cacheTimestamp: number | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; 
+
+const getTokenPrice = async (): Promise<number> => {
+    const response = await fetch('https://zero-dash.vercel.app/api/meow/token-price');
+    if (!response.ok) {
+        throw new Error(`Error fetching MEOW price: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.price;
+};
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { filter } = req.query;
@@ -18,28 +41,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const now = Date.now();
     const fromTs = filter === '24h' ? now - 24 * 60 * 60 * 1000 : now - 48 * 60 * 60 * 1000;
- 
-    if (cache[filter] && cacheTimestamp && now - cacheTimestamp < CACHE_DURATION) {
+
+    if (cache[filter] && cacheTimestamp && now - cacheTimestamp < CACHE_DURATION) {        
         return res.status(200).json(cache[filter]);
     }
 
-    try {
-        const data = await fetchMetricsDataInChunks(fromTs, now);
-        const todayMetrics = await fetchTodayMetricsData();
+    try {        
+        const data = await fetchMetricsDataInChunks(fromTs, now);        
 
-        if (Array.isArray(data) && data.length > 0) {
-            const combinedData = data.map(entry => ({
-                ...entry,
-                totalRewardsEarned: todayMetrics.totalRewardsEarned
-            }));
-            
-            cache[filter] = combinedData;
-            cacheTimestamp = now;
+        const tokenPrice = await getTokenPrice();
+        const { metricsData, totalRewards } = await addTotalRewardsToData(data, filter, tokenPrice);
 
-            return res.status(200).json(combinedData);
-        } else {
-            throw new Error('No valid data received from the API');
-        }
+        const response = {
+            metricsData,
+            totalRewards
+        };
+
+        cache[filter] = response;
+        cacheTimestamp = now;
+
+        return res.status(200).json(response);
     } catch (error) {
         console.error('Error fetching data:', error);
         return res.status(500).json({ error: (error as Error).message });
@@ -67,23 +88,22 @@ const fetchMetricsData = async (fromTs: number, toTs: number): Promise<any[]> =>
     return normalizeData(data, fromTs);
 };
 
-const fetchTodayMetricsData = async (): Promise<any> => {
-    const today = new Date().toISOString().split('T')[0];
-    const response = await fetch(`${API_URL_METRICS}?fromDate=${today}&toDate=${today}`);
+const fetchMetricsDataByDate = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
+    const response = await fetch(`${API_URL_METRICS}?fromDate=${fromDate}&toDate=${toDate}`);
     if (!response.ok) {
-        throw new Error(`Error fetching today's data: ${response.statusText}`);
+        throw new Error(`Error fetching data: ${response.statusText}`);
     }
     const data = await response.json();
     return Object.entries(data).map(([date, metrics]: [string, any]) => ({
         date,
         ...metrics,
-    }))[0];
+    }));
 };
 
 const normalizeData = (data: any, timestamp: number): any[] => {
     const date = new Date(timestamp);
     const humanReadableTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    const humanReadableDate = date.toLocaleDateString('en-US');
+    const humanReadableDate = date.toISOString().split('T')[0]; 
 
     if (Array.isArray(data)) {
         return data.map(entry => ({ ...entry, timestamp, humanReadableTime, humanReadableDate }));
@@ -92,6 +112,35 @@ const normalizeData = (data: any, timestamp: number): any[] => {
     } else {
         throw new Error('Unexpected response format');
     }
+};
+
+const addTotalRewardsToData = async (data: any[], filter: string, tokenPrice: number): Promise<{ metricsData: any[], totalRewards: { amount: string, unit: string } }> => {
+    if (data.length === 0) return { metricsData: data, totalRewards: null };
+
+    const firstDate = data[0].humanReadableDate;
+    const lastDate = data[data.length - 1].humanReadableDate;    
+
+    const metricsData = await fetchMetricsDataByDate(firstDate, lastDate);
+
+    let totalRewards = { amount: "0.00", unit: "USD" };
+
+    if (filter === '24h') {
+        const lastItemMetrics = metricsData[metricsData.length - 1];
+        if (lastItemMetrics && lastItemMetrics.totalRewardsEarned) {
+            const lastRewardInEther = parseFloat(formatUnits(BigInt(lastItemMetrics.totalRewardsEarned.amount), lastItemMetrics.totalRewardsEarned.precision));
+            totalRewards.amount = (lastRewardInEther * tokenPrice).toFixed(2);
+        }
+    } else if (filter === '48h') {
+        const firstItemMetrics = metricsData[0];
+        const lastItemMetrics = metricsData[metricsData.length - 1];
+        if (firstItemMetrics && lastItemMetrics) {
+            const firstRewardInEther = parseFloat(formatUnits(BigInt(firstItemMetrics.totalRewardsEarned.amount), firstItemMetrics.totalRewardsEarned.precision));
+            const lastRewardInEther = parseFloat(formatUnits(BigInt(lastItemMetrics.totalRewardsEarned.amount), lastItemMetrics.totalRewardsEarned.precision));
+            totalRewards.amount = ((firstRewardInEther + lastRewardInEther) * tokenPrice).toFixed(2);
+        }
+    }
+    
+    return { metricsData: data, totalRewards };
 };
 
 export default handler;

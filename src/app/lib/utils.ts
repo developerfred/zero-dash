@@ -165,3 +165,5 @@ export const formatToMillion = (value: number): string => {
     }
     return `$${value.toFixed(2)}`;
 };
+
+export const formatTime = (date: string, formatStr: string) => format(new Date(date), formatStr);
