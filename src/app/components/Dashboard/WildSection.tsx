@@ -27,6 +27,10 @@ const WildSection: React.FC = () => {
             case '24h':
                 start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
                 break;
+            case '48h':
+                start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                start.setHours(0, 0, 0, 0);
+                break;
             case '7d':
                 start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
                 break;
@@ -86,9 +90,7 @@ const WildSection: React.FC = () => {
                     <Card title="Token price" value={formatUSD(chartData[0]?.price) || 0} isLoading={isLoadingChart || isLoading || isPriceLoading} />
                     <Card title="Volume (DEX)" value={volume || 0} isLoading={isInfoLoading} />
                     <Card title="Volume NFT" value={totalNFTVolume || 0} isLoading={isInfoLoading} />
-                    <Card title="Holders" value={holderCount || 0} isLoading={isInfoLoading} />
-                    
-                    
+                    <Card title="Holders" value={holderCount || 0} isLoading={isInfoLoading} />                                        
                 </div>
                 
                 <div className="cards">
