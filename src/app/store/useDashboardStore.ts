@@ -6,6 +6,8 @@ import { DataPoint, MetricsData, GroupedData, DashboardState, Totals } from '@/a
 import { formatUSD } from '@/app/lib/currencyUtils';
 import axios from 'axios';
 
+const CACHE_TIMEOUT = 15 * 60 * 1000;
+
 const calculateDateRange = (filter: string): { fromDate: string; toDate: string; include15MinutesData: boolean } => {
     const now = new Date();
     let fromDate: string, toDate: string;
@@ -126,6 +128,9 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
     znsData: [],
     znsDataCache: {},
     zosDataCache: {},
+    rewardsDataCache: {},
+    totalsCache: {},
+    cacheTimestamps: {},
     totals: {
         totalRegistrations: 0,
         totalWorlds: 0,
@@ -239,7 +244,21 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         }
 
         try {
-            const { activeSection } = get();
+            const { activeSection, cacheTimestamps } = get();
+            const cacheKey = `${filter}_${activeSection}`;
+            const now = Date.now();
+
+            // Check if cache is older than 15 minutes
+            if (get().zosDataCache[cacheKey] && (now - cacheTimestamps[cacheKey]) < CACHE_TIMEOUT) {
+                set({
+                    zosData: get().zosDataCache[cacheKey],
+                    rewardsData: get().rewardsDataCache[cacheKey],
+                    totals: get().totalsCache[cacheKey],
+                });
+                return;
+            }
+
+            set({ isLoadingDashboard: true });
 
             if ((filter === '24h' || filter === '48h') && activeSection === 'Zero') {
                 const { metricsData, totalRewards } = await fetchDashboardDataFromTime(filter);
@@ -279,9 +298,12 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
 
                 set((state) => ({
                     zosData: metricsData,
-                    zosDataCache: { ...state.zosDataCache, [`${filter}`]: metricsData },
-                    totals,
+                    zosDataCache: { ...state.zosDataCache, [cacheKey]: metricsData },
                     rewardsData,
+                    rewardsDataCache: { ...state.rewardsDataCache, [cacheKey]: rewardsData },
+                    totals,
+                    totalsCache: { ...state.totalsCache, [cacheKey]: totals },
+                    cacheTimestamps: { ...state.cacheTimestamps, [cacheKey]: now },
                     isLoadingDashboard: false,
                 }));
             } else {
@@ -289,9 +311,14 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                 const { fetchTokenPrice, fetchDashboardData } = get();
                 await fetchTokenPrice();
                 await fetchDashboardData(fromDate, toDate, include15MinutesData);
+                set(state => ({
+                    cacheTimestamps: { ...state.cacheTimestamps, [cacheKey]: now },
+                    isLoadingDashboard: false,
+                }));
             }
         } catch (error) {
             console.error('Error in fetchDashboardDataByFilter:', error);
+            set({ isLoadingDashboard: false });
         }
     },
 
