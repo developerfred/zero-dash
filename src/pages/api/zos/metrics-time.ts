@@ -2,6 +2,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
 import { formatUnits } from 'viem';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const API_URL = 'https://zosapi.zero.tech/metrics/dynamic';
 const API_URL_METRICS = process.env.NEXT_PUBLIC_API_METRICS;
@@ -19,9 +24,7 @@ interface MetricsData {
     };
 }
 
-let cache: { [key: string]: any[] } = {};
-let cacheTimestamp: number | null = null;
-const CACHE_DURATION = 5 * 60 * 1000; 
+const CACHE_DURATION = 15 * 60 * 1000;
 
 const getTokenPrice = async (): Promise<number> => {
     const response = await fetch('https://zero-dash.vercel.app/api/meow/token-price');
@@ -42,12 +45,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const now = Date.now();
     const fromTs = filter === '24h' ? now - 24 * 60 * 60 * 1000 : now - 48 * 60 * 60 * 1000;
 
-    if (cache[filter] && cacheTimestamp && now - cacheTimestamp < CACHE_DURATION) {        
-        return res.status(200).json(cache[filter]);
+    const { data: cachedData, error: cacheError } = await supabase
+        .from('metrics')
+        .select('*')
+        .eq('filter', filter)
+        .order('timestamp', { ascending: false })
+        .limit(1);
+
+    if (cacheError) {
+        console.error('Error fetching data from Supabase cache:', cacheError);
+    } else if (cachedData.length > 0 && (now - new Date(cachedData[0].timestamp).getTime() < CACHE_DURATION)) {
+        return res.status(200).json(cachedData[0].data);
     }
 
-    try {        
-        const data = await fetchMetricsDataInChunks(fromTs, now);        
+    try {
+        const data = await fetchMetricsDataInChunks(fromTs, now);
 
         const tokenPrice = await getTokenPrice();
         const { metricsData, totalRewards } = await addTotalRewardsToData(data, filter, tokenPrice);
@@ -57,8 +69,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             totalRewards
         };
 
-        cache[filter] = response;
-        cacheTimestamp = now;
+        await saveDataToSupabase(filter, response);
 
         return res.status(200).json(response);
     } catch (error) {
@@ -68,7 +79,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 const fetchMetricsDataInChunks = async (fromTs: number, toTs: number): Promise<any[]> => {
-    const interval = 15 * 60 * 1000; 
+    const interval = 15 * 60 * 1000;
     const promises = [];
 
     for (let ts = fromTs; ts < toTs; ts += interval) {
@@ -103,7 +114,7 @@ const fetchMetricsDataByDate = async (fromDate: string, toDate: string): Promise
 const normalizeData = (data: any, timestamp: number): any[] => {
     const date = new Date(timestamp);
     const humanReadableTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    const humanReadableDate = date.toISOString().split('T')[0]; 
+    const humanReadableDate = date.toISOString().split('T')[0];
 
     if (Array.isArray(data)) {
         return data.map(entry => ({ ...entry, timestamp, humanReadableTime, humanReadableDate }));
@@ -118,7 +129,7 @@ const addTotalRewardsToData = async (data: any[], filter: string, tokenPrice: nu
     if (data.length === 0) return { metricsData: data, totalRewards: null };
 
     const firstDate = data[0].humanReadableDate;
-    const lastDate = data[data.length - 1].humanReadableDate;    
+    const lastDate = data[data.length - 1].humanReadableDate;
 
     const metricsData = await fetchMetricsDataByDate(firstDate, lastDate);
 
@@ -139,8 +150,26 @@ const addTotalRewardsToData = async (data: any[], filter: string, tokenPrice: nu
             totalRewards.amount = ((firstRewardInEther + lastRewardInEther) * tokenPrice).toFixed(2);
         }
     }
-    
+
     return { metricsData: data, totalRewards };
+};
+
+const saveDataToSupabase = async (filter: string, data: any) => {
+    const { data: supabaseData, error } = await supabase
+        .from('metrics')
+        .insert([
+            {
+                filter,
+                data,
+                timestamp: new Date().toISOString(),
+            },
+        ]);
+
+    if (error) {
+        console.error('Error saving data to Supabase:', error);
+    } else {
+        console.log('Data saved to Supabase:', supabaseData);
+    }
 };
 
 export default handler;
