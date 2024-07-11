@@ -15,7 +15,7 @@
     justify-content: flex-start;
     align-items: flex-start;    
     width: 312px;
-    min-height: 100px;
+    min-height: 140px;
 }
 
 .card:hover {
