@@ -90,7 +90,7 @@ const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolea
     return await response.json();
 };
 
-const fetchDashboardDataFromTime = async (filter: string): Promise<{ metricsData: MetricsData[], totalRewards: { amount: string, unit: string } }> => {
+const fetchDashboardDataFromTime = async (filter: string): Promise<{ metricsData: MetricsData[], totalRewards: { amount: string, unit: string }, totalMessagesSent: number, totalDailyActiveUsers: number, totalUserSignUps: number }> => {
     const url = `/api/zos/${filter}`;
     const response = await fetch(url);
     if (!response.ok) {
@@ -248,7 +248,6 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             const cacheKey = `${filter}_${activeSection}`;
             const now = Date.now();
 
-            // Check if cache is older than 15 minutes
             if (get().zosDataCache[cacheKey] && (now - cacheTimestamps[cacheKey]) < CACHE_TIMEOUT) {
                 set({
                     zosData: get().zosDataCache[cacheKey],
@@ -261,13 +260,13 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             set({ isLoadingDashboard: true });
 
             if ((filter === '24h' || filter === '48h') && activeSection === 'Zero') {
-                const { metricsData, totalRewards } = await fetchDashboardDataFromTime(filter);
+                const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await fetchDashboardDataFromTime(filter);
                 const tokenPriceInUSD = get().tokenPriceInUSD;
 
                 const initialTotals = {
-                    dailyActiveUsers: 0,
-                    totalMessagesSent: 0,
-                    userSignUps: 0,
+                    dailyActiveUsers: totalDailyActiveUsers,
+                    totalMessagesSent: totalMessagesSent,
+                    userSignUps: totalUserSignUps,
                     newlyMintedDomains: 0,
                     totalRewardsEarned: '0',
                     totalRegistrations: 0,

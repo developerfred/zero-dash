@@ -49,11 +49,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const data = await fetchMetricsDataInChunks(fromTs, now);
 
         const tokenPrice = await getTokenPrice();
-        const { metricsData, totalRewards } = await addTotalRewardsToData(data, filter, tokenPrice);
+        const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await addTotalRewardsToData(data, filter, tokenPrice);
 
         const response = {
             metricsData,
-            totalRewards
+            totalRewards,
+            totalMessagesSent,
+            totalDailyActiveUsers,
+            totalUserSignUps
         };
 
         await saveDataToSupabase(filter as string, response);
@@ -112,8 +115,8 @@ const normalizeData = (data: any, timestamp: number): any[] => {
     }
 };
 
-const addTotalRewardsToData = async (data: any[], filter: string, tokenPrice: number): Promise<{ metricsData: any[], totalRewards: { amount: string, unit: string } }> => {
-    if (data.length === 0) return { metricsData: data, totalRewards: null };
+const addTotalRewardsToData = async (data: any[], filter: string, tokenPrice: number): Promise<{ metricsData: any[], totalRewards: { amount: string, unit: string }, totalMessagesSent: number, totalDailyActiveUsers: number, totalUserSignUps: number }> => {
+    if (data.length === 0) return { metricsData: data, totalRewards: { amount: "0.00", unit: "USD" }, totalMessagesSent: 0, totalDailyActiveUsers: 0, totalUserSignUps: 0 };
 
     const firstDate = data[0].humanReadableDate;
     const lastDate = data[data.length - 1].humanReadableDate;
@@ -121,6 +124,15 @@ const addTotalRewardsToData = async (data: any[], filter: string, tokenPrice: nu
     const metricsData = await fetchMetricsDataByDate(firstDate, lastDate);
 
     let totalRewards = { amount: "0.00", unit: "USD" };
+    let totalMessagesSent = 0;
+    let totalDailyActiveUsers = 0;
+    let totalUserSignUps = 0;
+
+    metricsData.forEach(metrics => {
+        totalMessagesSent += metrics.totalMessagesSent;
+        totalDailyActiveUsers += metrics.dailyActiveUsers;
+        totalUserSignUps += metrics.userSignUps;
+    });
 
     if (filter === '24h') {
         const lastItemMetrics = metricsData[metricsData.length - 1];
@@ -138,7 +150,7 @@ const addTotalRewardsToData = async (data: any[], filter: string, tokenPrice: nu
         }
     }
 
-    return { metricsData: data, totalRewards };
+    return { metricsData: data, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps };
 };
 
 const saveDataToSupabase = async (filter: string, data: any) => {
