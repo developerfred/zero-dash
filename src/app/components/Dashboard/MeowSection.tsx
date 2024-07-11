@@ -19,6 +19,13 @@ const MeowSection: React.FC = () => {
         let start: Date;
 
         switch (filter) {
+            case '15m':
+                start = new Date(now.getTime() - 15 * 60 * 1000);
+                break;
+            case '48h':
+                start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                start.setHours(0, 0, 0, 0);
+                break;
             case '24h':
                 start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
                 break;
@@ -84,7 +91,7 @@ const MeowSection: React.FC = () => {
                 </div>              
                 <div className="charts">
                     <div className="chart-row">                                            
-                        <Chart data={chartData} dataKey="price" chartType="area" isCurrency={true} title="Token price over time" />
+                        <Chart data={chartData} dataKey="price" chartType="area" isCurrency={true} title="Token price over time" single={true} isHourly={true} />
                     </div>
                 </div>
             </div>
