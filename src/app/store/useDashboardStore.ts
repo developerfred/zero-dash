@@ -91,7 +91,7 @@ const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolea
 };
 
 const fetchDashboardDataFromTime = async (filter: string): Promise<{ metricsData: MetricsData[], totalRewards: { amount: string, unit: string } }> => {
-    const url = `/api/zos/metrics-time?filter=${filter}`;
+    const url = `/api/zos/${filter}`;
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`Error fetching data: ${response.statusText}`);
