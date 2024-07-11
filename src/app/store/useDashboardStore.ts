@@ -238,7 +238,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         }
     },
 
-    fetchDashboardDataByFilter: async (filter: string) => {
+    fetchDashboardDataByFilter: async (filter: string, forceRefresh = false) => {
         if (!filter) {
             throw new Error('Filter is required');
         }
@@ -248,12 +248,14 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             const cacheKey = `${filter}_${activeSection}`;
             const now = Date.now();
 
-            if (get().zosDataCache[cacheKey] && (now - cacheTimestamps[cacheKey]) < CACHE_TIMEOUT) {
-                set({
+            if (!forceRefresh && get().zosDataCache[cacheKey] && (now - cacheTimestamps[cacheKey]) < CACHE_TIMEOUT) {
+                const cachedData = {
                     zosData: get().zosDataCache[cacheKey],
                     rewardsData: get().rewardsDataCache[cacheKey],
                     totals: get().totalsCache[cacheKey],
-                });
+                };
+                console.log('Using cached data:', cachedData);
+                set(cachedData);
                 return;
             }
 
@@ -261,19 +263,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
 
             if ((filter === '24h' || filter === '48h') && activeSection === 'Zero') {
                 const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await fetchDashboardDataFromTime(filter);
-                const tokenPriceInUSD = get().tokenPriceInUSD;
-
-                const initialTotals = {
-                    dailyActiveUsers: totalDailyActiveUsers,
-                    totalMessagesSent: totalMessagesSent,
-                    userSignUps: totalUserSignUps,
-                    newlyMintedDomains: 0,
-                    totalRewardsEarned: '0',
-                    totalRegistrations: 0,
-                    totalWorlds: 0,
-                    totalDomains: 0,
-                    dayCount: 0,
-                };
+                console.log('Fetched data:', { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps });
 
                 const rewardsData: { date: string; totalRewardsEarned: number }[] = [];
                 const hours = filter === '24h' ? 24 : 48;
@@ -284,27 +274,30 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                     rewardsData.push({ date: hourTimestamp, totalRewardsEarned: rewardPerHour });
                 }
 
-                const totals = metricsData.reduce((acc, curr) => {
-                    acc.dailyActiveUsers += curr.dailyActiveUsers;
-                    acc.totalMessagesSent += curr.totalMessagesSent;
-                    acc.userSignUps += curr.userSignUps;
-                    acc.newlyMintedDomains += curr.newlyMintedDomains;
-                    return acc;
-                }, initialTotals);
+                const totals = {
+                    dailyActiveUsers: totalDailyActiveUsers,
+                    totalMessagesSent: totalMessagesSent,
+                    userSignUps: totalUserSignUps,
+                    newlyMintedDomains: metricsData.reduce((acc, curr) => acc + curr.newlyMintedDomains, 0),
+                    totalRewardsEarned: totalRewards.amount,
+                    totalRegistrations: 0,
+                    totalWorlds: 0,
+                    totalDomains: 0,
+                    dayCount: hours,
+                };
 
-                totals.dailyActiveUsers = Math.round(totals.dailyActiveUsers / hours);
-                totals.totalRewardsEarned = formatUSD(parseFloat(totalRewards.amount) * 100);
-
-                set((state) => ({
+                const updatedData = {
                     zosData: metricsData,
-                    zosDataCache: { ...state.zosDataCache, [cacheKey]: metricsData },
+                    zosDataCache: { ...get().zosDataCache, [cacheKey]: metricsData },
                     rewardsData,
-                    rewardsDataCache: { ...state.rewardsDataCache, [cacheKey]: rewardsData },
+                    rewardsDataCache: { ...get().rewardsDataCache, [cacheKey]: rewardsData },
                     totals,
-                    totalsCache: { ...state.totalsCache, [cacheKey]: totals },
-                    cacheTimestamps: { ...state.cacheTimestamps, [cacheKey]: now },
+                    totalsCache: { ...get().totalsCache, [cacheKey]: totals },
+                    cacheTimestamps: { ...get().cacheTimestamps, [cacheKey]: now },
                     isLoadingDashboard: false,
-                }));
+                };
+                console.log('Updated store data:', updatedData);
+                set(updatedData);
             } else {
                 const { fromDate, toDate, include15MinutesData } = calculateDateRange(filter);
                 const { fetchTokenPrice, fetchDashboardData } = get();
@@ -320,6 +313,9 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             set({ isLoadingDashboard: false });
         }
     },
+
+
+
 
     fetchTotals: async (filter: string) => {
         const cacheKey = filter;
