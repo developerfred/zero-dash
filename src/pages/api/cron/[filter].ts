@@ -69,24 +69,38 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 const fetchMetricsDataInChunks = async (fromTs: number, toTs: number): Promise<any[]> => {
-    const interval = 15 * 60 * 1000;
+    const interval = 30 * 60 * 1000; 
     const promises = [];
 
     for (let ts = fromTs; ts < toTs; ts += interval) {
         promises.push(fetchMetricsData(ts, ts + interval));
     }
 
-    const results = await Promise.all(promises);
-    return results.flat();
+    const results = await Promise.allSettled(promises); 
+    const fulfilledResults = results
+        .filter(result => result.status === 'fulfilled')
+        .map(result => (result as PromiseFulfilledResult<any[]>).value);
+    return fulfilledResults.flat();
 };
 
 const fetchMetricsData = async (fromTs: number, toTs: number): Promise<any[]> => {
-    const response = await fetch(`${API_URL}?fromTs=${fromTs}&toTs=${toTs}`);
+    const response = await fetchWithTimeout(`${API_URL}?fromTs=${fromTs}&toTs=${toTs}`, 10000); 
     if (!response.ok) {
         throw new Error(`Error fetching data: ${response.statusText}`);
     }
     const data = await response.json();
     return normalizeData(data, fromTs);
+};
+
+const fetchWithTimeout = (resource: string, options: number): Promise<Response> => {
+    const { timeout = 8000 } = options;
+
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    return fetch(resource, {
+        ...options,
+        signal: controller.signal
+    }).finally(() => clearTimeout(id));
 };
 
 const fetchMetricsDataByDate = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
