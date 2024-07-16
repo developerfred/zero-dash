@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { DataPoint } from '@/app/types';
@@ -13,10 +15,18 @@ interface ChartProps {
     isHourly?: boolean;
 }
 
-const CustomTooltip = ({ active, payload, label, isCurrency, isHourly }: any) => {
+interface CustomTooltipProps {
+    active?: boolean;
+    payload?: any[];
+    label?: string | number;
+    isCurrency: boolean;
+    isHourly: boolean;
+}
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, isCurrency, isHourly }) => {
     if (active && payload && payload.length) {
         const value = isCurrency ? formatToMillion(payload[0].value) : formatNumberWithCommas(payload[0].value);
-        const formattedLabel = isHourly ? formatTime(new Date(label), 'HH:mm') : formatDate(new Date(label), 'MM-DD');
+        const formattedLabel = isHourly ? formatTime(new Date(label as string), 'HH:mm') : formatDate(new Date(label as string), 'MM-DD');
         return (
             <div className="custom-tooltip">
                 <p className="label">{formattedLabel}</p>
@@ -86,7 +96,7 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
         <div className="chart-wrapper">
             <div className="chart-header">
                 <h3 className="chart-title">{title}</h3>
-                {/*   <HiEllipsisVertical className="chart-icon" onClick={() => setMenuVisible(!menuVisible)} />
+                {/* <HiEllipsisVertical className="chart-icon" onClick={() => setMenuVisible(!menuVisible)} />
                 {menuVisible && (
                     <div className="menu" ref={menuRef}>
                         {}

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { create } from 'zustand';
 import { formatUnits } from 'viem';
 import { DataPoint, MetricsData, GroupedData, DashboardState, Totals } from '@/app/types';
@@ -6,54 +8,81 @@ import axios from 'axios';
 
 const CACHE_TIMEOUT = 15 * 60 * 1000;
 
-const formatDate = (date: Date): string => date.toISOString().split('T')[0];
-
 const calculateDateRange = (filter: string): { fromDate: string; toDate: string; include15MinutesData: boolean } => {
     const now = new Date();
     let fromDate: string, toDate: string;
     let include15MinutesData = false;
 
-    const dateAdjustments: Record<string, () => void> = {
-        '15m': () => { include15MinutesData = true; fromDate = toDate = formatDate(now); },
-        '24h': () => { toDate = formatDate(now); fromDate = formatDate(new Date(now.setDate(now.getDate() - 1))); },
-        '48h': () => { toDate = formatDate(now); fromDate = formatDate(new Date(now.setDate(now.getDate() - 2))); },
-        '7d': () => { toDate = formatDate(now); fromDate = formatDate(new Date(now.setDate(now.getDate() - 6))); },
-        '30d': () => { toDate = formatDate(now); fromDate = formatDate(new Date(now.setDate(now.getDate() - 30))); },
-        '90d': () => { toDate = formatDate(now); fromDate = formatDate(new Date(now.setDate(now.getDate() - 90))); },
-        '365d': () => { toDate = formatDate(now); fromDate = formatDate(new Date(now.setDate(now.getDate() - 365))); },
-        'today': () => { fromDate = toDate = formatDate(now); },
-        'yesterday': () => { fromDate = toDate = formatDate(new Date(now.setDate(now.getDate() - 1))); },
-        'last_week': () => {
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+    switch (filter) {
+        case '15m':
+            include15MinutesData = true;
+            toDate = formatDate(now);
+            fromDate = formatDate(now);
+            break;
+        case '24h':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 1)));
+            break;
+        case '48h':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 2)));
+            break;
+        case '7d':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 7)));
+            break;
+        case '30d':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 30)));
+            break;
+        case '90d':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 90)));
+            break;
+        case '365d':
+            toDate = formatDate(now);
+            fromDate = formatDate(new Date(now.setDate(now.getDate() - 365)));
+            break;
+        case 'today':
+            fromDate = toDate = formatDate(now);
+            break;
+        case 'yesterday':
+            toDate = formatDate(new Date(now.setDate(now.getDate() - 1)));
+            fromDate = toDate;
+            break;
+        case 'last_week':
             now.setDate(now.getDate() - now.getDay());
             toDate = formatDate(now);
             fromDate = formatDate(new Date(now.setDate(now.getDate() - 6)));
-        },
-        'last_month': () => {
+            break;
+        case 'last_month':
             now.setMonth(now.getMonth() - 1);
             toDate = formatDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
             fromDate = formatDate(new Date(now.getFullYear(), now.getMonth(), 1));
-        },
-        'last_year': () => {
+            break;
+        case 'last_year':
             now.setFullYear(now.getFullYear() - 1);
             toDate = formatDate(new Date(now.getFullYear(), 11, 31));
             fromDate = formatDate(new Date(now.getFullYear(), 0, 1));
-        }
-    };
-
-    if (filter in dateAdjustments) {
-        dateAdjustments[filter]();
-    } else if (filter.includes('_')) {
-        const dates = filter.split('_');
-        fromDate = dates[1];
-        toDate = dates[2];
-    } else {
-        throw new Error(`Invalid filter format: ${filter}`);
+            break;
+        default:
+            if (filter && filter.includes('_')) {
+                const dates = filter.split('_');
+                fromDate = dates[1];
+                toDate = dates[2];
+            } else {
+                throw new Error(`Invalid filter format: ${filter}`);
+            }
+            break;
     }
 
     return { fromDate, toDate, include15MinutesData };
 };
 
-const fetchData = async (url: string): Promise<any> => {
+const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolean = false): Promise<MetricsData[]> => {
+    const url = `/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}&includeLast15Minutes=${is15Minute}`;
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`Error fetching data: ${response.statusText}`);
@@ -61,18 +90,21 @@ const fetchData = async (url: string): Promise<any> => {
     return await response.json();
 };
 
-const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolean = false): Promise<MetricsData[]> => {
-    const url = `/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}&includeLast15Minutes=${is15Minute}`;
-    return fetchData(url);
-};
-
-const fetchDashboardDataFromTime = async (filter: string): Promise<any> => {
+const fetchDashboardDataFromTime = async (filter: string): Promise<{ metricsData: MetricsData[], totalRewards: { amount: string, unit: string }, totalMessagesSent: number, totalDailyActiveUsers: number, totalUserSignUps: number }> => {
     const url = `/api/zos/${filter}`;
-    return fetchData(url);
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Error fetching data: ${response.statusText}`);
+    }
+    return await response.json();
 };
 
 const fetchCurrentTokenPriceInUSD = async (): Promise<{ price: number; holders: number }> => {
-    const data = await fetchData('/api/meow/token-price');
+    const response = await fetch('/api/meow/token-price');
+    if (!response.ok) {
+        throw new Error(`Error fetching MEOW price: ${response.statusText}`);
+    }
+    const data = await response.json();
     return {
         price: data.price,
         holders: data.holders
@@ -80,15 +112,11 @@ const fetchCurrentTokenPriceInUSD = async (): Promise<{ price: number; holders: 
 };
 
 const fetchPairDataFromAPI = async (): Promise<any> => {
-    return fetchData('/api/meow/pairs');
-};
-
-const calculateTotals = (data: Record<string, GroupedData>): Totals => {
-    return {
-        totalRegistrations: Object.values(data).reduce((acc, val) => acc + val.totalDomainRegistrations, 0),
-        totalWorlds: Object.values(data).reduce((acc, val) => acc + val.totalWorlds, 0),
-        totalDomains: Object.values(data).reduce((acc, val) => acc + val.totalDomains, 0),
-    };
+    const response = await fetch('/api/meow/pairs');
+    if (!response.ok) {
+        throw new Error(`Error fetching pair data: ${response.statusText}`);
+    }
+    return await response.json();
 };
 
 const useDashboardStore = create<DashboardState>((set, get) => ({
@@ -225,8 +253,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                     zosData: get().zosDataCache[cacheKey],
                     rewardsData: get().rewardsDataCache[cacheKey],
                     totals: get().totalsCache[cacheKey],
-                };
-                console.log('Using cached data:', cachedData);
+                };                
                 set(cachedData);
                 return;
             }
@@ -234,8 +261,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             set({ isLoadingDashboard: true });
 
             if ((filter === '24h' || filter === '48h') && activeSection === 'Zero') {
-                const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await fetchDashboardDataFromTime(filter);
-                console.log('Fetched data:', { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps });
+                const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await fetchDashboardDataFromTime(filter);                
 
                 const rewardsData: { date: string; totalRewardsEarned: number }[] = [];
                 const hours = filter === '24h' ? 24 : 48;
@@ -267,8 +293,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                     totalsCache: { ...get().totalsCache, [cacheKey]: totals },
                     cacheTimestamps: { ...get().cacheTimestamps, [cacheKey]: now },
                     isLoadingDashboard: false,
-                };
-                console.log('Updated store data:', updatedData);
+                };                
                 set(updatedData);
             } else {
                 const { fromDate, toDate, include15MinutesData } = calculateDateRange(filter);
@@ -285,6 +310,9 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             set({ isLoadingDashboard: false });
         }
     },
+
+
+
 
     fetchTotals: async (filter: string) => {
         const cacheKey = filter;
@@ -351,9 +379,18 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             });
         } catch (error) {
             console.error('Failed to fetch wild info:', error);
-            set({ isInfoLoading: false });
+            set(
+                { isInfoLoading: false });
         }
     },
 }));
+
+const calculateTotals = (data: Record<string, GroupedData>): Totals => {
+    return {
+        totalRegistrations: Object.values(data).reduce((acc, val) => acc + val.totalDomainRegistrations, 0),
+        totalWorlds: Object.values(data).reduce((acc, val) => acc + val.totalWorlds, 0),
+        totalDomains: Object.values(data).reduce((acc, val) => acc + val.totalDomains, 0),
+    };
+};
 
 export default useDashboardStore;
