@@ -159,11 +159,28 @@ export const formatLabel = (label: string): string => {
         .replace(/^./, str => str.toUpperCase()); 
 };
 
+export const formatNumberWithCommas = (value: number | string): string => {
+    const number = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(number)) return value.toString();
+    return number.toLocaleString('en-US');
+};
+
 export const formatToMillion = (value: number): string => {
     if (value >= 1e6) {
-        return `$${(value / 1e6).toFixed(2)}M`;
+        return `$${formatNumberWithCommas((value / 1e6).toFixed(2))}M`;
     }
-    return `$${value.toFixed(2)}`;
+    return `$${formatNumberWithCommas(value.toFixed(2))}`;
 };
 
 export const formatTime = (date: string, formatStr: string) => format(new Date(date), formatStr);
+
+
+export const formatXAxis = (tickItem: string) => {
+    const date = new Date(tickItem);
+    if (isNaN(date.getTime())) {
+        console.error(`Invalid date value for tick: ${tickItem}`);
+        return '';
+    }
+    
+    return `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};

@@ -1,9 +1,7 @@
-// @ts-nocheck
-
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { DataPoint } from '@/app/types';
-import { formatDate, formatNumber, formatCurrency, formatToMillion, formatTime } from '@/lib/utils';
+import { formatDate, formatNumberWithCommas, formatToMillion, formatTime, formatXAxis } from '@/lib/utils';
 import './Chart.css';
 import { HiEllipsisVertical } from "react-icons/hi2";
 
@@ -17,8 +15,8 @@ interface ChartProps {
 
 const CustomTooltip = ({ active, payload, label, isCurrency, isHourly }: any) => {
     if (active && payload && payload.length) {
-        const value = isCurrency ? formatToMillion(payload[0].value) : formatNumber(payload[0].value);
-        const formattedLabel = isHourly ? formatTime(new Date(label), 'HH:mm') : formatDate(new Date(label), 'MM-DD-YY');
+        const value = isCurrency ? formatToMillion(payload[0].value) : formatNumberWithCommas(payload[0].value);
+        const formattedLabel = isHourly ? formatTime(new Date(label), 'HH:mm') : formatDate(new Date(label), 'MM-DD');
         return (
             <div className="custom-tooltip">
                 <p className="label">{formattedLabel}</p>
@@ -30,11 +28,26 @@ const CustomTooltip = ({ active, payload, label, isCurrency, isHourly }: any) =>
 };
 
 const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", title, isCurrency = false, isHourly = false }) => {
+    const [menuVisible, setMenuVisible] = useState(false);
+    const menuRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setMenuVisible(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const formattedData = useMemo(() => {
         const groupedData: { [key: string]: any } = {};
 
         data.forEach(item => {
-            // Support different data formats
             let timestamp: number | undefined;
             if (item.timestamp) {
                 timestamp = typeof item.timestamp === 'number' && item.timestamp.toString().length === 10
@@ -54,7 +67,7 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                 console.error(`Invalid date value: ${timestamp}`);
                 return;
             }
-            const hourKey = isHourly ? date.toISOString().slice(0, 13) + ":00:00" : date.toISOString().slice(0, 10); // YYYY-MM-DDTHH:00:00 ou YYYY-MM-DD
+            const hourKey = isHourly ? date.toISOString().slice(0, 13) + ":00:00" : date.toISOString().slice(0, 10);
 
             if (!groupedData[hourKey]) {
                 groupedData[hourKey] = { ...item, date: hourKey, totalMessagesSent: 0, dailyActiveUsers: 0, userSignUps: 0, totalRewardsEarned: 0 };
@@ -69,20 +82,16 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
         return Object.values(groupedData);
     }, [data, isHourly]);
 
-    const formatXAxis = (tickItem: string) => {
-        const date = new Date(tickItem);
-        if (isNaN(date.getTime())) {
-            console.error(`Invalid date value for tick: ${tickItem}`);
-            return '';
-        }
-        return isHourly ? `${date.getHours()}h` : formatDate(date, 'MM-DD-YY');
-    };
-
     return (
         <div className="chart-wrapper">
             <div className="chart-header">
                 <h3 className="chart-title">{title}</h3>
-                <HiEllipsisVertical className="chart-icon" />
+                {/*   <HiEllipsisVertical className="chart-icon" onClick={() => setMenuVisible(!menuVisible)} />
+                {menuVisible && (
+                    <div className="menu" ref={menuRef}>
+                        {}
+                    </div>
+                )} */}
             </div>
             <ResponsiveContainer width="100%" height={300} minWidth={300}>
                 <AreaChart data={formattedData} margin={{ top: 50, right: 30, left: 20, bottom: 50 }}>
@@ -98,11 +107,11 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                         stroke="rgba(117, 122, 128, 1)"
                         style={{ fontSize: '1.0rem' }}
                         tick={{ transform: 'translate(0, 10)' }}
-                        interval={isHourly ? 2 : 'preserveStartEnd'}                        
+                        interval={isHourly ? 2 : 'preserveStartEnd'}
                         textAnchor="end"
                     />
                     <YAxis
-                        tickFormatter={isCurrency ? formatCurrency : formatNumber}
+                        tickFormatter={isCurrency ? formatToMillion : formatNumberWithCommas}
                         stroke="rgba(117, 122, 128, 1)"
                         style={{ fontSize: '1.0rem' }}
                     />
