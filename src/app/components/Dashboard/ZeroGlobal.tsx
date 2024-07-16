@@ -21,19 +21,19 @@ const ZeroGlobal: React.FC = () => {
         <div className="section">                       
             <div className="zero-global">                    
                 <div className="cards">
-                    <Card title="Daily active users" value={totals.dailyActiveUsers} isLoading={isLoadingDashboard} />
-                    <Card title="Total messages sent" value={totals.totalMessagesSent} isLoading={isLoadingDashboard} />
-                    <Card title="User sign ups" value={totals.userSignUps} isLoading={isLoadingDashboard} />
-                    <Card title="Total rewards earned" value={totals.totalRewardsEarned} isLoading={isLoadingDashboard} />
+                    <Card title="Active users" value={totals.dailyActiveUsers} isLoading={isLoadingDashboard} />
+                    <Card title="Messages sent" value={totals.totalMessagesSent} isLoading={isLoadingDashboard} />
+                    <Card title="Registrations" value={totals.userSignUps} isLoading={isLoadingDashboard} />
+                    <Card title="Rewards earned" value={totals.totalRewardsEarned} isLoading={isLoadingDashboard} />
                 </div>
                 <div className="charts">
                     <div className="chart-row">                                                           
-                        <Chart data={zosData} dataKey="dailyActiveUsers" chartType="area" title="Daily active users" isCurrency={false} isHourly={isHourly} />                                                     
-                        <Chart data={zosData} dataKey="totalMessagesSent" chartType="area" title="Total messages sent" isCurrency={false} isHourly={isHourly} />                            
+                        <Chart data={zosData} dataKey="dailyActiveUsers" chartType="area" title="Active users" isCurrency={false} isHourly={isHourly} />                                                     
+                        <Chart data={zosData} dataKey="totalMessagesSent" chartType="area" title="Messages sent" isCurrency={false} isHourly={isHourly} />                            
                     </div>
                     <div className="chart-row">                            
-                        <Chart data={zosData} dataKey="userSignUps" chartType="area" title="User sign ups" isCurrency={false} isHourly={isHourly} />                                                        
-                        <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true} title="Total rewards earned" isHourly={isHourly} />
+                        <Chart data={zosData} dataKey="userSignUps" chartType="area" title="Registrations" isCurrency={false} isHourly={isHourly} />                                                        
+                        <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true} title="Rewards earned" isHourly={isHourly} />
                         
                     </div>
                 </div>

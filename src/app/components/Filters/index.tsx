@@ -37,7 +37,7 @@ const Filters: React.FC<FiltersProps> = ({ setFilter, show15MinFilter }) => {
     const { filter } = useDashboardStore();
     const [customDateRange, setCustomDateRange] = useState<[Date | null, Date | null]>([null, null]);
     const [startDate, endDate] = customDateRange;
-    const [selectedOption, setSelectedOption] = useState<string>('7d'); // Default to 7 days
+    const [selectedOption, setSelectedOption] = useState<string>('7d'); 
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -107,8 +107,7 @@ const Filters: React.FC<FiltersProps> = ({ setFilter, show15MinFilter }) => {
                         </button>
                     ))}
                 </div>
-            </div>
-            <HiAdjustmentsHorizontal />
+            </div>            
             <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={closeModal}

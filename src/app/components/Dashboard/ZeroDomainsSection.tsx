@@ -9,11 +9,16 @@ const ZeroDomainsSection: React.FC = () => {
         znsDataCache,        
         fetchTotals,
         isLoadingZns,
+        setFilter,
     } = useDashboardStore();
 
-    useEffect(() => {
-        fetchTotals(filter);
-    }, [filter]);
+    useEffect(() => {        
+        if (filter === '15m') {
+            setFilter('7d');
+        } else {
+            fetchTotals(filter);
+        }
+    }, [filter, setFilter, fetchTotals]);
 
     const cachedData = znsDataCache[filter] || {};
 
@@ -29,23 +34,17 @@ const ZeroDomainsSection: React.FC = () => {
         <div className="section">            
             <div className="zero-domains">
                 <div className="cards">
-                    <Card title="Total Domain registrations" value={totals.totalRegistrations} isLoading={isLoadingZns} />
-                    <Card title="Total worlds" value={totals.totalWorlds} isLoading={isLoadingZns} />
-                    <Card title="Total domains" value={totals.totalDomains} isLoading={isLoadingZns} />
+                    <Card title="Domain registrations" value={totals.totalRegistrations} isLoading={isLoadingZns} />
+                    <Card title="Worlds" value={totals.totalWorlds} isLoading={isLoadingZns} />
+                    <Card title="Domains" value={totals.totalDomains} isLoading={isLoadingZns} />
                 </div>
                 <div className="charts">
-                    <div className="chart-row">
-                        
-                            <Chart data={znsData} dataKey="totalDomainRegistrations" chartType="bar" title="Total Domain registrations" />
-                        
-                        
-                            <Chart data={znsData} dataKey="totalWorlds" chartType="area" title="Total worlds" />
-                        
+                    <div className="chart-row">                        
+                        <Chart data={znsData} dataKey="totalDomainRegistrations" chartType="bar" title="Domain registrations" />                                                
+                        <Chart data={znsData} dataKey="totalWorlds" chartType="area" title="Worlds" />                        
                     </div>
-                    <div className="chart-row">
-                                                   
-                            <Chart data={znsData} dataKey="totalDomains" chartType="line" title="Total domains" />
-                        
+                    <div className="chart-row">                                                   
+                        <Chart data={znsData} dataKey="totalDomains" chartType="line" title="Domains" />                        
                     </div>
                 </div>
             </div>
