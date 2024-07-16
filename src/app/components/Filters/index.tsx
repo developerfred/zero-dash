@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import Modal from 'react-modal';
@@ -23,25 +23,31 @@ type Option = {
 
 const createOption = (label: string, value: string): Option => ({ label, value });
 
-const options: Option[] = [    
+const options: Option[] = [
     createOption('Last 24 hours', '24h'),
     createOption('Last 48 hours', '48h'),
     createOption('Last 7 days', '7d'),
     createOption('Last 30 days', '30d'),
     createOption('Last 90 days', '90d'),
-    createOption('Last 365 days', '365d'), 
+    createOption('Last 365 days', '365d'),
     createOption('Custom date range', 'custom')
 ];
 
 const Filters: React.FC<FiltersProps> = ({ setFilter, show15MinFilter }) => {
     const { filter } = useDashboardStore();
     const [customDateRange, setCustomDateRange] = useState<[Date | null, Date | null]>([null, null]);
-    const [startDate, endDate] = customDateRange;
-    const [selectedOption, setSelectedOption] = useState<string>('7d'); 
+    const [selectedOption, setSelectedOption] = useState<string>('7d');
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-    const handleButtonClick = (value: string) => {
+    const closeModal = useCallback(() => setModalIsOpen(false), []);
+
+    const handleDateChange = useCallback((dates: [Date | null, Date | null]) => {
+        setCustomDateRange(dates);
+    }, []);
+
+    const handleButtonClick = useCallback((value: string) => {
         if (value === '15m' && !show15MinFilter) {
             setFilter('7d');
             setSelectedOption('7d');
@@ -57,7 +63,7 @@ const Filters: React.FC<FiltersProps> = ({ setFilter, show15MinFilter }) => {
             setCustomDateRange([null, null]);
         }
         setDropdownOpen(false);
-    };
+    }, [setFilter, show15MinFilter]);
 
     useEffect(() => {
         if (selectedOption && selectedOption !== 'custom' && selectedOption !== filter) {
@@ -66,27 +72,32 @@ const Filters: React.FC<FiltersProps> = ({ setFilter, show15MinFilter }) => {
     }, [selectedOption, setFilter, filter]);
 
     useEffect(() => {
-        if (selectedOption === 'custom' && startDate && endDate) {
-            const formattedStartDate = format(startDate, 'yyyy-MM-dd');
-            const formattedEndDate = format(endDate, 'yyyy-MM-dd');
+        if (selectedOption === 'custom' && customDateRange[0] && customDateRange[1]) {
+            const formattedStartDate = format(customDateRange[0], 'yyyy-MM-dd');
+            const formattedEndDate = format(customDateRange[1], 'yyyy-MM-dd');
             setFilter(`custom_${formattedStartDate}_${formattedEndDate}`);
             setModalIsOpen(false);
         }
-    }, [startDate, endDate, selectedOption, setFilter]);
-
-    const closeModal = () => {
-        setModalIsOpen(false);
-    };
-
-    const handleDateChange = (dates: [Date | null, Date | null]) => {
-        setCustomDateRange(dates);
-    };
+    }, [customDateRange, selectedOption, setFilter]);
 
     const availableOptions = show15MinFilter ? options : options.filter(option => option.value !== '15m');
 
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     return (
         <div className="filters">
-            <div className="filter-container">
+            <div className="filter-container" ref={dropdownRef}>
                 <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     className="filter-button"
@@ -107,7 +118,7 @@ const Filters: React.FC<FiltersProps> = ({ setFilter, show15MinFilter }) => {
                         </button>
                     ))}
                 </div>
-            </div>            
+            </div>
             <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={closeModal}
@@ -119,10 +130,10 @@ const Filters: React.FC<FiltersProps> = ({ setFilter, show15MinFilter }) => {
                     <h2>Select Custom Date Range</h2>
                     <div className="datepicker-container">
                         <DatePicker
-                            selected={startDate}
+                            selected={customDateRange[0]}
                             onChange={handleDateChange}
-                            startDate={startDate}
-                            endDate={endDate}
+                            startDate={customDateRange[0]}
+                            endDate={customDateRange[1]}
                             selectsRange
                             inline
                         />
