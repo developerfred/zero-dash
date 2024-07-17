@@ -125,7 +125,7 @@ const FinanceSection: React.FC = () => {
                     />
                     <Card
                         title="DAO Balance"
-                        value={balanceInUSD !== null ? formatUSD(balanceInUSD) : 'Loading...'}
+                        value={balanceInUSD !== null ? formatUSD(balanceInUSD) : '0'}
                         isLoading={isLoadingChart}
                     />
                 </div>

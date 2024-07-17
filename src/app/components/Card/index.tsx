@@ -15,7 +15,6 @@ const formatNumberWithCommas = (value: string | number): string => {
     return new Intl.NumberFormat('en-US').format(number);
 };
 
-
 const Card: React.FC<CardProps> = ({ title, value, isLoading }) => {
     const [showLoading, setShowLoading] = useState(false);
 
@@ -24,7 +23,7 @@ const Card: React.FC<CardProps> = ({ title, value, isLoading }) => {
         if (isLoading) {
             timer = setTimeout(() => {
                 setShowLoading(true);
-            }, 500);
+            }, 600);
         } else {
             setShowLoading(false);
         }
@@ -36,13 +35,15 @@ const Card: React.FC<CardProps> = ({ title, value, isLoading }) => {
     return (
         <div className="card">
             <div className='card-title-wrapper'>
-            {getIconForTitle(title)}
-            <h3>{title}</h3>
+                {getIconForTitle(title)}
+                <h3>{title}</h3>
             </div>
             <div className="card-content">
                 <div className={`card-value-wrapper ${showLoading ? 'loading' : ''}`}>
-                    {showLoading || value === null || value === undefined || value === '' ? (
-                        <Loading />
+                    {showLoading ? (
+                        <div className="loading-container">
+                            <Loading />
+                        </div>
                     ) : (
                         <p className="card-value">{formattedValue}</p>
                     )}
