@@ -36,7 +36,7 @@ body {
 }
 
 .dashboard {
-  @apply p-5 md:px-10 flex flex-col items-center w-full max-w-screen-xl mx-auto box-border;
+  @apply p-5 mt-6  md:px-10 flex flex-col items-center w-full max-w-screen-xl mx-auto box-border;
   max-width: 1440px;
 }
 
@@ -169,5 +169,3 @@ body {
     @apply gap-3;
   }
 }
-
-

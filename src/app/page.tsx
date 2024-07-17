@@ -11,8 +11,10 @@ export default function Home() {
 
   return (
     <>
-      <Navbar activeSection={activeSection} setActiveSection={setActiveSection} />
-      <Dashboard activeSection={activeSection} />
+      <div className="flex flex-col items-center w-full max-w-screen-2xl mx-auto">
+        <Navbar activeSection={activeSection} setActiveSection={setActiveSection} />      
+        <Dashboard activeSection={activeSection} />
+      </div> 
     </>
   );
 }

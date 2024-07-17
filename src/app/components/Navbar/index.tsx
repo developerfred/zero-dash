@@ -1,4 +1,3 @@
-// src/app/components/Navbar/index.tsx
 import React from 'react';
 import styles from './Navbar.module.css';
 
@@ -25,17 +24,17 @@ const Navbar: React.FC<NavbarProps> = ({ activeSection, setActiveSection }) => {
         { label: "ZNS", section: "ZNS" },
         { label: "MEOW", section: "MEOW" },
         { label: "WILD", section: "WILD" },
-        { label: "DAO", section: "Finance" },        
+        { label: "DAO", section: "Finance" },
     ];
 
     return (
         <nav className={styles.navbar}>
-            <div className={styles.navbarContainer}>
-                <div className={styles.navbarLeft}>
-                    <button onClick={() => setActiveSection("Zero")} className={styles.navbarTitle}>
-                        <img src='./zero-dashboard-logo.png' />
-                    </button>
-                </div>
+            <div className={styles.navbarLeft}>
+                <button onClick={() => setActiveSection("Zero")} className={styles.navbarTitle}>
+                    <img src='./zero-dashboard-logo.png' alt="Logo" />
+                </button>
+            </div>
+            <div className={styles.navbarContainer}>                
                 <div className={styles.navbarMenu}>
                     {navItems.map((item) => (
                         <NavItem

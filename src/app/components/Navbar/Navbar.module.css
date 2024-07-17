@@ -1,25 +1,26 @@
 .navbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  border-radius: 50px;  
+  justify-content: center; 
+  border-radius: 50px;
   padding: 12px;
   backdrop-filter: blur(20px);
-  margin: 16px;
+  
   position: sticky;
   top: 16px;
   z-index: 1000;
   transition: all 0.3s ease-in-out;
+  max-width: 1440px; /* Define largura máxima */
+  width: 100%; /* Ocupa toda a largura disponível */
+  box-sizing: border-box; /* Inclui padding e border na largura total */
 }
 
 .navbarContainer {
   display: flex;
   align-items: center;
+  justify-content: center; 
   width: 100%;
-  max-width: 1800px;
-  padding: 0 16px;
-  position: relative;
-  transition: padding 0.3s ease-in-out;
+  box-sizing: border-box;
 }
 
 .navbarLeft {
@@ -43,9 +44,6 @@
   align-items: center;
   justify-content: center;
   gap: 32px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   transition: gap 0.3s ease-in-out;
 }
 
