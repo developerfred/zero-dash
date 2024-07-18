@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { DataPoint } from '@/app/types';
-import { formatDate, formatNumberWithCommas, formatToMillion, formatTime, formatXAxis } from '@/lib/utils';
+import { formatDate, formatNumberWithCommas, formatToMillion, formatTime } from '@/lib/utils';
 import './Chart.css';
 import { HiEllipsisVertical } from "react-icons/hi2";
 
@@ -39,6 +39,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, i
 
 const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value", title, isCurrency = false, isHourly = false }) => {
     const [menuVisible, setMenuVisible] = useState(false);
+    const [activeTick, setActiveTick] = useState<string | number | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -92,6 +93,27 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
         return Object.values(groupedData);
     }, [data, isHourly]);
 
+    const formatXAxis = (tickItem: string) => {
+        const date = new Date(tickItem);
+        if (isNaN(date.getTime())) {
+            console.error(`Invalid date value for tick: ${tickItem}`);
+            return '';
+        }
+        if (isHourly) {
+            const hours = date.getHours();
+            return `${hours}h`;
+        }
+        return `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    };
+
+    const handleMouseMove = (state: any) => {
+        if (state.isTooltipActive) {
+            setActiveTick(state.activeTooltipIndex);
+        } else {
+            setActiveTick(null);
+        }
+    };
+
     return (
         <div className="chart-wrapper">
             <div className="chart-header">
@@ -104,7 +126,12 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                 )} */}
             </div>
             <ResponsiveContainer width="100%" height={300} minWidth={300}>
-                <AreaChart data={formattedData} margin={{ top: 50, right: 30, left: 20, bottom: 50 }}>
+                <AreaChart
+                    data={formattedData}
+                    margin={{ top: 50, right: 30, left: 20, bottom: 50 }}
+                    onMouseMove={handleMouseMove}
+                    onMouseLeave={() => setActiveTick(null)}
+                >
                     <defs>
                         <linearGradient id="colorMatrix" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="rgba(1, 244, 203, 0.5)" stopOpacity={0.5} />
@@ -119,6 +146,7 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                         tick={{ transform: 'translate(0, 10)' }}
                         interval={isHourly ? 2 : 'preserveStartEnd'}
                         textAnchor="end"
+                        tickLine={false}                        
                     />
                     <YAxis
                         tickFormatter={isCurrency ? formatToMillion : formatNumberWithCommas}
