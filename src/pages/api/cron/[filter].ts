@@ -59,8 +59,8 @@ const fetchMetricsData = async (fromTs: number, toTs: number): Promise<any[]> =>
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const fetchMetricsDataInChunks = async (fromTs: number, toTs: number): Promise<any[]> => {
-    const interval = 7 * 60 * 1000; 
-    const maxRequestsPerBatch = 10; 
+    const interval = 15 * 60 * 1000; // 15 minutos
+    const maxRequestsPerBatch = 10; // Número máximo de requisições por pacote
     const results = [];
 
     for (let ts = fromTs; ts < toTs; ts += interval * maxRequestsPerBatch) {
@@ -76,7 +76,7 @@ const fetchMetricsDataInChunks = async (fromTs: number, toTs: number): Promise<a
                 console.error('Error fetching data:', result.reason);
             }
         });
-        await delay(1000); 
+        await delay(1000); // Atraso de 1 segundo entre os pacotes
     }
 
     console.log(`Fetched ${results.length} chunks of metrics data`);
@@ -168,7 +168,7 @@ const aggregateDataByDay = (data: any[]): any[] => {
 
     data.forEach(entry => {
         const date = new Date(entry.timestamp);
-        const dayKey = date.toISOString().split('T')[0]; 
+        const dayKey = date.toISOString().split('T')[0]; // Keep only up to days
 
         if (!aggregatedData[dayKey]) {
             aggregatedData[dayKey] = {
@@ -230,15 +230,17 @@ const addTotalRewardsToData = async (data: any[], filter: string, tokenPrice: nu
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { filter } = req.query;
 
-    if (!['24h', '48h', '7d'].includes(filter)) {
+    if (!['24h', '48h', '7d', '30d', '365d'].includes(filter)) {
         console.error('Invalid filter:', filter);
-        return res.status(400).json({ error: 'Invalid filter. Only 24h, 48h, and 7d are supported.' });
+        return res.status(400).json({ error: 'Invalid filter. Only 24h, 48h, 7d, 30d, and 365d are supported.' });
     }
 
     const now = Date.now();
     const fromTs = filter === '24h' ? now - 24 * 60 * 60 * 1000
         : filter === '48h' ? now - 48 * 60 * 60 * 1000
-            : now - 7 * 24 * 60 * 60 * 1000;
+            : filter === '7d' ? now - 7 * 24 * 60 * 60 * 1000
+                : filter === '30d' ? now - 30 * 24 * 60 * 60 * 1000
+                    : now - 365 * 24 * 60 * 60 * 1000;
 
     console.log(`Fetching data for filter: ${filter}`);
 
@@ -257,6 +259,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             cache['48h'] = cached48hData;
             const previous5dData = await fetchMetricsDataInChunks(now - 7 * 24 * 60 * 60 * 1000, now - 48 * 60 * 60 * 1000);
             data = [...previous5dData, ...cached48hData];
+        } else if (filter === '30d') {
+            console.log('Fetching data for 30d');
+            const cached7dData = cache['7d'] || await fetchMetricsDataInChunks(now - 7 * 24 * 60 * 60 * 1000, now);
+            cache['7d'] = cached7dData;
+            const previous23dData = await fetchMetricsDataInChunks(now - 30 * 24 * 60 * 60 * 1000, now - 7 * 24 * 60 * 60 * 1000);
+            data = [...previous23dData, ...cached7dData];
+        } else if (filter === '365d') {
+            console.log('Fetching data for 365d');
+            const cached30dData = cache['30d'] || await fetchMetricsDataInChunks(now - 30 * 24 * 60 * 60 * 1000, now);
+            cache['30d'] = cached30dData;
+            const previous335dData = await fetchMetricsDataInChunks(now - 365 * 24 * 60 * 60 * 1000, now - 30 * 24 * 60 * 60 * 1000);
+            data = [...previous335dData, ...cached30dData];
         } else {
             data = await fetchMetricsDataInChunks(fromTs, now);
         }
@@ -266,7 +280,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         let aggregatedData;
         if (filter === '24h' || filter === '48h') {
             aggregatedData = aggregateDataByHour(data);
-        } else if (filter === '7d') {
+        } else {
             aggregatedData = aggregateDataByDay(data);
         }
 

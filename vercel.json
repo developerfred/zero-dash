@@ -7,6 +7,18 @@
     {
       "path": "/api/cron/48h",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/7d",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/30d",
+      "schedule": "0 0 1 */1 *"
+    },
+    {
+      "path": "/api/cron/365d",
+      "schedule": "0 0 1 1 *"
     }
   ]
 }
