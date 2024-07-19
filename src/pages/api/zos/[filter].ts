@@ -9,8 +9,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { filter } = req.query;
 
-    if (filter !== '24h' && filter !== '48h') {
-        return res.status(400).json({ error: 'Invalid filter. Only 24h and 48h are supported.' });
+    if (filter !== '24h' && filter !== '48h' && filter !== '7d') {
+        return res.status(400).json({ error: 'Invalid filter. Only 24h , 48h and 7d are supported.' });
     }
 
     const { data: cachedData, error: cacheError } = await supabase
