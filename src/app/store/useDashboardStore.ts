@@ -260,7 +260,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
 
             set({ isLoadingDashboard: true });
 
-            if ((filter === '24h' || filter === '48h') && activeSection === 'Zero') {
+            if ((filter === '24h' || filter === '48h' || filter === '7d' || filter === '30d' || filter === '365d') && activeSection === 'Zero') {
                 const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await fetchDashboardDataFromTime(filter);                
 
                 const rewardsData: { date: string; totalRewardsEarned: number }[] = [];
