@@ -27,12 +27,17 @@ interface MetricsData {
 const cache: { [key: string]: any } = {};
 
 const getTokenPrice = async (): Promise<number> => {
-    const response = await fetch('https://zero-dash.vercel.app/api/meow/token-price');
-    if (!response.ok) {
-        throw new Error(`Error fetching MEOW price: ${response.statusText}`);
+    try {
+        const response = await fetch('https://zero-dash.vercel.app/api/meow/token-price');
+        if (!response.ok) {
+            throw new Error(`Error fetching MEOW price: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data.price;
+    } catch (error) {
+        console.error('Error fetching token price:', error);
+        return 0; // Retornar um valor padrão em caso de erro
     }
-    const data = await response.json();
-    return data.price;
 };
 
 const fetchWithTimeout = (resource: string, options: { timeout: number }): Promise<Response> => {
@@ -47,20 +52,25 @@ const fetchWithTimeout = (resource: string, options: { timeout: number }): Promi
 };
 
 const fetchMetricsData = async (fromTs: number, toTs: number): Promise<any[]> => {
-    console.log(`Fetching metrics data from ${fromTs} to ${toTs}`);
-    const response = await fetchWithTimeout(`${API_URL}?fromTs=${fromTs}&toTs=${toTs}`, { timeout: 10000 });
-    if (!response.ok) {
-        throw new Error(`Error fetching data: ${response.statusText}`);
+    try {
+        console.log(`Fetching metrics data from ${fromTs} to ${toTs}`);
+        const response = await fetchWithTimeout(`${API_URL}?fromTs=${fromTs}&toTs=${toTs}`, { timeout: 10000 });
+        if (!response.ok) {
+            throw new Error(`Error fetching data: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return normalizeData(data, fromTs);
+    } catch (error) {
+        console.error('Error fetching metrics data:', error);
+        return []; // Retornar uma lista vazia em caso de erro
     }
-    const data = await response.json();
-    return normalizeData(data, fromTs);
 };
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const fetchMetricsDataInChunks = async (fromTs: number, toTs: number): Promise<any[]> => {
-    const interval = 15 * 60 * 1000; // 15 minutos
-    const maxRequestsPerBatch = 10; // Número máximo de requisições por pacote
+    const interval = 15 * 60 * 1000; // Intervalo de 15 minutos
+    const maxRequestsPerBatch = 5; // Reduzido para evitar o timeout
     const results = [];
 
     for (let ts = fromTs; ts < toTs; ts += interval * maxRequestsPerBatch) {
@@ -76,7 +86,7 @@ const fetchMetricsDataInChunks = async (fromTs: number, toTs: number): Promise<a
                 console.error('Error fetching data:', result.reason);
             }
         });
-        await delay(1000); // Atraso de 1 segundo entre os pacotes
+        await delay(1000); 
     }
 
     console.log(`Fetched ${results.length} chunks of metrics data`);
@@ -84,16 +94,21 @@ const fetchMetricsDataInChunks = async (fromTs: number, toTs: number): Promise<a
 };
 
 const fetchMetricsDataByDate = async (fromDate: string, toDate: string): Promise<MetricsData[]> => {
-    console.log(`Fetching metrics data by date from ${fromDate} to ${toDate}`);
-    const response = await fetch(`${API_URL_METRICS}?fromDate=${fromDate}&toDate=${toDate}`);
-    if (!response.ok) {
-        throw new Error(`Error fetching data: ${response.statusText}`);
+    try {
+        console.log(`Fetching metrics data by date from ${fromDate} to ${toDate}`);
+        const response = await fetch(`${API_URL_METRICS}?fromDate=${fromDate}&toDate=${toDate}`);
+        if (!response.ok) {
+            throw new Error(`Error fetching data: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return Object.entries(data).map(([date, metrics]: [string, any]) => ({
+            date,
+            ...metrics,
+        }));
+    } catch (error) {
+        console.error('Error fetching metrics data by date:', error);
+        return []; 
     }
-    const data = await response.json();
-    return Object.entries(data).map(([date, metrics]: [string, any]) => ({
-        date,
-        ...metrics,
-    }));
 };
 
 const normalizeData = (data: any, timestamp: number): any[] => {
@@ -142,7 +157,7 @@ const aggregateDataByHour = (data: any[]): any[] => {
 
     data.forEach(entry => {
         const date = new Date(entry.timestamp);
-        const hourKey = date.toISOString().split(':')[0]; // Keep only up to hours
+        const hourKey = date.toISOString().split(':')[0]; 
 
         if (!aggregatedData[hourKey]) {
             aggregatedData[hourKey] = {
@@ -168,7 +183,7 @@ const aggregateDataByDay = (data: any[]): any[] => {
 
     data.forEach(entry => {
         const date = new Date(entry.timestamp);
-        const dayKey = date.toISOString().split('T')[0]; // Keep only up to days
+        const dayKey = date.toISOString().split('T')[0]; 
 
         if (!aggregatedData[dayKey]) {
             aggregatedData[dayKey] = {
@@ -227,10 +242,48 @@ const addTotalRewardsToData = async (data: any[], filter: string, tokenPrice: nu
     return { metricsData: data, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps };
 };
 
+const updateMetricsData = async (filter: string, fromTs: number, toTs: number): Promise<{ totalMessagesSent: number, totalDailyActiveUsers: number, totalUserSignUps: number }> => {
+    try {
+        if (filter === '30d' || filter === '365d') {
+            const fromDate = new Date(fromTs).toISOString().split('T')[0];
+            const toDate = new Date(toTs).toISOString().split('T')[0];
+            const metricsData = await fetchMetricsDataByDate(fromDate, toDate);
+            return metricsData.reduce((totals, dayMetrics) => {
+                totals.totalMessagesSent += dayMetrics.totalMessagesSent;
+                totals.totalDailyActiveUsers += dayMetrics.dailyActiveUsers;
+                totals.totalUserSignUps += dayMetrics.userSignUps;
+                return totals;
+            }, {
+                totalMessagesSent: 0,
+                totalDailyActiveUsers: 0,
+                totalUserSignUps: 0,
+            });
+        } else {
+            const response = await fetchWithTimeout(`${API_URL}?fromTs=${fromTs}&toTs=${toTs}`, { timeout: 10000 });
+            if (!response.ok) {
+                throw new Error(`Error fetching data: ${response.statusText}`);
+            }
+            const data = await response.json();
+            return {
+                totalMessagesSent: data.totalMessagesSent,
+                totalDailyActiveUsers: data.dailyActiveUsers,
+                totalUserSignUps: data.userSignUps
+            };
+        }
+    } catch (error) {
+        console.error('Error updating metrics data:', error);
+        return {
+            totalMessagesSent: 0,
+            totalDailyActiveUsers: 0,
+            totalUserSignUps: 0
+        }; 
+    }
+};
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { filter } = req.query;
 
-    if (!['24h', '48h', '7d', '30d', '365d'].includes(filter)) {
+    if (!['24h', '48h', '7d', '30d', '365d'].includes(filter as string)) {
         console.error('Invalid filter:', filter);
         return res.status(400).json({ error: 'Invalid filter. Only 24h, 48h, 7d, 30d, and 365d are supported.' });
     }
@@ -275,7 +328,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             data = await fetchMetricsDataInChunks(fromTs, now);
         }
 
-        cache[filter] = data;
+        cache[filter as string] = data;
 
         let aggregatedData;
         if (filter === '24h' || filter === '48h') {
@@ -285,14 +338,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         }
 
         const tokenPrice = await getTokenPrice();
-        const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await addTotalRewardsToData(aggregatedData, filter, tokenPrice);
+        const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await addTotalRewardsToData(aggregatedData, filter as string, tokenPrice);
+
+        const updatedMetrics = await updateMetricsData(filter as string, fromTs, now);
 
         const response = {
             metricsData,
             totalRewards,
-            totalMessagesSent,
-            totalDailyActiveUsers,
-            totalUserSignUps
+            totalMessagesSent: updatedMetrics.totalMessagesSent,
+            totalDailyActiveUsers: updatedMetrics.totalDailyActiveUsers,
+            totalUserSignUps: updatedMetrics.totalUserSignUps
         };
 
         console.log('Response:', response);
