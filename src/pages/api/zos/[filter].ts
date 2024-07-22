@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { filter } = req.query;
 
-    if (filter !== '24h' && filter !== '48h' && filter !== '7d') {
+    if (filter !== '24h' && filter !== '48h' && filter !== '7d' && filter !== '30d' && filter !== '90d' && filter !== '365d') {
         return res.status(400).json({ error: 'Invalid filter. Only 24h , 48h and 7d are supported.' });
     }
 
