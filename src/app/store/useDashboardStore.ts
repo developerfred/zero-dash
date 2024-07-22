@@ -119,6 +119,31 @@ const fetchPairDataFromAPI = async (): Promise<any> => {
     return await response.json();
 };
 
+const calculateDateTimestamp = (filter: string) => {
+    const now = Date.now();
+    let fromDate: number;
+    let toDate = now;
+
+    switch (filter) {
+        case '24h':
+            fromDate = now - 24 * 60 * 60 * 1000; 
+            break;
+        case '48h':
+            fromDate = now - 48 * 60 * 60 * 1000; 
+            break;
+        case '7d':
+            fromDate = now - 7 * 24 * 60 * 60 * 1000; 
+            break;
+        case '30d':
+            fromDate = now - 30 * 24 * 60 * 60 * 1000; 
+            break;
+        default:
+            throw new Error('Invalid filter');
+    }
+
+    return { fromDate, toDate };
+};
+
 const useDashboardStore = create<DashboardState>((set, get) => ({
     filter: '7d',
     data: [],
@@ -238,6 +263,8 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         }
     },
 
+    
+
     fetchDashboardDataByFilter: async (filter: string, forceRefresh = false) => {
         if (!filter) {
             throw new Error('Filter is required');
@@ -253,29 +280,37 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                     zosData: get().zosDataCache[cacheKey],
                     rewardsData: get().rewardsDataCache[cacheKey],
                     totals: get().totalsCache[cacheKey],
-                };                
+                };
                 set(cachedData);
                 return;
             }
 
             set({ isLoadingDashboard: true });
 
-            if ((filter === '24h' || filter === '48h' || filter === '7d' || filter === '30d') && activeSection === 'Zero') {
-                const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await fetchDashboardDataFromTime(filter);                
+            if ((filter === '24h' || filter === '48h' || filter === '7d') && activeSection === 'Zero') {
+                const { metricsData, totalRewards } = await fetchDashboardDataFromTime(filter);
+
+                const { fromDate, toDate } = calculateDateTimestamp(filter);
+                const API_URL = 'https://zosapi.zero.tech/metrics/dynamic';
+                const response = await axios.get(`${API_URL}?fromTs=${fromDate}&toTs=${toDate}`);
+                const data = response.data;
+
+                console.log('filter', data);
 
                 const rewardsData: { date: string; totalRewardsEarned: number }[] = [];
-                const hours = filter === '24h' ? 24 : 48;
+                const hours = filter === '24h' ? 24 : (filter === '48h' ? 48 : 168); // 7d = 168h
                 const rewardPerHour = parseFloat(totalRewards.amount) / hours;
 
                 for (let i = 0; i < hours; i++) {
                     const hourTimestamp = new Date(new Date().setHours(new Date().getHours() - i)).toISOString();
                     rewardsData.push({ date: hourTimestamp, totalRewardsEarned: rewardPerHour });
                 }
+                
 
                 const totals = {
-                    dailyActiveUsers: totalDailyActiveUsers,
-                    totalMessagesSent: totalMessagesSent,
-                    userSignUps: totalUserSignUps,
+                    dailyActiveUsers: data.dailyActiveUsers,
+                    totalMessagesSent: data.totalMessagesSent,
+                    userSignUps: data.userSignUps,
                     newlyMintedDomains: metricsData.reduce((acc, curr) => acc + curr.newlyMintedDomains, 0),
                     totalRewardsEarned: totalRewards.amount,
                     totalRegistrations: 0,
@@ -293,7 +328,42 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                     totalsCache: { ...get().totalsCache, [cacheKey]: totals },
                     cacheTimestamps: { ...get().cacheTimestamps, [cacheKey]: now },
                     isLoadingDashboard: false,
-                };                
+                };
+                set(updatedData);
+            } else if (filter === '30d' && activeSection === 'Zero') {
+                const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await fetchDashboardDataFromTime(filter);
+
+                const rewardsData: { date: string; totalRewardsEarned: number }[] = [];
+                const days = 30;
+                const rewardPerDay = parseFloat(totalRewards.amount) / days;
+
+                for (let i = 0; i < days; i++) {
+                    const dayTimestamp = new Date(new Date().setDate(new Date().getDate() - i)).toISOString();
+                    rewardsData.push({ date: dayTimestamp, totalRewardsEarned: rewardPerDay });
+                }
+
+                const totals = {
+                    dailyActiveUsers: totalDailyActiveUsers,
+                    totalMessagesSent: totalMessagesSent,
+                    userSignUps: totalUserSignUps,
+                    newlyMintedDomains: metricsData.reduce((acc, curr) => acc + curr.newlyMintedDomains, 0),
+                    totalRewardsEarned: totalRewards.amount,
+                    totalRegistrations: 0,
+                    totalWorlds: 0,
+                    totalDomains: 0,
+                    dayCount: days,
+                };
+
+                const updatedData = {
+                    zosData: metricsData,
+                    zosDataCache: { ...get().zosDataCache, [cacheKey]: metricsData },
+                    rewardsData,
+                    rewardsDataCache: { ...get().rewardsDataCache, [cacheKey]: rewardsData },
+                    totals,
+                    totalsCache: { ...get().totalsCache, [cacheKey]: totals },
+                    cacheTimestamps: { ...get().cacheTimestamps, [cacheKey]: now },
+                    isLoadingDashboard: false,
+                };
                 set(updatedData);
             } else {
                 const { fromDate, toDate, include15MinutesData } = calculateDateRange(filter);
@@ -310,6 +380,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             set({ isLoadingDashboard: false });
         }
     },
+
 
 
 
