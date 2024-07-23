@@ -36,7 +36,7 @@ const getTokenPrice = async (): Promise<number> => {
         return data.price;
     } catch (error) {
         console.error('Error fetching token price:', error);
-        return 0; // Retornar um valor padrão em caso de erro
+        return 0; 
     }
 };
 
@@ -62,15 +62,15 @@ const fetchMetricsData = async (fromTs: number, toTs: number): Promise<any[]> =>
         return normalizeData(data, fromTs);
     } catch (error) {
         console.error('Error fetching metrics data:', error);
-        return []; // Retornar uma lista vazia em caso de erro
+        return []; 
     }
 };
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const fetchMetricsDataInChunks = async (fromTs: number, toTs: number): Promise<any[]> => {
-    const interval = 15 * 60 * 1000; // Intervalo de 15 minutos
-    const maxRequestsPerBatch = 5; // Reduzido para evitar o timeout
+    const interval = 15 * 60 * 1000; 
+    const maxRequestsPerBatch = 5; 
     const results = [];
 
     for (let ts = fromTs; ts < toTs; ts += interval * maxRequestsPerBatch) {
@@ -283,9 +283,9 @@ const updateMetricsData = async (filter: string, fromTs: number, toTs: number): 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { filter } = req.query;
 
-    if (!['24h', '48h', '7d', '30d', '365d'].includes(filter as string)) {
+    if (!['24h', '48h', '7d', '30d', '90d', '365d'].includes(filter as string)) {
         console.error('Invalid filter:', filter);
-        return res.status(400).json({ error: 'Invalid filter. Only 24h, 48h, 7d, 30d, and 365d are supported.' });
+        return res.status(400).json({ error: 'Invalid filter. Only 24h, 48h, 7d, 30d, 90d, and 365d are supported.' });
     }
 
     const now = Date.now();
@@ -318,6 +318,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             cache['7d'] = cached7dData;
             const previous23dData = await fetchMetricsDataInChunks(now - 30 * 24 * 60 * 60 * 1000, now - 7 * 24 * 60 * 60 * 1000);
             data = [...previous23dData, ...cached7dData];
+        } else if (filter === '90d') {
+            console.log('Fetching data for 90d');
+            const cached30dData = cache['30d'] || await fetchMetricsDataInChunks(now - 30 * 24 * 60 * 60 * 1000, now);
+            cache['30d'] = cached30dData;
+            const previous83dData = await fetchMetricsDataInChunks(now - 90 * 24 * 60 * 60 * 1000, now - 7 * 24 * 60 * 60 * 1000);
+            data = [...previous83dData, ...cached30dData];
         } else if (filter === '365d') {
             console.log('Fetching data for 365d');
             const cached30dData = cache['30d'] || await fetchMetricsDataInChunks(now - 30 * 24 * 60 * 60 * 1000, now);
