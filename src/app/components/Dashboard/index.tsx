@@ -10,6 +10,7 @@ import ZeroGlobal from './ZeroGlobal';
 import MeowSection from './MeowSection';
 import FinanceSection from './FinanceSection';
 import WildSection from './WildSection';
+import RacingSection from './RacingSection';
 
 interface DashboardProps {
     activeSection: string;
@@ -22,6 +23,7 @@ const sectionComponents = {
     WILD: WildSection,
     Finance: FinanceSection,
     Productivity: ProductivitySection,
+    Racing: RacingSection,
 };
 
 const sectionTitles = {
@@ -31,6 +33,7 @@ const sectionTitles = {
     WILD: "W.I.L.D",
     Finance: "Finance",
     Productivity: "Productivity Section",
+    Racing: "W.I.L.D Racing",
 };
 
 const Dashboard: React.FC<DashboardProps> = ({ activeSection }) => {

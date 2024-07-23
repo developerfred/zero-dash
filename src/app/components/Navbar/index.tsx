@@ -24,7 +24,8 @@ const Navbar: React.FC<NavbarProps> = ({ activeSection, setActiveSection }) => {
         { label: "ZNS", section: "ZNS" },
         { label: "MEOW", section: "MEOW" },
         { label: "WILD", section: "WILD" },
-        { label: "DAO", section: "Finance" },
+        { label: "RACING", section: "Racing" },
+        { label: "DAO", section: "Finance" },        
     ];
 
     return (
