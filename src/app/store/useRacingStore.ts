@@ -61,7 +61,7 @@ const useRacingStore = create<RacingStore>((set) => ({
         try {
             const response = await axios.post('https://dashboard.zero.tech/api/racing/players', { filter });
             const { data, cardsData, rechartsData } = response.data;
-                        
+
             const formattedCardsData = {
                 ...cardsData,
                 averageLapTime: cardsData.averageLapTime.toString(),
