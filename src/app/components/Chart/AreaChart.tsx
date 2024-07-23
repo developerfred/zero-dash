@@ -23,10 +23,21 @@ interface CustomTooltipProps {
     isHourly: boolean;
 }
 
+const convertUTCToPST = (utcDate: Date): string => {
+    return utcDate.toLocaleString("en-US", {
+        timeZone: "America/Los_Angeles", 
+        hour12: true,
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",        
+    });
+};
+
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, isCurrency, isHourly }) => {
     if (active && payload && payload.length) {
         const value = isCurrency ? formatToMillion(payload[0].value) : formatNumberWithCommas(payload[0].value);
-        const formattedLabel = isHourly ? formatTime(new Date(label as string), 'HH:mm') : formatDate(new Date(label as string), 'MM-DD');
+        const date = new Date(label as string);
+        const formattedLabel = isHourly ? formatTime(date, 'HH:mm') : convertUTCToPST(date);
         return (
             <div className="custom-tooltip">
                 <p className="label">{formattedLabel}</p>
@@ -103,7 +114,7 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
             const hours = date.getHours();
             return `${hours}h`;
         }
-        return `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        return convertUTCToPST(date);
     };
 
     const handleMouseMove = (state: any) => {
@@ -146,7 +157,7 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                         tick={{ transform: 'translate(0, 10)' }}
                         interval={isHourly ? 2 : 'preserveStartEnd'}
                         textAnchor="end"
-                        tickLine={false}                        
+                        tickLine={false}
                     />
                     <YAxis
                         tickFormatter={isCurrency ? formatToMillion : formatNumberWithCommas}
