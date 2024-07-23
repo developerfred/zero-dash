@@ -2,6 +2,7 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import fetch from 'node-fetch';
+import { cors } from '@/app/lib/cors-middleware';
 
 const API_RACING = process.env.NEXT_PUBLIC_API_RACING!;
 
@@ -77,8 +78,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     try {
         const { startDate, endDate } = getDatesFromFilter(filter);
-        console.log(`Fetching data for filter ${filter} from ${startDate} to ${endDate}`);
-
+        
         const requests = endpoints.map(endpoint => fetchData(endpoint, { startDate, endDate, daysCount: 0 }));
         const results = await Promise.all(requests);
 
