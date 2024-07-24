@@ -8,19 +8,13 @@ import axios from 'axios';
 
 const CACHE_TIMEOUT = 15 * 60 * 1000;
 
-const calculateDateRange = (filter: string): { fromDate: string; toDate: string; include15MinutesData: boolean } => {
+const calculateDateRange = (filter: string): { fromDate: string; toDate: string;} => {
     const now = new Date();
     let fromDate: string, toDate: string;
-    let include15MinutesData = false;
 
     const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
-    switch (filter) {
-        case '15m':
-            include15MinutesData = true;
-            toDate = formatDate(now);
-            fromDate = formatDate(now);
-            break;
+    switch (filter) {       
         case '24h':
             toDate = formatDate(now);
             fromDate = formatDate(new Date(now.setDate(now.getDate() - 1)));
@@ -78,7 +72,7 @@ const calculateDateRange = (filter: string): { fromDate: string; toDate: string;
             break;
     }
 
-    return { fromDate, toDate, include15MinutesData };
+    return { fromDate, toDate };
 };
 
 const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolean = false): Promise<MetricsData[]> => {
@@ -137,6 +131,9 @@ const calculateDateTimestamp = (filter: string) => {
         case '30d':
             fromDate = now - 30 * 24 * 60 * 60 * 1000; 
             break;
+        case '90d':
+            fromDate = now - 90 * 24 * 60 * 60 * 1000;
+            break;
         default:
             throw new Error('Invalid filter');
     }
@@ -180,20 +177,12 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
 
     setFilter: (filter: string) => {
         const { activeSection } = get();
-        if (filter === '15m' && activeSection !== 'Zero') {
-            filter = '7d';
-        }
-        if (filter !== '15m') {
-            localStorage.setItem('selectedOption', filter);
-        }
+        localStorage.setItem('selectedOption', filter);
         set({ filter });
     },
 
     setActiveSection: (section: string) => {
         const { filter } = get();
-        if (filter === '15m' && section !== 'Zero') {
-            set({ filter: '7d' });
-        }
         set({ activeSection: section });
     },
 
@@ -263,6 +252,77 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
         }
     },
 
+    calculateRewardInUSD: (amount: string, precision: number, tokenPriceInUSD: number): number => {
+        const rewardInEther = parseFloat(formatUnits(BigInt(amount), precision));
+        return rewardInEther * tokenPriceInUSD;
+    },
+
+    sumTotals: (data: DataPoint[], tokenPriceInUSD: number): Totals => {
+        const initialTotals: Totals = {
+            dailyActiveUsers: 0,
+            totalMessagesSent: 0,
+            userSignUps: 0,
+            newlyMintedDomains: 0,
+            totalRewardsEarned: 0,
+            dayCount: 0,
+        };
+
+        return data.reduce((acc, curr) => ({
+            dailyActiveUsers: acc.dailyActiveUsers + curr.dailyActiveUsers,
+            totalMessagesSent: acc.totalMessagesSent + curr.totalMessagesSent,
+            userSignUps: acc.userSignUps + curr.userSignUps,
+            newlyMintedDomains: acc.newlyMintedDomains + curr.newlyMintedDomains,
+            totalRewardsEarned: acc.totalRewardsEarned + calculateRewardInUSD(
+                curr.totalRewardsEarned.amount,
+                curr.totalRewardsEarned.precision,
+                tokenPriceInUSD
+            ),
+            dayCount: acc.dayCount + 1,
+        }), initialTotals);
+    },
+
+    calculateAverages: (totals: Totals): Totals => ({
+        ...totals,
+        dailyActiveUsers: Math.round(totals.dailyActiveUsers / totals.dayCount),
+        totalRewardsEarned: formatUSD(totals.totalRewardsEarned * 100),
+    }),
+
+    extractRewardsData: (data: DataPoint[], tokenPriceInUSD: number): RewardData[] =>
+        data.map(item => ({
+            date: item.date,
+            totalRewardsEarned: calculateRewardInUSD(
+                item.totalRewardsEarned.amount,
+                item.totalRewardsEarned.precision,
+                tokenPriceInUSD
+            ),
+        })),
+
+    fetchDashboardData: async (fromDate: string, toDate: string, is15Minute?: boolean) => {
+        try {
+            set({ isLoadingDashboard: true });
+            const data: DataPoint[] = await fetchAllData(fromDate, toDate, is15Minute);
+            const tokenPriceInUSD = get().tokenPriceInUSD;
+
+            if (tokenPriceInUSD === null) {
+                throw new Error('Token price is not available');
+            }
+
+            const totals = sumTotals(data, tokenPriceInUSD);
+            const averagedTotals = calculateAverages(totals);
+            const rewardsData = extractRewardsData(data, tokenPriceInUSD);
+
+            set((state) => ({
+                zosData: data,
+                zosDataCache: { ...state.zosDataCache, [`${fromDate}_${toDate}`]: data },
+                totals: averagedTotals,
+                rewardsData,
+                isLoadingDashboard: false,
+            }));
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            set({ isLoadingDashboard: false });
+        }
+    },
     
 
     fetchDashboardDataByFilter: async (filter: string, forceRefresh = false) => {
@@ -294,11 +354,9 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                 const API_URL = 'https://zosapi.zero.tech/metrics/dynamic';
                 const response = await axios.get(`${API_URL}?fromTs=${fromDate}&toTs=${toDate}`);
                 const data = response.data;
-
-                console.log('filter', data);
-
+                
                 const rewardsData: { date: string; totalRewardsEarned: number }[] = [];
-                const hours = filter === '24h' ? 24 : (filter === '48h' ? 48 : 168); // 7d = 168h
+                const hours = filter === '24h' ? 24 : (filter === '48h' ? 48 : 168); 
                 const rewardPerHour = parseFloat(totalRewards.amount) / hours;
 
                 for (let i = 0; i < hours; i++) {
@@ -366,10 +424,10 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                 };
                 set(updatedData);
             } else {
-                const { fromDate, toDate, include15MinutesData } = calculateDateRange(filter);
+                const { fromDate, toDate } = calculateDateRange(filter);
                 const { fetchTokenPrice, fetchDashboardData } = get();
                 await fetchTokenPrice();
-                await fetchDashboardData(fromDate, toDate, include15MinutesData);
+                await fetchDashboardData(fromDate, toDate);
                 set(state => ({
                     cacheTimestamps: { ...state.cacheTimestamps, [cacheKey]: now },
                     isLoadingDashboard: false,
@@ -383,17 +441,10 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
 
 
 
-
-
     fetchTotals: async (filter: string) => {
         const cacheKey = filter;
         const state = get();
-
-        if (filter === '15m') {
-            console.warn('not supported on fetchTotals.');
-            return;
-        }
-
+    
         const cachedData = state.znsDataCache[cacheKey];
         if (cachedData) {
             set({
