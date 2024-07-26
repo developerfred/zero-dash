@@ -8,13 +8,13 @@ import axios from 'axios';
 
 const CACHE_TIMEOUT = 15 * 60 * 1000;
 
-const calculateDateRange = (filter: string): { fromDate: string; toDate: string;} => {
+const calculateDateRange = (filter: string): { fromDate: string; toDate: string; } => {
     const now = new Date();
     let fromDate: string, toDate: string;
 
     const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
-    switch (filter) {       
+    switch (filter) {
         case '24h':
             toDate = formatDate(now);
             fromDate = formatDate(new Date(now.setDate(now.getDate() - 1)));
@@ -76,8 +76,9 @@ const calculateDateRange = (filter: string): { fromDate: string; toDate: string;
 };
 
 const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolean = false): Promise<MetricsData[]> => {
-    const url = `/api/zos/metrics?fromDate=${fromDate}&toDate=${toDate}&includeLast15Minutes=${is15Minute}`;
+    const url = `https://go-metrics-api-production.up.railway.app/api/metrics?fromDate=${fromDate}&toDate=${toDate}&includeLast15Minutes=${is15Minute}`;
     const response = await fetch(url);
+    
     if (!response.ok) {
         throw new Error(`Error fetching data: ${response.statusText}`);
     }
@@ -85,13 +86,17 @@ const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolea
 };
 
 const fetchDashboardDataFromTime = async (filter: string): Promise<{ metricsData: MetricsData[], totalRewards: { amount: string, unit: string }, totalMessagesSent: number, totalDailyActiveUsers: number, totalUserSignUps: number }> => {
-    const url = `/api/zos/${filter}`;
+    const url = `https://go-metrics-api-production.up.railway.app/api/metrics?filter=${filter}`;
+    
     const response = await fetch(url);
+    
     if (!response.ok) {
         throw new Error(`Error fetching data: ${response.statusText}`);
     }
+
     return await response.json();
 };
+
 
 const fetchCurrentTokenPriceInUSD = async (): Promise<{ price: number; holders: number }> => {
     const response = await fetch('/api/meow/token-price');
@@ -120,16 +125,16 @@ const calculateDateTimestamp = (filter: string) => {
 
     switch (filter) {
         case '24h':
-            fromDate = now - 24 * 60 * 60 * 1000; 
+            fromDate = now - 24 * 60 * 60 * 1000;
             break;
         case '48h':
-            fromDate = now - 48 * 60 * 60 * 1000; 
+            fromDate = now - 48 * 60 * 60 * 1000;
             break;
         case '7d':
-            fromDate = now - 7 * 24 * 60 * 60 * 1000; 
+            fromDate = now - 7 * 24 * 60 * 60 * 1000;
             break;
         case '30d':
-            fromDate = now - 30 * 24 * 60 * 60 * 1000; 
+            fromDate = now - 30 * 24 * 60 * 60 * 1000;
             break;
         case '90d':
             fromDate = now - 90 * 24 * 60 * 60 * 1000;
@@ -323,7 +328,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             set({ isLoadingDashboard: false });
         }
     },
-    
+
 
     fetchDashboardDataByFilter: async (filter: string, forceRefresh = false) => {
         if (!filter) {
@@ -349,28 +354,28 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
 
             if ((filter === '24h' || filter === '48h' || filter === '7d') && activeSection === 'Zero') {
                 const { metricsData, totalRewards } = await fetchDashboardDataFromTime(filter);
-
+                
                 const { fromDate, toDate } = calculateDateTimestamp(filter);
                 const API_URL = 'https://zosapi.zero.tech/metrics/dynamic';
                 const response = await axios.get(`${API_URL}?fromTs=${fromDate}&toTs=${toDate}`);
                 const data = response.data;
-                
+
                 const rewardsData: { date: string; totalRewardsEarned: number }[] = [];
-                const hours = filter === '24h' ? 24 : (filter === '48h' ? 48 : 168); 
+                const hours = filter === '24h' ? 24 : (filter === '48h' ? 48 : 168);
                 const rewardPerHour = parseFloat(totalRewards.amount) / hours;
 
                 for (let i = 0; i < hours; i++) {
                     const hourTimestamp = new Date(new Date().setHours(new Date().getHours() - i)).toISOString();
                     rewardsData.push({ date: hourTimestamp, totalRewardsEarned: rewardPerHour });
                 }
-                
+
 
                 const totals = {
                     dailyActiveUsers: data.dailyActiveUsers,
                     totalMessagesSent: data.totalMessagesSent,
                     userSignUps: data.userSignUps,
                     newlyMintedDomains: metricsData.reduce((acc, curr) => acc + curr.newlyMintedDomains, 0),
-                    totalRewardsEarned: totalRewards.amount,
+                    totalRewardsEarned: totalRewards,
                     totalRegistrations: 0,
                     totalWorlds: 0,
                     totalDomains: 0,
@@ -388,11 +393,26 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                     isLoadingDashboard: false,
                 };
                 set(updatedData);
-            } else if (filter === '30d' && activeSection === 'Zero') {
+            } else if ((filter === '30d' || filter === '90d' || filter === '365d') && activeSection === 'Zero') {
                 const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await fetchDashboardDataFromTime(filter);
 
                 const rewardsData: { date: string; totalRewardsEarned: number }[] = [];
-                const days = 30;
+                let days;
+
+                switch (filter) {
+                    case '30d':
+                        days = 30;
+                        break;
+                    case '90d':
+                        days = 90;
+                        break;
+                    case '365d':
+                        days = 365;
+                        break;
+                    default:
+                        days = 30;
+                }
+
                 const rewardPerDay = parseFloat(totalRewards.amount) / days;
 
                 for (let i = 0; i < days; i++) {
@@ -405,7 +425,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                     totalMessagesSent: totalMessagesSent,
                     userSignUps: totalUserSignUps,
                     newlyMintedDomains: metricsData.reduce((acc, curr) => acc + curr.newlyMintedDomains, 0),
-                    totalRewardsEarned: totalRewards.amount,
+                    totalRewardsEarned: totalRewards,
                     totalRegistrations: 0,
                     totalWorlds: 0,
                     totalDomains: 0,
@@ -423,7 +443,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                     isLoadingDashboard: false,
                 };
                 set(updatedData);
-            } else {
+            }else {
                 const { fromDate, toDate } = calculateDateRange(filter);
                 const { fetchTokenPrice, fetchDashboardData } = get();
                 await fetchTokenPrice();
@@ -444,7 +464,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
     fetchTotals: async (filter: string) => {
         const cacheKey = filter;
         const state = get();
-    
+
         const cachedData = state.znsDataCache[cacheKey];
         if (cachedData) {
             set({

@@ -25,12 +25,25 @@ interface CustomTooltipProps {
 
 const convertUTCToPST = (utcDate: Date): string => {
     return utcDate.toLocaleString("en-US", {
-        timeZone: "America/Los_Angeles", 
+        timeZone: "America/Los_Angeles",
         hour12: true,
         year: "numeric",
         month: "numeric",
-        day: "numeric",        
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric"
     });
+};
+
+const getStartDateOfISOWeek = (week: number, year: number): Date => {
+    const simple = new Date(year, 0, 1 + (week - 1) * 7);
+    const dow = simple.getDay();
+    const ISOweekStart = simple;
+    if (dow <= 4)
+        ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+    else
+        ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+    return ISOweekStart;
 };
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, isCurrency, isHourly }) => {
@@ -71,16 +84,29 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
 
         data.forEach(item => {
             let timestamp: number | undefined;
+            let periodType: 'hour' | 'day' | 'week' | 'month' = 'day';
+
             if (item.timestamp) {
                 timestamp = typeof item.timestamp === 'number' && item.timestamp.toString().length === 10
                     ? item.timestamp * 1000
                     : item.timestamp;
             } else if (item.date) {
                 timestamp = new Date(item.date).getTime();
+            } else if (item.period) {
+                if (item.period.includes('-W')) {
+                    const [year, week] = item.period.split('-W').map(Number);
+                    const date = getStartDateOfISOWeek(week, year);
+                    timestamp = date.getTime();
+                    periodType = 'week';
+                } else if (item.period.includes('-')) {
+                    const [year, month] = item.period.split('-').map(Number);
+                    timestamp = new Date(year, month - 1).getTime();
+                    periodType = 'month';
+                }
             }
 
             if (timestamp === undefined) {
-                console.error(`Invalid date value: ${item.timestamp || item.date}`);
+                console.error(`Invalid date value: ${item.timestamp || item.date || item.period}`);
                 return;
             }
 
@@ -89,16 +115,27 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
                 console.error(`Invalid date value: ${timestamp}`);
                 return;
             }
-            const hourKey = isHourly ? date.toISOString().slice(0, 13) + ":00:00" : date.toISOString().slice(0, 10);
 
-            if (!groupedData[hourKey]) {
-                groupedData[hourKey] = { ...item, date: hourKey, totalMessagesSent: 0, dailyActiveUsers: 0, userSignUps: 0, totalRewardsEarned: 0 };
+            let dateKey;
+            if (isHourly) {
+                dateKey = date.toISOString().slice(0, 13) + ":00:00";
+                periodType = 'hour';
+            } else if (periodType === 'month') {
+                dateKey = date.toISOString().slice(0, 7); // YYYY-MM
+            } else if (periodType === 'week') {
+                dateKey = date.toISOString().slice(0, 10); // YYYY-MM-DD
+            } else {
+                dateKey = date.toISOString().slice(0, 10); // YYYY-MM-DD
             }
 
-            groupedData[hourKey].totalMessagesSent += item.totalMessagesSent || 0;
-            groupedData[hourKey].dailyActiveUsers += item.dailyActiveUsers || 0;
-            groupedData[hourKey].userSignUps += item.userSignUps || 0;
-            groupedData[hourKey].totalRewardsEarned += item.totalRewardsEarned || 0;
+            if (!groupedData[dateKey]) {
+                groupedData[dateKey] = { ...item, date: dateKey, totalMessagesSent: 0, dailyActiveUsers: 0, userSignUps: 0, totalRewardsEarned: 0 };
+            }
+
+            groupedData[dateKey].totalMessagesSent += item.totalMessagesSent || 0;
+            groupedData[dateKey].dailyActiveUsers += item.dailyActiveUsers || 0;
+            groupedData[dateKey].userSignUps += item.userSignUps || 0;
+            groupedData[dateKey].totalRewardsEarned += item.totalRewardsEarned || 0;
         });
 
         return Object.values(groupedData);
@@ -110,11 +147,17 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
             console.error(`Invalid date value for tick: ${tickItem}`);
             return '';
         }
-        if (isHourly) {
-            const hours = date.getHours();
-            return `${hours}h`;
+
+        if (tickItem.length === 7) {
+            return date.toLocaleString('en-US', { month: 'short', year: '2-digit' }); // Month and year
+        } else if (isHourly) {
+            return date.toLocaleString('en-US', { hour: 'numeric', hour12: true }); // Hour
+        } else if (tickItem.length === 10) {
+            return date.toLocaleString('en-US', { day: 'numeric', month: 'short' }); // Day and month
+        } else {
+            const weekNumber = Math.ceil(date.getDate() / 7);
+            return `Week ${weekNumber}`; // Week of the month
         }
-        return convertUTCToPST(date);
     };
 
     const handleMouseMove = (state: any) => {
