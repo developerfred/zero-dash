@@ -16,7 +16,7 @@ const ZeroGlobal: React.FC = () => {
         fetchDashboardDataByFilter(filter);
     }, [filter]);
     
-    const isHourly = filter === '24h' || filter === '48h';
+    const isHourly = filter === '24h' || filter === '48h';    
     return (
         <div className="section">                       
             <div className="zero-global">                    
@@ -33,7 +33,7 @@ const ZeroGlobal: React.FC = () => {
                     </div>
                     <div className="chart-row">                            
                         <Chart data={zosData} dataKey="userSignUps" chartType="area" title="Registrations" isCurrency={false} isHourly={isHourly} />                                                        
-                        <Chart data={rewardsData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true} title="Rewards earned" isHourly={isHourly} />
+                        <Chart data={zosData} dataKey="totalRewardsEarned" chartType="area" isCurrency={true} title="Rewards earned" isHourly={isHourly} />
                         
                     </div>
                 </div>

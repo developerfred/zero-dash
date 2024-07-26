@@ -50,7 +50,14 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, i
     if (active && payload && payload.length) {
         const value = isCurrency ? formatToMillion(payload[0].value) : formatNumberWithCommas(payload[0].value);
         const date = new Date(label as string);
-        const formattedLabel = isHourly ? formatTime(date, 'HH:mm') : convertUTCToPST(date);
+        let formattedLabel: string;
+
+        if (isHourly) {
+            formattedLabel = formatTime(date.toISOString(), 'HH:mm');
+        } else {
+            formattedLabel = convertUTCToPST(date);
+        }
+
         return (
             <div className="custom-tooltip">
                 <p className="label">{formattedLabel}</p>
@@ -80,66 +87,60 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
     }, []);
 
     const formattedData = useMemo(() => {
-        const groupedData: { [key: string]: any } = {};
-
-        data.forEach(item => {
-            let timestamp: number | undefined;
+        return data.map(item => {
+            let timestamp: number;
             let periodType: 'hour' | 'day' | 'week' | 'month' = 'day';
 
             if (item.timestamp) {
                 timestamp = typeof item.timestamp === 'number' && item.timestamp.toString().length === 10
                     ? item.timestamp * 1000
                     : item.timestamp;
+                periodType = 'hour';
             } else if (item.date) {
                 timestamp = new Date(item.date).getTime();
             } else if (item.period) {
                 if (item.period.includes('-W')) {
                     const [year, week] = item.period.split('-W').map(Number);
-                    const date = getStartDateOfISOWeek(week, year);
-                    timestamp = date.getTime();
+                    timestamp = getStartDateOfISOWeek(week, year).getTime();
                     periodType = 'week';
                 } else if (item.period.includes('-')) {
-                    const [year, month] = item.period.split('-').map(Number);
-                    timestamp = new Date(year, month - 1).getTime();
-                    periodType = 'month';
+                    const parts = item.period.split('-').map(Number);
+                    if (parts.length === 3) {
+                        // Format: YYYY-MM-DD
+                        timestamp = new Date(item.period).getTime();
+                    } else if (parts.length === 2) {
+                        // Format: YYYY-MM
+                        timestamp = new Date(parts[0], parts[1] - 1).getTime();
+                        periodType = 'month';
+                    }
                 }
-            }
-
-            if (timestamp === undefined) {
-                console.error(`Invalid date value: ${item.timestamp || item.date || item.period}`);
-                return;
+            } else {
+                console.error('Invalid date format in item:', item);
+                return null;
             }
 
             const date = new Date(timestamp);
-            if (isNaN(date.getTime())) {
-                console.error(`Invalid date value: ${timestamp}`);
-                return;
-            }
+            let formattedDate: string;
 
-            let dateKey;
             if (isHourly) {
-                dateKey = date.toISOString().slice(0, 13) + ":00:00";
-                periodType = 'hour';
+                formattedDate = date.toISOString().slice(0, 13) + ":00:00";
             } else if (periodType === 'month') {
-                dateKey = date.toISOString().slice(0, 7); // YYYY-MM
+                formattedDate = date.toISOString().slice(0, 7); 
             } else if (periodType === 'week') {
-                dateKey = date.toISOString().slice(0, 10); // YYYY-MM-DD
+                formattedDate = date.toISOString().slice(0, 10); 
             } else {
-                dateKey = date.toISOString().slice(0, 10); // YYYY-MM-DD
+                formattedDate = date.toISOString().slice(0, 10); 
             }
 
-            if (!groupedData[dateKey]) {
-                groupedData[dateKey] = { ...item, date: dateKey, totalMessagesSent: 0, dailyActiveUsers: 0, userSignUps: 0, totalRewardsEarned: 0 };
-            }
-
-            groupedData[dateKey].totalMessagesSent += item.totalMessagesSent || 0;
-            groupedData[dateKey].dailyActiveUsers += item.dailyActiveUsers || 0;
-            groupedData[dateKey].userSignUps += item.userSignUps || 0;
-            groupedData[dateKey].totalRewardsEarned += item.totalRewardsEarned || 0;
-        });
-
-        return Object.values(groupedData);
-    }, [data, isHourly]);
+            return {
+                ...item,
+                date: formattedDate,
+                [dataKey]: isCurrency && typeof item[dataKey] === 'string'
+                    ? parseFloat(item[dataKey].replace(/[^0-9.-]+/g, ""))
+                    : item[dataKey]
+            };
+        }).filter(Boolean);
+    }, [data, isHourly, dataKey, isCurrency]);
 
     const formatXAxis = (tickItem: string) => {
         const date = new Date(tickItem);
@@ -149,14 +150,14 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
         }
 
         if (tickItem.length === 7) {
-            return date.toLocaleString('en-US', { month: 'short', year: '2-digit' }); // Month and year
+            return date.toLocaleString('en-US', { month: 'short', year: '2-digit' }); 
         } else if (isHourly) {
-            return date.toLocaleString('en-US', { hour: 'numeric', hour12: true }); // Hour
+            return date.toLocaleString('en-US', { hour: 'numeric', hour12: true }); 
         } else if (tickItem.length === 10) {
-            return date.toLocaleString('en-US', { day: 'numeric', month: 'short' }); // Day and month
+            return date.toLocaleString('en-US', { day: 'numeric', month: 'short' }); 
         } else {
             const weekNumber = Math.ceil(date.getDate() / 7);
-            return `Week ${weekNumber}`; // Week of the month
+            return `Week ${weekNumber}`; 
         }
     };
 
@@ -172,12 +173,6 @@ const AreaChartComponent: React.FC<ChartProps> = ({ data = [], dataKey = "value"
         <div className="chart-wrapper">
             <div className="chart-header">
                 <h3 className="chart-title">{title}</h3>
-                {/* <HiEllipsisVertical className="chart-icon" onClick={() => setMenuVisible(!menuVisible)} />
-                {menuVisible && (
-                    <div className="menu" ref={menuRef}>
-                        {}
-                    </div>
-                )} */}
             </div>
             <ResponsiveContainer width="100%" height={300} minWidth={300}>
                 <AreaChart

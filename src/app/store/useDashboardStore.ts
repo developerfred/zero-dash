@@ -7,6 +7,15 @@ import { formatUSD } from '@/app/lib/currencyUtils';
 import axios from 'axios';
 
 const CACHE_TIMEOUT = 15 * 60 * 1000;
+const API_URL_METRICS = process.env.NEXT_PUBLIC_METRICS_GO_URL!;
+
+const getMetricsUrl = (filter) => {
+    if (filter === "24h" || filter === "48h") {
+        return `${API_URL_METRICS}/api/metrics/dynamic?filter=${filter}`;
+    } else {
+        return `${API_URL_METRICS}/api/metrics?filter=${filter}`;
+    }
+};
 
 const calculateDateRange = (filter: string): { fromDate: string; toDate: string; } => {
     const now = new Date();
@@ -76,7 +85,7 @@ const calculateDateRange = (filter: string): { fromDate: string; toDate: string;
 };
 
 const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolean = false): Promise<MetricsData[]> => {
-    const url = `https://go-metrics-api-production.up.railway.app/api/metrics?fromDate=${fromDate}&toDate=${toDate}&includeLast15Minutes=${is15Minute}`;
+    const url = `${API_URL_METRICS}/api/metrics?fromDate=${fromDate}&toDate=${toDate}&includeLast15Minutes=${is15Minute}`;
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -86,7 +95,7 @@ const fetchAllData = async (fromDate: string, toDate: string, is15Minute: boolea
 };
 
 const fetchDashboardDataFromTime = async (filter: string): Promise<{ metricsData: MetricsData[], totalRewards: { amount: string, unit: string }, totalMessagesSent: number, totalDailyActiveUsers: number, totalUserSignUps: number }> => {
-    const url = `https://go-metrics-api-production.up.railway.app/api/metrics?filter=${filter}`;
+    const url = getMetricsUrl(filter);
     
     const response = await fetch(url);
     
@@ -353,22 +362,15 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             set({ isLoadingDashboard: true });
 
             if ((filter === '24h' || filter === '48h' || filter === '7d') && activeSection === 'Zero') {
-                const { metricsData, totalRewards } = await fetchDashboardDataFromTime(filter);
+                const { metricsData, totalRewards, totalMessagesSent, totalDailyActiveUsers, totalUserSignUps } = await fetchDashboardDataFromTime(filter);
+                
                 
                 const { fromDate, toDate } = calculateDateTimestamp(filter);
                 const API_URL = 'https://zosapi.zero.tech/metrics/dynamic';
                 const response = await axios.get(`${API_URL}?fromTs=${fromDate}&toTs=${toDate}`);
                 const data = response.data;
-
+                
                 const rewardsData: { date: string; totalRewardsEarned: number }[] = [];
-                const hours = filter === '24h' ? 24 : (filter === '48h' ? 48 : 168);
-                const rewardPerHour = parseFloat(totalRewards.amount) / hours;
-
-                for (let i = 0; i < hours; i++) {
-                    const hourTimestamp = new Date(new Date().setHours(new Date().getHours() - i)).toISOString();
-                    rewardsData.push({ date: hourTimestamp, totalRewardsEarned: rewardPerHour });
-                }
-
 
                 const totals = {
                     dailyActiveUsers: data.dailyActiveUsers,
@@ -378,8 +380,7 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
                     totalRewardsEarned: totalRewards,
                     totalRegistrations: 0,
                     totalWorlds: 0,
-                    totalDomains: 0,
-                    dayCount: hours,
+                    totalDomains: 0,                    
                 };
 
                 const updatedData = {
@@ -458,8 +459,6 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             set({ isLoadingDashboard: false });
         }
     },
-
-
 
     fetchTotals: async (filter: string) => {
         const cacheKey = filter;
