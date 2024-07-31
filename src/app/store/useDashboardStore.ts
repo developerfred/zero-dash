@@ -311,6 +311,40 @@ const useDashboardStore = create<DashboardState>((set, get) => ({
             ),
         })),
 
+    cardTotals: {
+        dailyActiveUsers: 0,
+        totalMessagesSent: 0,
+        userSignUps: 0,
+        totalRewardsEarned: '0',
+    },
+    isLoadingCards: false,
+
+    fetchCardData: async (filter: string) => {
+        if (['24h', '48h', '7d'].includes(filter)) {
+            try {
+                const { fromDate, toDate } = calculateDateTimestamp(filter);
+                const API_URL = 'https://zosapi.zero.tech/metrics/dynamic';
+                const response = await axios.get(`${API_URL}?fromTs=${fromDate}&toTs=${toDate}`);
+                const data = response.data;
+
+                set({
+                    cardTotals: {
+                        dailyActiveUsers: data.dailyActiveUsers,
+                        totalMessagesSent: data.totalMessagesSent,
+                        userSignUps: data.userSignUps,
+                        totalRewardsEarned: data.totalRewardsEarned || '0', 
+                    },
+                    isLoadingCards: false,
+                });
+            } catch (error) {
+                console.error('Error fetching card data:', error);
+                set({ isLoadingCards: false });
+            }
+        } else {
+            set({ isLoadingCards: false });
+        }
+    },
+
     fetchDashboardData: async (fromDate: string, toDate: string, is15Minute?: boolean) => {
         try {
             set({ isLoadingDashboard: true });
